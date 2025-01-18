@@ -20,9 +20,11 @@
 
 			if ($rateLimit > 0) {
 				$expirationTime = Cache::getExpiration($cacheKey);
+
 				if ($expirationTime !== false) {
 					Cache::set($cacheKey, $rateLimit - 1, $expirationTime);
 					return true;
+
 				} else {
 					return self::attempt($key, $limit, $decayRate);
 				}

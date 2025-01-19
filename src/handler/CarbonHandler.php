@@ -8,6 +8,7 @@
 	abstract class CarbonHandler
 	{
 		protected DateTime $date;
+		protected string $timezone;
 
 		public function __construct(string $time = 'now', string $timezone = 'UTC')
 		{
@@ -79,12 +80,12 @@
 
 		public function isFuture(): bool
 		{
-			return $this->getDateTime() > new DateTime('now', new DateTimeZone('UTC'));
+			return $this->getDateTime() > new DateTime('now', new DateTimeZone($this->timezone));
 		}
 
 		public function isPast(): bool
 		{
-			return $this->getDateTime() < new DateTime('now', new DateTimeZone('UTC'));
+			return $this->getDateTime() < new DateTime('now', new DateTimeZone($this->timezone));
 		}
 
 		public function startOfDay(): static
@@ -107,5 +108,6 @@
 		private function registerDate(string $time, string $timezone): void
 		{
 			$this->date = new DateTime($time, new DateTimeZone($timezone));
+			$this->timezone = $timezone;
 		}
 	}

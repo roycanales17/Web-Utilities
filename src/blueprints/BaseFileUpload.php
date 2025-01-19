@@ -260,5 +260,8 @@
 		public static function setStoragePath(string $path): void
 		{
 			self::$root = $path;
+
+			if (!file_exists($path))
+				mkdir($path,  0777, true);
 		}
 	}

@@ -1,0 +1,28 @@
+{
+    "name": "roy404/utilities",
+    "description": "A comprehensive collection of PHP utilities including Carbon, Logger, Storage, RateLimiter, Cache, and Session Handler, designed to enhance productivity and simplify development.",
+    "keywords": [
+        "php",
+        "compiler"
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\Utilities": "src/",
+            "App\\Utilities\\Handler": "src/handler",
+            "App\\Utilities\\Blueprints": "src/blueprints"
+        }
+    },
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Robroy B Canales",
+            "email": "canales.robroy123@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    }
+}

@@ -2,6 +2,12 @@
 
 A comprehensive collection of essential PHP utilities designed to streamline development and enhance productivity. This library includes versatile tools for common tasks, offering a robust foundation for building efficient and maintainable applications.
 
+**Installation**
+
+```
+composer require roy404/utilities
+```
+
 ## Features
 * **Carbon:** Simplified date and time manipulation.
 * **Logger:** Flexible logging utility with support for multiple log levels, contextual data, and custom file handling.

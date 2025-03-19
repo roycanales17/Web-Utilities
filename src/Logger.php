@@ -69,7 +69,7 @@
 		{
 			$timestamp = Carbon::format('Y-m-d H:i:s');
 			$contextString = $this->formatContext($context);
-			return "[{$timestamp}] {$level}: {$message} {$contextString}" . PHP_EOL;
+			return "[{$timestamp}] {".strtoupper($level)."}: {$message} {$contextString}" . PHP_EOL;
 		}
 
 		protected function formatContext(array $context): string
@@ -78,7 +78,7 @@
 				return '';
 			}
 
-			return json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			return "\n\n".print_r($context, true)."|\n|\n|\n|";
 		}
 
 		protected function getLogFilePath(): string

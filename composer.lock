@@ -1,0 +1,71 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "fc56724e27c7b47d3fba902f519abec0",
+    "packages": [
+        {
+            "name": "roy404/request",
+            "version": "v3.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roycanales17/Input-Request.git",
+                "reference": "d936c21a9e9baea585147501e3cca9cec4d1e3ca"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/d936c21a9e9baea585147501e3cca9cec4d1e3ca",
+                "reference": "d936c21a9e9baea585147501e3cca9cec4d1e3ca",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Standard.php"
+                ],
+                "psr-4": {
+                    "App\\Headers\\": "src/",
+                    "App\\Headers\\Scheme\\": "src/scheme",
+                    "App\\Headers\\Requests\\": "src/requests",
+                    "App\\Headers\\Scheme\\Validation\\": "src/scheme/validation"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robroy Canales",
+                    "email": "canales.robroy123@gmail.com"
+                }
+            ],
+            "description": "Request class provides an object-oriented way to interact with the current HTTP request being handled by your application as well as retrieve the input, and files that were submitted with the request.",
+            "keywords": [
+                "php",
+                "plugins"
+            ],
+            "support": {
+                "issues": "https://github.com/roycanales17/Input-Request/issues",
+                "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.4"
+            },
+            "time": "2025-03-27T08:24:55+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.0"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}

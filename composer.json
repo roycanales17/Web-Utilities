@@ -10,7 +10,10 @@
             "App\\Utilities\\": "src/",
             "App\\Utilities\\Handler\\": "src/handler",
             "App\\Utilities\\Blueprints\\": "src/blueprints"
-        }
+        },
+        "files": [
+            "src/Standard.php"
+        ]
     },
     "type": "library",
     "license": "MIT",

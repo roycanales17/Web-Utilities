@@ -53,3 +53,8 @@
 
 		return $decoded;
 	}
+
+	function render(string $path, array $data = [], $asynchronous = false): string
+	{
+		return App\Utilities\Stream::render($path, $data, $asynchronous);
+	}

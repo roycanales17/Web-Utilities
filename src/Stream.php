@@ -3,11 +3,13 @@
 	namespace App\Utilities;
 
 	use App\Headers\Request;
+	use ReflectionException;
 	use ReflectionMethod;
 
 	class Stream
 	{
 		private static string $root = '';
+		private static array $methodCache = [];
 
 		public static function config(string $root): void
 		{
@@ -109,18 +111,26 @@
 
 		private static function validateMethod(object $class, string $method, array $args): bool
 		{
-			if ($class && method_exists($class, $method)) {
-				$reflection = new ReflectionMethod($class, $method);
-				$requiredParams = $reflection->getNumberOfRequiredParameters();
-				$totalParams = $reflection->getNumberOfParameters();
+			if (!method_exists($class, $method))
+				return false;
 
-				$providedParams = count($args);
-				if ($providedParams >= $requiredParams && $providedParams <= $totalParams) {
-					return true;
+			$className = get_class($class);
+			$cacheKey = $className . '::' . $method;
+
+			if (!isset(self::$methodCache[$cacheKey])) {
+				try {
+					self::$methodCache[$cacheKey] = new ReflectionMethod($class, $method);
+				} catch (ReflectionException $e) {
+					return false;
 				}
 			}
 
-			return false;
+			$reflection = self::$methodCache[$cacheKey];
+			$requiredParams = $reflection->getNumberOfRequiredParameters();
+			$totalParams = $reflection->getNumberOfParameters();
+			$providedParams = count($args);
+
+			return $providedParams >= $requiredParams && $providedParams <= $totalParams;
 		}
 
 		private static function parse(string $actionString): null|array

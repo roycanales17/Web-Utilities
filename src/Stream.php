@@ -85,7 +85,7 @@
 					}
 
 					$parsed = self::parse($method);
-					$function = $parsed['name'] ?? '';
+					$function = $parsed['name'] ?? $method;
 					$args = $parsed['args'] ?? [];
 
 					$component = null;
@@ -97,7 +97,7 @@
 						if ($orig_properties)
 							$component->models($orig_properties);
 
-						if ($method != 'render' && self::validateMethod($component, $function, $args))
+						if ($function != 'render' && self::validateMethod($component, $function, $args))
 							call_user_func_array([$component, $function], $args);
 
 						return response($component->parse($identifier, $startedTime))->html();

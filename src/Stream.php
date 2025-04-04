@@ -97,7 +97,7 @@
 						if ($orig_properties)
 							$component->models($orig_properties);
 
-						if ($method != 'render' && self::validateMethod($component, $method, $args))
+						if ($method != 'render' && self::validateMethod($component, $function, $args))
 							call_user_func_array([$component, $function], $args);
 
 						return response($component->parse($identifier, $startedTime))->html();

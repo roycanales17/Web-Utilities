@@ -63,7 +63,10 @@
 			return <<<HTML
 			    <fragment class='component-container' $dataAttributes>
 			    	$html 
-			    	<script>new stream("$component");</script>
+			    	<script type="module"> 
+			    		import {init} from '../resources/libraries/StreamWire.js';
+			    		init("$component");
+			    	</script>
 			    </fragment>
 			HTML;
 		}

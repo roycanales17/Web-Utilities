@@ -5,32 +5,44 @@
 	use ReflectionClass;
 	use ReflectionProperty;
 
-	abstract class Component {
-
+	abstract class Component
+	{
 		private string $componentIdentifier = '';
 		private float $startedTime = 0;
 		private static array $registered = [];
 
-		public function initialize(string $component, array $params = []): void  {
-
+		public function initialize(string $component, array $params = []): void
+		{
 			$this->startedTime = hrtime(true);
-			$timeIdentifier = substr($this->startedTime, -5);
-			$identifier = encrypt("COMPONENT_" . $component) . "-{".$timeIdentifier."}";
-			$existing = array_filter(self::$registered, fn($id) => str_starts_with($id, $identifier . "-["));
+			$this->componentIdentifier = $this->generateComponentIdentifier($component);
+			self::$registered[] = $this->componentIdentifier;
 
-			if (empty($existing)) {
-				$newIdentifier = $identifier . "-[1]";
-			} else {
-				preg_match('/\[(\d+)\]$/', end($existing), $matches);
-				$newIdentifier = preg_replace('/\[\d+\]$/', "[" . (intval($matches[1]) + 1) . "]", end($existing)) ?? $identifier . "-[2]";
-			}
-
-			self::$registered[] = $this->componentIdentifier =  $newIdentifier;
-			if ($params && method_exists($this, 'init'))
+			if (!empty($params) && method_exists($this, 'init')) {
 				$this->init(...$params);
+			}
 		}
 
-		public function models(array $models): void {
+		private function generateComponentIdentifier(string $component): string
+		{
+			$timeIdentifier = substr(hrtime(true), -5);
+			$baseId = encrypt("COMPONENT_" . $component) . "-{" . $timeIdentifier . "}";
+			$existing = array_filter(
+				self::$registered,
+				fn($id) => str_starts_with($id, $baseId . "-[")
+			);
+
+			if (empty($existing)) {
+				return $baseId . "-[1]";
+			}
+
+			preg_match('/\[(\d+)\]$/', end($existing), $matches);
+			$count = isset($matches[1]) ? ((int)$matches[1] + 1) : 2;
+
+			return preg_replace('/\[\d+\]$/', "[$count]", end($existing)) ?: $baseId . "-[$count]";
+		}
+
+		public function models(array $models): void
+		{
 			foreach ($models as $key => $value) {
 				if (property_exists($this, $key)) {
 					$this->$key = $value;
@@ -38,54 +50,59 @@
 			}
 		}
 
-		public function preloader(): string {
+		public function preloader(): string
+		{
 			return 'Ajax requests';
 		}
 
 		public function parse(string $identifier = '', float $startedTime = 0): string
 		{
-			$dataAttributes = '';
-			$html = str_replace(['<>','</>'], '', $this->render());
-			$timeDuration = hrtime(true) - ($identifier ? $startedTime: $this->startedTime);
-			$timeMilliseconds = $timeDuration / 1_000_000;
-			$component = $identifier ?: base64_encode($this->componentIdentifier);
-			$properties = base64_encode(encrypt(json_encode($this->fetchProperties())));
+			$html = str_replace(['<>', '</>'], '', $this->render());
 
+			$duration = hrtime(true) - ($identifier ? $startedTime : $this->startedTime);
+			$durationMs = $duration / 1_000_000;
+
+			$component = $identifier ?: base64_encode($this->componentIdentifier);
+			$properties = $this->fetchProperties();
+
+			$dataAttributes = '';
 			foreach ([
 						 'component' => $component,
-						 'duration' => sprintf('%.2f', $timeMilliseconds),
-						 'properties' => $properties,
-						 'original' => json_encode($this->fetchProperties())
+						 'duration' => sprintf('%.2f', $durationMs),
+						 'properties' => base64_encode(encrypt(json_encode($properties))),
+						 'original' => json_encode($properties),
 					 ] as $key => $value) {
-				$dataAttributes .= " data-".htmlspecialchars($key)."='".htmlspecialchars($value, ENT_QUOTES)."'";
+				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
 			return <<<HTML
-			    <fragment class='component-container' $dataAttributes>
-			    	$html 
-			    	<script type="module"> 
-			    		import {init} from '../resources/libraries/StreamWire.js';
-			    		init("$component");
-			    	</script>
-			    </fragment>
-			HTML;
+            <fragment class='component-container'{$dataAttributes}>
+                {$html}
+                <script type="module">
+                    import {init} from '../resources/libraries/streamdom/stream-wire.js';
+                    init("{$component}");
+                </script>
+            </fragment>
+        HTML;
 		}
 
-		protected function print(mixed $callback): mixed {
+		protected function print(mixed $callback): mixed
+		{
 			if (is_object($callback)) {
 				ob_start();
-				echo($callback());
+				echo $callback();
 				return ob_get_clean();
 			}
 
 			return $callback;
 		}
 
-		private function fetchProperties(): array {
-			$properties = [];
+		private function fetchProperties(): array
+		{
 			$reflection = new ReflectionClass($this);
 			$publicProperties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
 
+			$properties = [];
 			foreach ($publicProperties as $property) {
 				$properties[$property->getName()] = $property->getValue($this);
 			}

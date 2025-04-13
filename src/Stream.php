@@ -18,6 +18,9 @@
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
 		{
+			if ($html = self::isCompiled($path))
+				return $html;
+
 			ob_start();
 
 			$component = null;
@@ -152,5 +155,27 @@
 				'name' => $functionName,
 				'args' => array_map(fn($param) => trim($param, " '\""), $params)
 			];
+		}
+
+		private static function isCompiled(string $path): string|bool
+		{
+			$compiled = request()->post('_compiled');
+			if ($compiled) {
+				$compiled = json_decode($compiled, true);
+				foreach ($compiled as $decoded => $html) {
+					if (is_string($html) && is_string($decoded)) {
+						$pathCompiled = base64_decode($decoded);
+						$pathCompiled = str_replace('COMPONENT_', '', decrypt($pathCompiled));
+
+						$normalizedPath = preg_replace('/\.php$/i', '', $path);
+						$normalizedCompiled = preg_replace('/\.php$/i', '', $pathCompiled);
+
+						if (strtolower($normalizedPath) === strtolower($normalizedCompiled))
+							return $html;
+					}
+				}
+			}
+
+			return false;
 		}
 	}

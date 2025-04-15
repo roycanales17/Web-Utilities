@@ -74,6 +74,9 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
+			if (property_exists($this, 'target'))
+				$dataAttributes .= " data-id='" . $this->target . "'";
+
 			return <<<HTML
 				<fragment class='component-container'{$dataAttributes}>
 					{$html}

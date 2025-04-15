@@ -146,10 +146,6 @@
 
 			$functionName = $matches[1];
 			$paramsString = $matches[2];
-
-			if (empty($paramsString))
-				return ['name' => $functionName, 'args' => []];
-
 			$params = preg_split('/,(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/', $paramsString);
 
 			return [

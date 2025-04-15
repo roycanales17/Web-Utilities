@@ -19,7 +19,7 @@
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
 		{
-			if ($html = self::isCompiled($path))
+			if (!$data && ($html = self::isCompiled($path)))
 				return $html;
 
 			ob_start();

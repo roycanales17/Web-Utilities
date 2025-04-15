@@ -69,21 +69,20 @@
 			foreach ([
 						 'component' => $component,
 						 'duration' => sprintf('%.2f', $durationMs),
-						 'properties' => base64_encode(encrypt(json_encode($properties))),
-						 'original' => json_encode($properties),
+						 'properties' => base64_encode(encrypt(json_encode($properties)))
 					 ] as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
 			return <<<HTML
-            <fragment class='component-container'{$dataAttributes}>
-                {$html}
-                <script type="module">
-                    import {init} from '../resources/libraries/streamdom/stream-wire.js';
-                    init("{$component}");
-                </script>
-            </fragment>
-        HTML;
+				<fragment class='component-container'{$dataAttributes}>
+					{$html}
+					<script type="module">
+						import {init} from '../resources/libraries/streamdom/stream-wire.js';
+						init("{$component}");
+					</script>
+				</fragment>
+			HTML;
 		}
 
 		protected function print(mixed $callback): mixed

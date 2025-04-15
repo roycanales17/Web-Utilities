@@ -10,6 +10,7 @@
 	{
 		private static string $root = '';
 		private static array $methodCache = [];
+		private static array $compiled = [];
 
 		public static function config(string $root): void
 		{
@@ -159,19 +160,49 @@
 
 		private static function isCompiled(string $path): string|bool
 		{
-			$compiled = request()->post('_compiled');
-			if ($compiled) {
-				$compiled = json_decode($compiled, true);
-				foreach ($compiled as $decoded => $html) {
-					if (is_string($html) && is_string($decoded)) {
-						$pathCompiled = base64_decode($decoded);
-						$pathCompiled = str_replace('COMPONENT_', '', decrypt($pathCompiled));
+			$compiledJson = request()->post('_compiled');
 
-						$normalizedPath = preg_replace('/\.php$/i', '', $path);
-						$normalizedCompiled = preg_replace('/\.php$/i', '', $pathCompiled);
+			if ($compiledJson) {
+				$compiledArray = json_decode($compiledJson, true);
 
-						if (strtolower($normalizedPath) === strtolower($normalizedCompiled))
-							return $html;
+				if (!is_array($compiledArray)) {
+					return false;
+				}
+
+				$normalizedTargetPath = strtolower(preg_replace('/\.php$/i', '', $path));
+
+				foreach ($compiledArray as $encodedPath => $html) {
+					if (is_string($html) && is_string($encodedPath)) {
+						$decoded = base64_decode($encodedPath);
+						$compiledPath = str_replace('COMPONENT_', '', decrypt($decoded));
+						$normalizedCompiledPath = strtolower(preg_replace('/\.php$/i', '', $compiledPath));
+
+						// Group all compiled HTMLs by compiled path
+						if (!isset(self::$compiled[$compiledPath])) {
+							self::$compiled[$compiledPath] = 0;
+						}
+
+						self::$compiled[$compiledPath]++;
+
+						// Return the latest HTML if paths match
+						if ($normalizedTargetPath === $normalizedCompiledPath) {
+
+							$index = 0;
+							foreach ($compiledArray as $encodedPath2 => $html2) {
+								if (is_string($html2) && is_string($encodedPath2)) {
+									$decoded2 = base64_decode($encodedPath2);
+									$compiledPath2 = str_replace('COMPONENT_', '', decrypt($decoded2));
+									$normalizedCompiledPath2 = strtolower(preg_replace('/\.php$/i', '', $compiledPath2));
+
+									if ($normalizedTargetPath === $normalizedCompiledPath2) {
+										$index++;
+
+										if ($index == self::$compiled[$compiledPath])
+											return $html2;
+									}
+								}
+							}
+						}
 					}
 				}
 			}

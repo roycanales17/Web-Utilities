@@ -8,13 +8,13 @@
 
 	class Stream
 	{
-		private static string $root = '';
+		private static array $root = [];
 		private static array $methodCache = [];
 		private static array $compiled = [];
 
-		public static function config(string $root): void
+		public static function load(string|array $root): void
 		{
-			self::$root = $root;
+			self::$root = is_string($root) ? [$root] : $root;
 		}
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
@@ -25,8 +25,14 @@
 			ob_start();
 
 			$component = null;
-			if (file_exists($full_path = self::$root. ltrim($path, '/') .".php"))
-				$component = require($full_path);
+			if (class_exists($path)) {
+				$component = new $path();
+			} else {
+				foreach (self::$root as $rootPath) {
+					if(file_exists($full_path = $rootPath. ltrim($path, '/') .".php"))
+						$component = require($full_path);
+				}
+			}
 
 			if ($component) {
 				$component->initialize($path, $data);
@@ -93,8 +99,14 @@
 					$args = $parsed['args'] ?? [];
 
 					$component = null;
-					if (file_exists($full_path = self::$root. ltrim($path, '/') .".php"))
-						$component = require($full_path);
+					if (class_exists($path)) {
+						$component = new $path();
+					} else {
+						foreach (self::$root as $rootPath) {
+							if(file_exists($full_path = $rootPath. ltrim($path, '/') .".php"))
+								$component = require($full_path);
+						}
+					}
 
 					if ($component) {
 

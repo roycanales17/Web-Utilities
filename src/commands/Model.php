@@ -31,9 +31,9 @@
 				
 				class {$className} extends Model {
 				
+					public string \$primary_key = 'id';
 					public string \$table = '{$className}';
 					public array \$fillable = [];
-					public string \$primary_key = 'id';
 				}
 			HTML;
 

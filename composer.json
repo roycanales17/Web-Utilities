@@ -7,9 +7,10 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\Utilities\\": "src/",
+            "App\\Utilities\\": "src",
             "App\\Utilities\\Handler\\": "src/handler",
-            "App\\Utilities\\Blueprints\\": "src/blueprints"
+            "App\\Utilities\\Blueprints\\": "src/blueprints",
+            "App\\Http\\": "http"
         },
         "files": [
             "src/Standard.php"
@@ -28,6 +29,7 @@
     "require": {
         "php": "^8.0",
         "roy404/request": "^3.0",
-        "roy404/artisan": "^1.0"
+        "roy404/artisan": "^1.0",
+        "roy404/eloquent": "^1.0"
     }
 }

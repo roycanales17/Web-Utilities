@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "86218e32d141022c3e8791c3bfae11d0",
+    "content-hash": "060c2d89c636049b4204506ccbcc719d",
     "packages": [
         {
             "name": "roy404/artisan",
-            "version": "v1.0.5",
+            "version": "v1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Web-Artisan.git",
-                "reference": "ade11d62d95ee337d026f16e0d20fe0a4cad9cad"
+                "reference": "efda9f5934873a9f1b29fcdddb8d604ff035714a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/ade11d62d95ee337d026f16e0d20fe0a4cad9cad",
-                "reference": "ade11d62d95ee337d026f16e0d20fe0a4cad9cad",
+                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/efda9f5934873a9f1b29fcdddb8d604ff035714a",
+                "reference": "efda9f5934873a9f1b29fcdddb8d604ff035714a",
                 "shasum": ""
             },
             "require": {
@@ -46,9 +46,53 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Web-Artisan/issues",
-                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.0.5"
+                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.0.6"
             },
-            "time": "2025-04-18T14:11:58+00:00"
+            "time": "2025-04-18T15:06:30+00:00"
+        },
+        {
+            "name": "roy404/eloquent",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roycanales17/Eloquent-Class.git",
+                "reference": "44833383cb33708bff8a9a7c0c21b6c6a7f04ae0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roycanales17/Eloquent-Class/zipball/44833383cb33708bff8a9a7c0c21b6c6a7f04ae0",
+                "reference": "44833383cb33708bff8a9a7c0c21b6c6a7f04ae0",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Illuminate\\Databases\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robroy Canales",
+                    "email": "canales.robroy123@gmail.com"
+                }
+            ],
+            "description": "Eloquent is the default ORM (Object-Relational Mapping). It provides a simple ActiveRecord implementation for working with your database. With Eloquent, you can define database models as classes, and interact with the database using these models, rather than writing raw SQL queries.",
+            "keywords": [
+                "php",
+                "plugins"
+            ],
+            "support": {
+                "issues": "https://github.com/roycanales17/Eloquent-Class/issues",
+                "source": "https://github.com/roycanales17/Eloquent-Class/tree/1.0.1"
+            },
+            "time": "2024-02-19T12:05:55+00:00"
         },
         {
             "name": "roy404/request",

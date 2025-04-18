@@ -2,6 +2,7 @@
 
 	use App\Utilities\Config;
 	use App\Utilities\Session;
+	use App\Console\Terminal;
 
 	function config(string $key, $default = null): mixed
 	{
@@ -57,4 +58,10 @@
 	function render(string $path, array $data = [], $asynchronous = false): string
 	{
 		return App\Utilities\Stream::render($path, $data, $asynchronous);
+	}
+
+	function launchCliSession(array $args): void
+	{
+		Terminal::config('commands', dirname(__DIR__) . "/src");
+		Terminal::capture($args);
 	}

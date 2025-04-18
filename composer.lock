@@ -4,20 +4,64 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fc56724e27c7b47d3fba902f519abec0",
+    "content-hash": "86218e32d141022c3e8791c3bfae11d0",
     "packages": [
         {
-            "name": "roy404/request",
-            "version": "v3.0.4",
+            "name": "roy404/artisan",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/roycanales17/Input-Request.git",
-                "reference": "d936c21a9e9baea585147501e3cca9cec4d1e3ca"
+                "url": "https://github.com/roycanales17/Web-Artisan.git",
+                "reference": "ade11d62d95ee337d026f16e0d20fe0a4cad9cad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/d936c21a9e9baea585147501e3cca9cec4d1e3ca",
-                "reference": "d936c21a9e9baea585147501e3cca9cec4d1e3ca",
+                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/ade11d62d95ee337d026f16e0d20fe0a4cad9cad",
+                "reference": "ade11d62d95ee337d026f16e0d20fe0a4cad9cad",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "App\\Console\\": "src/",
+                    "App\\Console\\Commands\\": "commands/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robroy B Canales",
+                    "email": "canales.robroy123@gmail.com"
+                }
+            ],
+            "keywords": [
+                "console",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/roycanales17/Web-Artisan/issues",
+                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.0.5"
+            },
+            "time": "2025-04-18T14:11:58+00:00"
+        },
+        {
+            "name": "roy404/request",
+            "version": "v3.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roycanales17/Input-Request.git",
+                "reference": "e843a7e118e8836a80eaa8d9789989e4331213e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/e843a7e118e8836a80eaa8d9789989e4331213e7",
+                "reference": "e843a7e118e8836a80eaa8d9789989e4331213e7",
                 "shasum": ""
             },
             "require": {
@@ -52,20 +96,20 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Input-Request/issues",
-                "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.4"
+                "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.5"
             },
-            "time": "2025-03-27T08:24:55+00:00"
+            "time": "2025-03-27T10:34:57+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.0"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

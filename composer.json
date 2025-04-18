@@ -27,6 +27,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "roy404/request": "^3.0"
+        "roy404/request": "^3.0",
+        "roy404/artisan": "^1.0"
     }
 }

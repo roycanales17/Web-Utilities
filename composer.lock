@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "roy404/artisan",
-            "version": "v1.0.6",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Web-Artisan.git",
-                "reference": "efda9f5934873a9f1b29fcdddb8d604ff035714a"
+                "reference": "23ec83e414c3f674758993e77dc2e70dd12cf0a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/efda9f5934873a9f1b29fcdddb8d604ff035714a",
-                "reference": "efda9f5934873a9f1b29fcdddb8d604ff035714a",
+                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/23ec83e414c3f674758993e77dc2e70dd12cf0a8",
+                "reference": "23ec83e414c3f674758993e77dc2e70dd12cf0a8",
                 "shasum": ""
             },
             "require": {
@@ -46,9 +46,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Web-Artisan/issues",
-                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.0.6"
+                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.0.8"
             },
-            "time": "2025-04-18T15:06:30+00:00"
+            "time": "2025-04-18T15:50:10+00:00"
         },
         {
             "name": "roy404/eloquent",

@@ -11,15 +11,20 @@
 
 		public function handle($className = ''): void
 		{
-			$this->info('Clearing application logs...');
+			$confirm = $this->confirm("Are you sure you want to clear logs?");
+			if (!$confirm) {
+				$this->info("Clearing logs is cancelled \n");
+				return;
+			}
 
+			$this->info('Clearing application logs...');
 			$path = dirname('./') . '/logs';
 
 			if (is_dir($path)) {
 				$this->deleteDirectory($path);
 				$this->success('Application logs cleared successfully.');
 			} else {
-				$this->warn('No log directory found to clear.');
+				$this->success('No log directory found to clear.');
 			}
 		}
 

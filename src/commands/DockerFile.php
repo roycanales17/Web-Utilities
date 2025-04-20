@@ -38,7 +38,7 @@
 
 		public function handle(): void
 		{
-			$root = dirname('../');
+			$root = dirname('./');
 			$dockerComposeDir = $root . '/vendor/roy404/utilities';
 
 			$this->loadEnv($root);

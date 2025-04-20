@@ -56,7 +56,7 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/default-ssl.conf
 
 # Copy your project files into the container's web directory
-COPY ./ /var/www/html
+COPY ../ /var/www/html
 
 # Expose port 80
 EXPOSE 80

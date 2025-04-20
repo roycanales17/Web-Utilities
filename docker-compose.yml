@@ -1,8 +1,8 @@
 services:
   app:
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: vendor/roy404/utilities/Dockerfile
     container_name: app_container
     restart: unless-stopped
     ports:

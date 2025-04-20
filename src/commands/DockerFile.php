@@ -38,18 +38,19 @@
 
 		public function handle(): void
 		{
-			$root = dirname('./');
+			$root = dirname('../');
 			$dockerComposeDir = $root . '/vendor/roy404/utilities';
 
 			$this->loadEnv($root);
 
+			$this->info("⏳ Initializing Docker images...");
 			$command = "cd $dockerComposeDir && docker-compose up --build -d";
 			$output = shell_exec($command);
 
 			if ($output === null) {
 				$this->error("Failed to run docker-compose.");
 			} else {
-				$this->info("Docker Compose command executed successfully.");
+				$this->success("Docker Compose command executed successfully.");
 			}
 		}
 	}

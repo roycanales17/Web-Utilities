@@ -60,8 +60,11 @@
 		return App\Utilities\Stream::render($path, $data, $asynchronous);
 	}
 
-	function launchCliSession(array $args): void
+	function launchCliSession(array $args, string $path = '', string $root = ''): void
 	{
+		if ($path)
+			Terminal::config($path, $root);
+
 		Terminal::config('commands', dirname(__DIR__) . "/src");
 		Terminal::capture($args);
 	}

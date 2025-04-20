@@ -9,12 +9,14 @@
 		protected string $signature = 'clear:logs';
 		protected string $description = 'Flush the application logs';
 
-		public function handle($className = ''): void
+		public function handle(bool $force = false): void
 		{
-			$confirm = $this->confirm("Are you sure you want to clear logs?");
-			if (!$confirm) {
-				$this->info("Clearing logs is cancelled \n");
-				return;
+			if (!$force) {
+				$confirm = $this->confirm("Are you sure you want to clear logs?");
+				if (!$confirm) {
+					$this->info("Clearing logs is cancelled \n");
+					return;
+				}
 			}
 
 			$this->info('Clearing application logs...');

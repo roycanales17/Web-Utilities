@@ -65,7 +65,7 @@
 	function launch_cli_session(array $args, string $path = '', string $root = ''): void
 	{
 		if (!$root)
-			$root = dirname(__DIR__);
+			$root = './';
 
 		if ($path)
 			Terminal::config($path, $root);

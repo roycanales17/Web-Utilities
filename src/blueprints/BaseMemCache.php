@@ -12,12 +12,10 @@
 
 		public static function configure(string $serverName, string $port, ?Closure $callback = null): void
 		{
-			self::registerCallback($callback);
-
-			if (!$serverName || !$port) {
-				self::throw('Cache is not configured properly.');
+			if (!$serverName || !$port)
 				return;
-			}
+
+			self::registerCallback($callback);
 
 			if (class_exists('Memcached')) {
 

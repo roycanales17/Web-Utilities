@@ -11,7 +11,7 @@
             "App\\Http\\": "http"
         },
         "files": [
-            "src/Standard.php"
+            "Standard.php"
         ]
     },
     "type": "library",
@@ -26,6 +26,7 @@
     ],
     "require": {
         "php": "^8.1",
+        "roy404/blades": "^1.0",
         "roy404/request": "^3.0",
         "roy404/artisan": "^1.0",
         "roy404/eloquent": "^1.0"

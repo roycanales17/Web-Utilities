@@ -1,5 +1,7 @@
 <?php
 
+	use App\Content\Blade;
+	use App\Headers\Request;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\Console\Terminal;
@@ -70,4 +72,42 @@
 
 		Terminal::config('commands', $root);
 		Terminal::capture($args);
+	}
+
+	function view(string $path, array $data = []): string
+	{
+		ob_start();
+
+		$root = config('APP_ROOT');
+		$root = rtrim($root, '/');
+
+		$normalizedPath = preg_replace('/\.php$/', '', trim($path, '/'));
+		$bladePath = str_replace('.php', '.blade.php', $mainPath = "/views/{$normalizedPath}.php");
+
+		if (file_exists($root . $bladePath))
+			$mainPath = $bladePath;
+
+		Blade::render($mainPath, extract: $data);
+
+		return ob_get_clean();
+	}
+
+	function dump(mixed $data, bool $exit = false): void
+	{
+		if (config('DEVELOPMENT')) {
+			$printed = print_r($data, true);
+			echo <<<HTML
+				<pre> 
+					$printed
+				</pre>
+			HTML;
+		}
+
+		if ($exit) exit;
+	}
+
+	function validate_token(): void
+	{
+		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token'))
+			exit(response(['message' => 'Bad Request'], 400)->json());
 	}

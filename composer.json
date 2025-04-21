@@ -8,8 +8,6 @@
     "autoload": {
         "psr-4": {
             "App\\Utilities\\": "src",
-            "App\\Utilities\\Handler\\": "src/handler",
-            "App\\Utilities\\Blueprints\\": "src/blueprints",
             "App\\Http\\": "http"
         },
         "files": [

@@ -81,6 +81,7 @@
 		$root = config('APP_ROOT');
 		$root = rtrim($root, '/');
 
+		$path = str_replace('.', '/', $path);
 		$normalizedPath = preg_replace('/\.php$/', '', trim($path, '/'));
 		$bladePath = str_replace('.php', '.blade.php', $mainPath = "/views/{$normalizedPath}.php");
 

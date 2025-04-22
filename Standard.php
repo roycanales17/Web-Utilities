@@ -64,13 +64,10 @@
 
 	function launch_cli_session(array $args, string $path = '', string $root = ''): void
 	{
-		if (!$root)
-			$root = './';
-
 		if ($path)
 			Terminal::config($path, $root);
 
-		Terminal::config('commands', $root);
+		Terminal::config('commands', dirname(__DIR__) . "/commands");
 		Terminal::capture($args);
 	}
 

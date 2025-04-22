@@ -89,16 +89,16 @@
         },
         {
             "name": "roy404/artisan",
-            "version": "v1.1.4",
+            "version": "v1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Web-Artisan.git",
-                "reference": "5c8c1f2f258ba6c8dc753164d71a2766d4c15a0c"
+                "reference": "ec35814f006ec89638f2b5bf273c7b447695327a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/5c8c1f2f258ba6c8dc753164d71a2766d4c15a0c",
-                "reference": "5c8c1f2f258ba6c8dc753164d71a2766d4c15a0c",
+                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/ec35814f006ec89638f2b5bf273c7b447695327a",
+                "reference": "ec35814f006ec89638f2b5bf273c7b447695327a",
                 "shasum": ""
             },
             "require": {
@@ -128,9 +128,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Web-Artisan/issues",
-                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.1.4"
+                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.1.5"
             },
-            "time": "2025-04-20T14:11:50+00:00"
+            "time": "2025-04-22T12:54:05+00:00"
         },
         {
             "name": "roy404/blades",

@@ -67,7 +67,7 @@
 		if ($path)
 			Terminal::config($path, $root);
 
-		Terminal::config('commands', dirname(__DIR__) . "/commands");
+		Terminal::config('commands', __DIR__);
 		Terminal::capture($args);
 	}
 

@@ -29,7 +29,8 @@
 				$component = new $path();
 			} else {
 				foreach (self::$root as $rootPath) {
-					if(file_exists($full_path = $rootPath. ltrim($path, '/') .".php"))
+					$path = preg_replace('/\.php$/', '', $path);
+					if(file_exists($full_path = $rootPath. str_replace('\\', '/', $path). '.php'))
 						$component = require($full_path);
 				}
 			}

@@ -85,6 +85,7 @@
 						init("{$component}");
 					</script>
 				</fragment>
+
 			HTML;
 		}
 

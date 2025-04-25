@@ -78,13 +78,13 @@
 				$dataAttributes .= " data-id='" . $this->target . "'";
 
 			return <<<HTML
-				<fragment class='component-container'{$dataAttributes}>
-					{$html}
-					<script type="module">
-						import {init} from '../resources/libraries/streamdom/stream-wire.js';
-						init("{$component}");
-					</script>
-				</fragment>
+			<fragment class='component-container'{$dataAttributes}>
+				{$html}
+				<script type="module">
+					import {init} from '../resources/libraries/streamdom/stream-wire.js';
+					init("{$component}");
+				</script>
+			</fragment>
 
 			HTML;
 		}

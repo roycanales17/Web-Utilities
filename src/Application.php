@@ -15,14 +15,25 @@
 		private int $startMemory;
 		private int $endMemory;
 
-		public static function run(Closure $callback, string $summary = 'app_summary'): self {
-			return new self($callback, $summary);
+		public static function run(Closure $callback, string $summary = 'app_summary', string $configPath = '../app/Config.php', string $envPath = '../.env'): self {
+			return new self($callback, $summary, $configPath, $envPath);
 		}
 
-		function __construct(Closure $callback, string $summary) {
+		function __construct(Closure $callback, string $summary, string $configPath, string $envPath) {
 			try {
+				Config::load($envPath);
+
 				$this->startTracking();
-				$callback();
+				if (!file_exists($configPath))
+					throw new Exception("Configuration file is required. ". empty($configPath) ? '' : "path: `$configPath`");
+
+				$conf = require($configPath);
+				foreach ($conf['defines'] ?? [] as $key => $value) {
+					if (!defined($key))
+						define($key, $value);
+				}
+
+				$callback($conf);
 			} catch (Exception|Error $e) {
 				$this->exception = $e;
 				$this->throw();

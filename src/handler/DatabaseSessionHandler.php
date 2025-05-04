@@ -29,13 +29,22 @@
 		{
 			$ip = Server::IPAddress();
 			$now = date('Y-m-d H:i:s');
+			$exists = DB::table($this->table)->where('id', $id)->count();
 
-			return (bool) DB::table($this->table)->replace([
-				'id' => $id,
-				'data' => $data,
-				'ip_address' => $ip,
-				'last_activity' => $now
-			]);
+			if ($exists) {
+				return (bool) DB::table($this->table)->where('id', $id)->update([
+					'data' => $data,
+					'ip_address' => $ip,
+					'last_activity' => $now
+				]);
+			} else {
+				return (bool) DB::table($this->table)->create([
+					'id' => $id,
+					'data' => $data,
+					'ip_address' => $ip,
+					'last_activity' => $now
+				]);
+			}
 		}
 
 		public function destroy($id): bool

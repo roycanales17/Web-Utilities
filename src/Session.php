@@ -2,8 +2,49 @@
 
 	namespace App\Utilities;
 
+	use App\Utilities\Handler\DatabaseSessionHandler;
+	// use App\Utilities\Handler\RedisSessionHandler;
+
 	class Session
 	{
+		public static function configure(array $config): void
+		{
+			// Set default driver
+			$config['driver'] = ($config['driver'] ?? 'file');
+
+			// Session lifetime
+			ini_set('session.gc_maxlifetime', ($config['lifetime'] ?? 120) * 60);
+
+			// Session save path (for file driver)
+			if ($config['driver'] === 'file') {
+				$storagePath = $config['storage_path'] ?? '../storage/sessions';
+				if (!is_dir($storagePath)) {
+					mkdir($storagePath, 0755, true);
+				}
+				session_save_path($storagePath);
+			}
+
+			// Cookie parameters
+			session_set_cookie_params([
+				'lifetime' => $config['expire_on_close'] ? 0 : ($config['lifetime'] ?? 120) * 60,
+				'path'     => $config['path'] ?? '/',
+				'domain'   => $config['domain'] ?? '',
+				'secure'   => $config['secure'] ?? false,
+				'httponly' => $config['http_only'] ?? true,
+				'samesite' => $config['same_site'] ?? 'lax',
+			]);
+
+			switch ($config['driver']) {
+				case 'redis':
+					// session_set_save_handler(new RedisSessionHandler($object), true);
+					break;
+
+				case 'database':
+					session_set_save_handler(new DatabaseSessionHandler, true);
+					break;
+			}
+		}
+
 		public static function start(): void
 		{
 			if (session_status() === PHP_SESSION_NONE) {

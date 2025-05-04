@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "44420ef0950ea97bb84cc409ab0fde10",
+    "content-hash": "e6b9c8f501dc6711dab07105dcb3a8be",
     "packages": [
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.9.3",
+            "version": "v6.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e"
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/2f5c94fe7493efc213f643c23b1b1c249d40f47e",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
                 "shasum": ""
             },
             "require": {
@@ -77,7 +77,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.9.3"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.10.0"
             },
             "funding": [
                 {
@@ -85,20 +85,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-24T18:04:13+00:00"
+            "time": "2025-04-24T15:19:31+00:00"
         },
         {
             "name": "roy404/artisan",
-            "version": "v1.1.5",
+            "version": "v1.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Web-Artisan.git",
-                "reference": "ec35814f006ec89638f2b5bf273c7b447695327a"
+                "reference": "d05d0bc646ff2b3992cd046997aa3836eb1786a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/ec35814f006ec89638f2b5bf273c7b447695327a",
-                "reference": "ec35814f006ec89638f2b5bf273c7b447695327a",
+                "url": "https://api.github.com/repos/roycanales17/Web-Artisan/zipball/d05d0bc646ff2b3992cd046997aa3836eb1786a4",
+                "reference": "d05d0bc646ff2b3992cd046997aa3836eb1786a4",
                 "shasum": ""
             },
             "require": {
@@ -128,9 +128,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Web-Artisan/issues",
-                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.1.5"
+                "source": "https://github.com/roycanales17/Web-Artisan/tree/v1.1.7"
             },
-            "time": "2025-04-22T12:54:05+00:00"
+            "time": "2025-05-04T12:41:42+00:00"
         },
         {
             "name": "roy404/blades",
@@ -178,16 +178,16 @@
         },
         {
             "name": "roy404/eloquent",
-            "version": "1.0.1",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Eloquent-Class.git",
-                "reference": "44833383cb33708bff8a9a7c0c21b6c6a7f04ae0"
+                "reference": "820acc287aa4a7036e31cebbbf76225ed8b1482b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Eloquent-Class/zipball/44833383cb33708bff8a9a7c0c21b6c6a7f04ae0",
-                "reference": "44833383cb33708bff8a9a7c0c21b6c6a7f04ae0",
+                "url": "https://api.github.com/repos/roycanales17/Eloquent-Class/zipball/820acc287aa4a7036e31cebbbf76225ed8b1482b",
+                "reference": "820acc287aa4a7036e31cebbbf76225ed8b1482b",
                 "shasum": ""
             },
             "require": {
@@ -196,7 +196,8 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Illuminate\\Databases\\": "src/"
+                    "App\\Database\\": "src/",
+                    "App\\Databases\\Scheme\\": "src/Databases/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -216,9 +217,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Eloquent-Class/issues",
-                "source": "https://github.com/roycanales17/Eloquent-Class/tree/1.0.1"
+                "source": "https://github.com/roycanales17/Eloquent-Class/tree/v1.0.4"
             },
-            "time": "2024-02-19T12:05:55+00:00"
+            "time": "2025-05-04T15:15:22+00:00"
         },
         {
             "name": "roy404/request",
@@ -269,6 +270,50 @@
                 "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.5"
             },
             "time": "2025-03-27T10:34:57+00:00"
+        },
+        {
+            "name": "roy404/schema",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roycanales17/Database-Schema.git",
+                "reference": "3375e633eec7e5f7be96a25b602898280c19642a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roycanales17/Database-Schema/zipball/3375e633eec7e5f7be96a25b602898280c19642a",
+                "reference": "3375e633eec7e5f7be96a25b602898280c19642a",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Illuminate\\Database\\Facades\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robroy Canales",
+                    "email": "canales.robroy123@gmail.com"
+                }
+            ],
+            "description": "The Schema Builder class is a part of the database layer that allows you to define database tables and their columns using a fluent syntax. It provides a way to create and manipulate database tables without writing SQL queries directly.",
+            "keywords": [
+                "php",
+                "plugins"
+            ],
+            "support": {
+                "issues": "https://github.com/roycanales17/Database-Schema/issues",
+                "source": "https://github.com/roycanales17/Database-Schema/tree/1.0.1"
+            },
+            "time": "2024-02-19T13:09:40+00:00"
         }
     ],
     "packages-dev": [],

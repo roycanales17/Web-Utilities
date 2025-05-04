@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use App\Database\DB;
 	use Closure;
 	use Error;
 	use Exception;
@@ -21,9 +22,9 @@
 
 		function __construct(Closure $callback, string $summary, string $configPath, string $envPath) {
 			try {
+				$this->startTracking();
 				Config::load($envPath);
 
-				$this->startTracking();
 				if (!file_exists($configPath))
 					throw new Exception("Configuration file is required. ". empty($configPath) ? '' : "path: `$configPath`");
 
@@ -32,6 +33,18 @@
 					if (!defined($key))
 						define($key, $value);
 				}
+
+				$databases = $conf['database'] ?? [];
+				if ($databases) {
+					$default = $databases['default'] ?? '';
+					$connections = $databases['connections'] ?? [];
+
+					if ($connections[$default] ?? false)
+						DB::configure($connections[$default]);
+				}
+
+				Session::configure($conf['session'] ?? []);
+				Session::start();
 
 				$callback($conf);
 			} catch (Exception|Error $e) {

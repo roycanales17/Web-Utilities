@@ -46,6 +46,7 @@
 				Session::configure($conf['session'] ?? []);
 				Session::start();
 
+				define('CSRF_TOKEN', csrf_token());
 				$callback($conf);
 			} catch (Exception|Error $e) {
 				$this->exception = $e;

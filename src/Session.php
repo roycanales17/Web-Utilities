@@ -9,30 +9,33 @@
 	{
 		public static function configure(array $config): void
 		{
-			// Set default driver
-			$config['driver'] = ($config['driver'] ?? 'file');
+			if (session_status() === PHP_SESSION_NONE) {
 
-			// Session lifetime
-			ini_set('session.gc_maxlifetime', ($config['lifetime'] ?? 120) * 60);
+				// Set default driver
+				$config['driver'] = ($config['driver'] ?? 'file');
 
-			// Session save path (for file driver)
-			if ($config['driver'] === 'file') {
-				$storagePath = $config['storage_path'] ?? '../storage/sessions';
-				if (!is_dir($storagePath)) {
-					mkdir($storagePath, 0755, true);
+				// Session lifetime
+				ini_set('session.gc_maxlifetime', ($config['lifetime'] ?? 120) * 60);
+
+				// Session save path (for file driver)
+				if ($config['driver'] === 'file') {
+					$storagePath = $config['storage_path'] ?? '../storage/sessions';
+					if (!is_dir($storagePath)) {
+						mkdir($storagePath, 0755, true);
+					}
+					session_save_path($storagePath);
 				}
-				session_save_path($storagePath);
-			}
 
-			// Cookie parameters
-			session_set_cookie_params([
-				'lifetime' => $config['expire_on_close'] ? 0 : ($config['lifetime'] ?? 120) * 60,
-				'path'     => $config['path'] ?? '/',
-				'domain'   => $config['domain'] ?? '',
-				'secure'   => $config['secure'] ?? false,
-				'httponly' => $config['http_only'] ?? true,
-				'samesite' => $config['same_site'] ?? 'lax',
-			]);
+				// Cookie parameters
+				session_set_cookie_params([
+					'lifetime' => $config['expire_on_close'] ? 0 : ($config['lifetime'] ?? 120) * 60,
+					'path'     => $config['path'] ?? '/',
+					'domain'   => $config['domain'] ?? '',
+					'secure'   => $config['secure'] ?? false,
+					'httponly' => $config['http_only'] ?? true,
+					'samesite' => $config['same_site'] ?? 'lax',
+				]);
+			}
 
 			switch ($config['driver']) {
 				case 'redis':

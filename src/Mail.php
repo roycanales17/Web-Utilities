@@ -22,7 +22,7 @@
 		protected array $cc = [];
 		protected array $bcc = [];
 
-		public static function config(string $host, int $port = 1025, array $credentials = []): bool
+		public static function configure(string $host, int $port = 1025, array $credentials = []): bool
 		{
 			if (!$host)
 				return false;

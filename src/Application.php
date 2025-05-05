@@ -3,6 +3,7 @@
 	namespace App\Utilities;
 
 	use App\Database\DB;
+	use App\Headers\Request;
 	use Closure;
 	use Error;
 	use Exception;
@@ -23,10 +24,11 @@
 		function __construct(Closure $callback, string $summary, string $configPath, string $envPath) {
 			try {
 				$this->startTracking();
-				Config::load($envPath);
-
 				if (!file_exists($configPath))
 					throw new Exception("Configuration file is required. ". empty($configPath) ? '' : "path: `$configPath`");
+
+				Request::capture();
+				Config::load($envPath);
 
 				$conf = require($configPath);
 				foreach ($conf['defines'] ?? [] as $key => $value) {
@@ -43,10 +45,23 @@
 						DB::configure($connections[$default]);
 				}
 
+				Stream::load($conf['stream'] ?? '');
 				Session::configure($conf['session'] ?? []);
 				Session::start();
 
 				define('CSRF_TOKEN', csrf_token());
+				foreach ($conf['preload_files'] ?? [] as $path) {
+					if (file_exists($path)) {
+						require_once $path;
+					} else {
+						$path = trim($path, '/');
+						$path = config('APP_ROOT') . "/$path";
+						if (file_exists($path))
+							require_once $path;
+					}
+				}
+
+				validate_token();
 				$callback($conf);
 			} catch (Exception|Error $e) {
 				$this->exception = $e;

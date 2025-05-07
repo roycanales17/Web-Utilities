@@ -59,7 +59,7 @@
 
 	function render(string $path, array $data = [], $asynchronous = false): string
 	{
-		return App\Utilities\Stream::render($path, $data, $asynchronous);
+		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
 	}
 
 	function launch_cli_session(array $args, string $path = '', string $root = ''): void

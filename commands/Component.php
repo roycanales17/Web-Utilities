@@ -35,9 +35,14 @@
 				
 				class {$className} extends Component
 				{
+					/**
+					 * This method is called automatically when the component is initialized and rendered.
+					 * If your component requires initialization logic or dependency injection, use the `init` method instead of the constructor.
+					 *
+					 * Interface: @see $basePath/index.blade.php
+					 */
 					public function render(): string
 					{
-						// Renders the component's interface located at "$basePath/index.blade.php".
 						// Pass any necessary data inside the compile() method as an associative array.
 						return \$this->compile();
 					}

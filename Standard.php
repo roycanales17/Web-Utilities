@@ -97,29 +97,6 @@
 	}
 
 	/**
-	 * Renders a PHP or Blade view file and returns the rendered content at any directory.
-	 *
-	 * @param string $path View path using dot notation (e.g., 'users.profile').
-	 * @param array  $data Data to be extracted and passed into the view.
-	 * @return string Rendered HTML content.
-	 */
-	function render(string $path, array $data = []): string
-	{
-		ob_start();
-
-		$path = str_replace('.', '/', $path);
-		$normalizedPath = preg_replace('/\.php$/', '', trim($path, '/'));
-		$bladePath = str_replace('.php', '.blade.php', $mainPath = "/{$normalizedPath}.php");
-
-		if (file_exists('..' . $bladePath))
-			$mainPath = $bladePath;
-
-		Blade::render($mainPath, extract: $data);
-
-		return ob_get_clean();
-	}
-
-	/**
 	 * Launches a CLI session using the internal Terminal class.
 	 *
 	 * @param array  $args The CLI arguments passed in (e.g., from $_SERVER['argv']).

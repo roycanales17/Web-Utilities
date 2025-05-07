@@ -148,31 +148,38 @@
 
 		/**
 		 * Compiles and returns the content of the view associated with the component.
-		 * This function looks for view files with different extensions and renders the first one found.
+		 * This function looks for the `index` file in the same directory as the class and renders
+		 * the first file it finds with the extensions `.blade.php`, `.php`, or `.html`.
+		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
-		 * @param bool $asynchronous Whether the rendering should be asynchronous.
-		 * @return string The rendered HTML content.
+		 * @param bool $asynchronous Whether the rendering should be asynchronous (currently not used in this method).
+		 * @return string The rendered HTML content from the matched view file.
 		 */
 		protected function compile(array $data = [], bool $asynchronous = false): string
 		{
 			ob_start();
 
-			// Normalize the component path.
+			// Set the root directory and determine the path of the class file
 			$root = "../";
 			$path = str_replace(['.', '\\'], '/', get_called_class());
+
+			// The index file is expected to be in the same directory as the class file
 			$index = dirname($path) . '/index';
+
+			// Define the possible file extensions for the view
 			$extensions = ['.blade.php', '.php', '.html'];
 
-			// Find the first existing file with the appropriate extension.
+			// Check each extension to see if the file exists in the directory
 			foreach ($extensions as $ext) {
 				if (file_exists($root . $index . $ext)) {
+					// If a matching file is found, set it as the skeleton to render
 					$skeleton = $index . $ext;
 					break;
 				}
 			}
 
-			// Render the found file if it exists.
+			// Render the matched skeleton (view) file, passing the extracted data
 			if (isset($skeleton)) {
 				Blade::render($skeleton, extract: $data);
 			}

@@ -18,7 +18,7 @@
 
 			$this->info('⏳ Initializing component class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "component/$className");
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "components/$className");
 			$directories = explode('/', $className);
 			$className = ucfirst($directories[count($directories) - 1]);
 

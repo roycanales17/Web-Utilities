@@ -6,7 +6,14 @@
 	use App\Utilities\Session;
 	use App\Console\Terminal;
 
-	function config(string $key, $default = null): mixed
+	/**
+	 * Retrieves a configuration value by key.
+	 *
+	 * @param string $key     The configuration key or constant name.
+	 * @param mixed|null $default The default value to return if the key is not found.
+	 * @return mixed
+	 */
+	function config(string $key, mixed $default = null): mixed
 	{
 		if (defined($key))
 			return constant($key);
@@ -14,6 +21,11 @@
 		return Config::get($key, $default);
 	}
 
+	/**
+	 * Returns a CSRF token stored in the session.
+	 *
+	 * @return string
+	 */
 	function csrf_token(): string
 	{
 		Session::start();
@@ -24,7 +36,13 @@
 		return Session::get('csrf_token');
 	}
 
-	function encrypt($string): string {
+	/**
+	 * Encrypts a string by encoding each character with a prefix.
+	 *
+	 * @param string $string The plain text to encrypt.
+	 * @return string The encrypted string format.
+	 */
+	function encrypt(string $string): string {
 		$numbers = [];
 
 		foreach (str_split($string) as $char) {
@@ -40,7 +58,13 @@
 		return implode('-', $numbers);
 	}
 
-	function decrypt($encoded): string {
+	/**
+	 * Decrypts a string that was encrypted with `encrypt()`.
+	 *
+	 * @param string $encoded The encoded string to decode.
+	 * @return string The original plain text.
+	 */
+	function decrypt(string $encoded): string {
 		$parts = explode('-', $encoded);
 		$decoded = '';
 
@@ -57,11 +81,46 @@
 		return $decoded;
 	}
 
-	function render(string $path, array $data = [], $asynchronous = false): string
+	/**
+	 * Compiles a Blade view and returns the output.
+	 *
+	 * Used to render both normal views and "stream" components (like Livewire).
+	 *
+	 * @param string $path         Path to the blade view.
+	 * @param array  $data         Variables passed to the view.
+	 * @param bool $asynchronous Whether the stream is asynchronous.
+	 * @return string Rendered HTML output.
+	 */
+	function compile(string $path, array $data = [], bool $asynchronous = false): string
 	{
 		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
 	}
 
+
+	function render(string $path, array $data = []): string
+	{
+		ob_start();
+
+		$path = str_replace('.', '/', $path);
+		$normalizedPath = preg_replace('/\.php$/', '', trim($path, '/'));
+		$bladePath = str_replace('.php', '.blade.php', $mainPath = "/{$normalizedPath}.php");
+
+		if (file_exists('..' . $bladePath))
+			$mainPath = $bladePath;
+
+		Blade::render($mainPath, extract: $data);
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Launches a CLI session using the internal Terminal class.
+	 *
+	 * @param array  $args The CLI arguments passed in (e.g., from $_SERVER['argv']).
+	 * @param string $path Optional command config path.
+	 * @param string $root Optional root directory.
+	 * @return void
+	 */
 	function launch_cli_session(array $args, string $path = '', string $root = ''): void
 	{
 		if ($path)
@@ -71,6 +130,13 @@
 		Terminal::capture($args);
 	}
 
+	/**
+	 * Renders a PHP or Blade view file and returns the rendered content.
+	 *
+	 * @param string $path View path using dot notation (e.g., 'users.profile').
+	 * @param array  $data Data to be extracted and passed into the view.
+	 * @return string Rendered HTML content.
+	 */
 	function view(string $path, array $data = []): string
 	{
 		ob_start();
@@ -90,6 +156,14 @@
 		return ob_get_clean();
 	}
 
+	/**
+	 * Outputs variable contents (formatted), only in development mode.
+	 * Optionally halts script execution.
+	 *
+	 * @param mixed $data Data to display (array, object, string, etc.).
+	 * @param bool  $exit Whether to call `exit()` after dumping.
+	 * @return void
+	 */
 	function dump(mixed $data, bool $exit = false): void
 	{
 		if (config('DEVELOPMENT')) {
@@ -104,6 +178,13 @@
 		if ($exit) exit;
 	}
 
+	/**
+	 * Validates CSRF token for requests other than GET, HEAD, or OPTIONS.
+	 *
+	 * Responds with HTTP 400 and JSON message on failure.
+	 *
+	 * @return void
+	 */
 	function validate_token(): void
 	{
 		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token'))

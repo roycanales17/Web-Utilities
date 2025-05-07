@@ -96,7 +96,13 @@
 		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
 	}
 
-
+	/**
+	 * Renders a PHP or Blade view file and returns the rendered content at any directory.
+	 *
+	 * @param string $path View path using dot notation (e.g., 'users.profile').
+	 * @param array  $data Data to be extracted and passed into the view.
+	 * @return string Rendered HTML content.
+	 */
 	function render(string $path, array $data = []): string
 	{
 		ob_start();

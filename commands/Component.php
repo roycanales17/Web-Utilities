@@ -24,7 +24,7 @@
 
 			array_pop($directories);
 			$basePath = dirname('./') . "/" . implode('/', $directories) . "/" . $className;
-			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
+			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', array_merge($directories, [ $className ]))) . ";";
 
 			$content = <<<PHP
 			<?php

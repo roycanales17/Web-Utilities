@@ -34,7 +34,7 @@
 				$value = $value[$keyPart];
 			}
 
-			return $value;
+			return self::castValue($value);
 		}
 
 		public static function set(string $key, mixed $value): void
@@ -50,5 +50,32 @@
 			}
 
 			$config = $value;
+		}
+
+		protected static function castValue(mixed $value): mixed
+		{
+			if (!is_string($value))
+				return $value;
+
+			$value = trim($value);
+
+			if ((str_starts_with($value, '{') && str_ends_with($value, '}')) ||
+				(str_starts_with($value, '[') && str_ends_with($value, ']'))) {
+				$json = json_decode($value, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					return $json;
+				}
+			}
+
+			$lower = strtolower($value);
+
+			return match ($lower) {
+				'true'  => true,
+				'false' => false,
+				'null'  => null,
+				default => (is_numeric($value) ? (
+				str_contains($value, '.') ? (float) $value : (int) $value
+				) : $value),
+			};
 		}
 	}

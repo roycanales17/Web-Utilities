@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use Exception;
 	use App\Headers\Request;
 	use ReflectionException;
 	use ReflectionMethod;
@@ -43,6 +44,11 @@
 			}
 
 			if ($component) {
+				if (!method_exists($component, 'initialize')) {
+					$className = is_object($component) ? get_class($component) : gettype($component);
+					throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
+				}
+
 				$component->initialize($path, $data);
 
 				if ($asynchronous) {
@@ -53,6 +59,8 @@
 				} else {
 					echo($component->parse());
 				}
+			} else {
+				throw new Exception("Unable to locate compiled file '{$path}'.");
 			}
 
 			# Capture the content

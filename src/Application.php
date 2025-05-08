@@ -10,19 +10,21 @@
 
 	class Application
 	{
-		private mixed $exception = null;
 		private string $preferredIDE = 'phpstorm';
+		private mixed $exception = null;
+		private string $errorPath;
 		private float $startTime;
 		private float $endTime;
 		private int $startMemory;
 		private int $endMemory;
 
-		public static function run(Closure $callback, string $summary = 'app_summary', string $configPath = '../app/Config.php', string $envPath = '../.env'): self {
-			return new self($callback, $summary, $configPath, $envPath);
+		public static function run(Closure $callback, string $summary = 'app_summary', string $configPath = '../app/Config.php', string $envPath = '../.env', string $errorPath = 'error'): self {
+			return new self($callback, $summary, $configPath, $envPath, $errorPath);
 		}
 
-		function __construct(Closure $callback, string $summary, string $configPath, string $envPath) {
+		function __construct(Closure $callback, string $summary, string $configPath, string $envPath, string $errorPath) {
 			try {
+				$this->errorPath = $errorPath;
 				$this->startTracking();
 
 				if (!file_exists($configPath))
@@ -103,7 +105,7 @@
 		private function throw(): void {
 
 			if (!intval(ini_get('display_errors'))) {
-				echo response(view('error', ['email' => config('APP_EMAIL')]))->html();
+				echo(response(view($this->errorPath, ['email' => config('APP_EMAIL')]))->html());
 				return;
 			}
 

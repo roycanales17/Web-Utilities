@@ -36,6 +36,11 @@
 						define($key, $value);
 				}
 
+				if (Config::get('DEVELOPMENT')) {
+					error_reporting(1);
+					ini_set('display_errors', 1);
+				}
+
 				$databases = $conf['database'] ?? [];
 				if ($databases) {
 					$default = $databases['default'] ?? '';

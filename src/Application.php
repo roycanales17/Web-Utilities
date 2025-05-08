@@ -36,7 +36,7 @@
 						define($key, $value);
 				}
 
-				if (Config::get('DEVELOPMENT') == 1) {
+				if (config('DEVELOPMENT')) {
 					error_reporting(1);
 					ini_set('display_errors', 1);
 				}

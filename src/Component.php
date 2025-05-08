@@ -154,10 +154,9 @@
 		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
-		 * @param bool $asynchronous Whether the rendering should be asynchronous (currently not used in this method).
 		 * @return string The rendered HTML content from the matched view file.
 		 */
-		protected function compile(array $data = [], bool $asynchronous = false): string
+		protected function compile(array $data = []): string
 		{
 			ob_start();
 

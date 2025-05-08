@@ -7,41 +7,46 @@
 	class Model extends Command
 	{
 		protected string $signature = 'make:model';
-		protected string $description = 'Generates a new model class';
+		protected string $description = 'Generates model class';
 
 		public function handle(string $className = ''): void
 		{
-			if (!$className) {
-				$this->error('Component class name is required.');
+			if (empty($className)) {
+				$this->error('Model class name is required.');
 				return;
 			}
 
 			$this->info('⏳ Initializing model class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_]/', '', $className);
-			$className = ucfirst($className);
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "http/Model/$className");
+			$directories = explode('/', $className);
+			$className = ucfirst($directories[count($directories) - 1]);
 
-			$filename = $className . '.php';
-			$content = <<<HTML
+			array_pop($directories);
+			$basePath = dirname('./') . "/" . implode('/', $directories);
+			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
+
+			$table = strtolower($className);
+			$content = <<<PHP
 			<?php
-
-				namespace Http\Models;
+			
+				{$namespaceDeclaration}
+			
+				use App\Database\Model;
 				
-				use Illuminate\Databases\Model;
-				
-				class {$className} extends Model {
-				
+				class {$className} extends Model
+				{
 					public string \$primary_key = 'id';
-					public string \$table = '{$className}';
+					public string \$table = '{$table}';
 					public array \$fillable = [];
 				}
-			HTML;
+			PHP;
 
-			if ($this->create($filename, $content, dirname('./'). '/Http/Models')) {
-				$this->success("✅ Model class file '{$filename}' has been successfully created and is ready for use.");
-				return;
+			// Create the PHP file
+			if ($this->create("$className.php", $content, $basePath)) {
+				$this->success("✅ Model class file '{$className}' has been successfully created and is ready for use.");
+			} else {
+				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
 			}
-
-			$this->error("❌ Failed to create the file '{$filename}'.");
 		}
 	}

@@ -18,7 +18,6 @@
 			}
 
 			Terminal::handle('clear:logs', ['force' => true]);
-			Terminal::handle('clear:config', ['force' => true]);
 			Terminal::handle('clear:directory', ['path' => 'routes']);
 			Terminal::handle('clear:directory', ['path' => 'views']);
 

@@ -11,37 +11,49 @@
 
 		public function handle(string $className = ''): void
 		{
-			if (!$className) {
+			if (empty($className)) {
 				$this->error('Controller class name is required.');
 				return;
 			}
 
 			$this->info('⏳ Initializing controller class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_]/', '', $className);
-			$className = ucfirst($className);
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "http/Controller/$className");
+			$directories = explode('/', $className);
+			$className = ucfirst($directories[count($directories) - 1]);
 
-			$filename = $className . '.php';
-			$content = <<<HTML
+			array_pop($directories);
+			$basePath = dirname('./') . "/" . implode('/', $directories);
+			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
+
+			$content = <<<PHP
 			<?php
-
-				namespace Http\Controllers;
-				
+			
+				{$namespaceDeclaration}
+			
 				use App\Http\Controller;
 				
-				class {$className} extends Controller {
-				
+				class {$className} extends Controller
+				{
 					public function index() {
 					
 					}
+					
+					public function edit() {
+					
+					}
+					
+					public function delete() {
+					
+					}
 				}
-			HTML;
+			PHP;
 
-			if ($this->create($filename, $content, dirname('./'). '/Http/Controllers')) {
-				$this->success("✅ Controller class file '{$filename}' has been successfully created and is ready for use.");
-				return;
+			// Create the PHP file
+			if ($this->create("$className.php", $content, $basePath)) {
+				$this->success("✅ Controller class file '{$className}' has been successfully created and is ready for use.");
+			} else {
+				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
 			}
-
-			$this->error("❌ Failed to create the file '{$filename}'.");
 		}
 	}

@@ -30,8 +30,15 @@
 			} else {
 				foreach (self::$root as $rootPath) {
 					$path = preg_replace('/\.php$/', '', $path);
-					if(file_exists($full_path = $rootPath. str_replace('\\', '/', $path). '.php'))
-						$component = require($full_path);
+					$normalizedPath = str_replace('\\', '/', $path);
+
+					foreach (['.blade.php', '.php'] as $extension) {
+						$full_path = $rootPath . $normalizedPath . $extension;
+						if (file_exists($full_path)) {
+							$component = require $full_path;
+							break 2;
+						}
+					}
 				}
 			}
 

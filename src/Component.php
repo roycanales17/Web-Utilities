@@ -3,6 +3,7 @@
 	namespace App\Utilities;
 
 	use App\Content\Blade;
+	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;
 
@@ -181,7 +182,9 @@
 
 			// Render the matched skeleton (view) file, passing the extracted data
 			if (isset($skeleton)) {
-				Blade::render($skeleton, extract: $data);
+				Blade::render($skeleton, extract: $data, onError: function ($trace) {
+					throw new Exception("{$trace['message']} in `{$trace['path']}`, line: `{$trace['line']}`", $trace['code']);
+				});
 			}
 
 			return ob_get_clean();

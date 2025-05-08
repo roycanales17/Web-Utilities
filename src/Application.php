@@ -98,6 +98,11 @@
 
 		private function throw(): void {
 
+			if (!intval(ini_get('display_errors'))) {
+				echo response(view('error', ['email' => config('APP_EMAIL')]))->html();
+				return;
+			}
+
 			$exception = $this->exception;
 			$file = urlencode($exception->getFile());
 			$line = $exception->getLine();

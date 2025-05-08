@@ -30,11 +30,11 @@
 				if (!file_exists($configPath))
 					throw new Exception("Configuration file is required. " . (empty($configPath) ? '' : "path: `$configPath`"));
 
-				if (!is_array($conf = require($configPath)))
-					throw new Exception("Invalid config file structure at `$configPath`");
-
 				Request::capture();
 				Config::load($envPath);
+
+				if (!is_array($conf = require($configPath)))
+					throw new Exception("Invalid config file structure at `$configPath`");
 
 				foreach ($conf['defines'] ?? [] as $key => $value) {
 					if (is_string($key) && !defined($key)) {

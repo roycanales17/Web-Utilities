@@ -178,16 +178,16 @@
         },
         {
             "name": "roy404/eloquent",
-            "version": "v1.0.6",
+            "version": "v1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Eloquent-Class.git",
-                "reference": "c87ad1703777d5c260be59c0067b5032ffe619be"
+                "reference": "f359f32022710ca653636413a66215d3af0a90bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Eloquent-Class/zipball/c87ad1703777d5c260be59c0067b5032ffe619be",
-                "reference": "c87ad1703777d5c260be59c0067b5032ffe619be",
+                "url": "https://api.github.com/repos/roycanales17/Eloquent-Class/zipball/f359f32022710ca653636413a66215d3af0a90bf",
+                "reference": "f359f32022710ca653636413a66215d3af0a90bf",
                 "shasum": ""
             },
             "require": {
@@ -217,9 +217,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Eloquent-Class/issues",
-                "source": "https://github.com/roycanales17/Eloquent-Class/tree/v1.0.6"
+                "source": "https://github.com/roycanales17/Eloquent-Class/tree/v1.0.7"
             },
-            "time": "2025-05-05T11:10:11+00:00"
+            "time": "2025-05-08T13:54:17+00:00"
         },
         {
             "name": "roy404/request",

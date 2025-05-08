@@ -24,16 +24,20 @@
 		function __construct(Closure $callback, string $summary, string $configPath, string $envPath) {
 			try {
 				$this->startTracking();
+
 				if (!file_exists($configPath))
-					throw new Exception("Configuration file is required. ". empty($configPath) ? '' : "path: `$configPath`");
+					throw new Exception("Configuration file is required. " . (empty($configPath) ? '' : "path: `$configPath`"));
+
+				if (!is_array($conf = require($configPath)))
+					throw new Exception("Invalid config file structure at `$configPath`");
 
 				Request::capture();
 				Config::load($envPath);
 
-				$conf = require($configPath);
 				foreach ($conf['defines'] ?? [] as $key => $value) {
-					if (!defined($key))
+					if (is_string($key) && !defined($key)) {
 						define($key, $value);
+					}
 				}
 
 				if (config('DEVELOPMENT')) {
@@ -73,7 +77,7 @@
 				$this->throw();
 			} finally {
 				$this->endTracking();
-				if (is_null($this->exception) && $_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET[$summary])) {
+				if (is_null($this->exception) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET' && isset($_GET[$summary])) {
 					$this->summary();
 				}
 			}

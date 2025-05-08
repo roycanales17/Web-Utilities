@@ -111,8 +111,15 @@
 						$component = new $path();
 					} else {
 						foreach (self::$root as $rootPath) {
-							if(file_exists($full_path = $rootPath. ltrim($path, '/') .".php"))
-								$component = require($full_path);
+							$normalizedPath = ltrim($path, '/');
+
+							foreach (['.blade.php', '.php'] as $extension) {
+								$full_path = $rootPath . $normalizedPath . $extension;
+								if (file_exists($full_path)) {
+									$component = require $full_path;
+									break 2;
+								}
+							}
 						}
 					}
 

@@ -134,7 +134,9 @@
 		if (file_exists($root . $bladePath))
 			$mainPath = $bladePath;
 
-		Blade::render($mainPath, extract: $data);
+		Blade::render($mainPath, extract: $data, onError: function ($trace) {
+			throw new Exception("{$trace['message']} in `{$trace['path']}`, line: `{$trace['line']}`", $trace['code']);
+		});
 
 		return ob_get_clean();
 	}

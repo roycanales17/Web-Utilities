@@ -103,7 +103,7 @@
 			}
 
 			if (isset($context['trace'])) {
-				$log .= "\n🔍 Trace:\\n" . trim($context['trace']) . "\n";
+				$log .= "\n🔍 Trace:\n" . trim($context['trace']) . "\n";
 			}
 
 			$log .= str_repeat('-', 47) . "\n\n\n\n";

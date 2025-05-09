@@ -25,18 +25,6 @@
 			}
 		}
 
-		public function log(string $level, string $message, array $context = []): void
-		{
-			if (!in_array($level, $this->logLevels)) {
-				throw new \InvalidArgumentException("Invalid log level: {$level}");
-			}
-
-			if ($this->shouldLog($level)) {
-				$logEntry = $this->formatLogEntry($level, $message, $context);
-				file_put_contents($this->getLogFilePath(), $logEntry, FILE_APPEND);
-			}
-		}
-
 		public function debug(string $message, array $context = []): void
 		{
 			$this->log('debug', $message, $context);
@@ -57,21 +45,6 @@
 			$this->log('error', $message, $context);
 		}
 
-		protected function shouldLog(string $level): bool
-		{
-			$currentLevelIndex = array_search($this->logLevel, $this->logLevels);
-			$messageLevelIndex = array_search($level, $this->logLevels);
-
-			return $messageLevelIndex >= $currentLevelIndex;
-		}
-
-		protected function formatLogEntry(string $level, string $message, array $context): string
-		{
-			$timestamp = Carbon::format('Y-m-d H:i:s');
-			$contextString = $this->formatContext($context);
-			return "[{$timestamp}] {".strtoupper($level)."}: {$message} {$contextString}" . PHP_EOL;
-		}
-
 		protected function formatContext(array $context): string
 		{
 			if (empty($context)) {
@@ -84,5 +57,57 @@
 		protected function getLogFilePath(): string
 		{
 			return "{$this->logDirectory}/{$this->logFile}";
+		}
+
+		public function log(string $level, string $message, array $context = []): void
+		{
+			if (!in_array($level, $this->logLevels)) {
+				throw new \InvalidArgumentException("Invalid log level: {$level}");
+			}
+
+			if ($this->shouldLog($level)) {
+				$logEntry = $this->formatLogEntry($level, $message, $context);
+				file_put_contents($this->getLogFilePath(), $logEntry, FILE_APPEND);
+			}
+		}
+
+		protected function shouldLog(string $level): bool
+		{
+			$currentLevelIndex = array_search($this->logLevel, $this->logLevels);
+			$messageLevelIndex = array_search($level, $this->logLevels);
+			return $messageLevelIndex >= $currentLevelIndex;
+		}
+
+		protected function formatLogEntry(string $level, string $message, array $context): string
+		{
+			$timestamp = Carbon::format('Y-m-d H:i:s');
+			$level = strtolower($level);
+			$levelUpper = strtoupper($level);
+
+			$icons = [
+				'info' => 'ℹ️',
+				'error' => '🚨',
+				'warning' => '⚠️',
+				'debug' => '🐞',
+			];
+
+			$icon = $icons[$level] ?? '📌';
+			$log = "{$icon} [{$levelUpper}] [{$timestamp}]\n\n";
+			$log .= "Message  : {$message}\n";
+
+			if (isset($context['file'])) {
+				$log .= "File     : {$context['file']}\n";
+			}
+			if (isset($context['line'])) {
+				$log .= "Line     : {$context['line']}\n";
+			}
+
+			if (isset($context['trace'])) {
+				$log .= "\n🔍 Trace:\\n" . trim($context['trace']) . "\n";
+			}
+
+			$log .= str_repeat('-', 47) . "\n\n\n\n";
+
+			return $log;
 		}
 	}

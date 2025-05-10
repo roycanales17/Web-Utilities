@@ -45,17 +45,10 @@
 		 * @return string Component skeleton loader
 		 * @throws Exception
 		 */
-		private function preloader(): string
+		private function preloader($dataAttributes, $component): string
 		{
 			if (!method_exists($this, 'loader'))
 				throw new Exception('Loader function is required.');
-
-			$dataAttributes = '';
-			$componentId = $this->componentIdentifier;
-
-			foreach (['component' => $componentId] as $key => $value) {
-				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
-			}
 
 			$html = $this->loader();
 
@@ -63,15 +56,15 @@
 			<fragment class='component-container' {$dataAttributes}>
 				{$html}
 				<script>
-					(function() {
+					document.addEventListener("DOMContentLoaded", function () {
 						const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-						const component = document.querySelector("[data-component='{$componentId}']");
+						const component = document.querySelector("[data-component='{$component}']");
 						if (!component) return;
 			
 						const form = new FormData();
-						form.append('_component', '$componentId');
+						form.append('_component', '$component');
 			
-						fetch("/api/stream-wire/{$componentId}", {
+						fetch("/api/stream-wire/{$component}", {
 							method: "POST",
 							headers: {
 								"X-STREAM-WIRE": "true",
@@ -116,7 +109,7 @@
 						.catch(error => {
 							console.error("Fetch error:", error);
 						});
-					})();
+					});
 				</script>
 			</fragment>
 			HTML;
@@ -188,10 +181,7 @@
 		 */
 		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false): string
 		{
-			if ($preloader)
-				return $this->preloader();
-
-			if (!method_exists($this, 'render'))
+			if (!$preloader && !method_exists($this, 'render'))
 				throw new Exception("Render function is required.");
 
 			// Calculate the duration of the component rendering.
@@ -211,9 +201,11 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
-			if (property_exists($this, 'target')) {
+			if (property_exists($this, 'target'))
 				$dataAttributes .= " data-id='" . $this->target . "'";
-			}
+
+			if ($preloader)
+				return $this->preloader($dataAttributes, $component);
 
 			$html = str_replace(['<>', '</>'], '', $this->render());
 			return <<<HTML

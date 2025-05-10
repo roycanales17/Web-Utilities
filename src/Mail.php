@@ -7,7 +7,7 @@
 
 	class Mail
 	{
-		protected static ?Logger $logger = null;
+		private static array $configure = [];
 		protected static ?PHPMailer $mailer = null;
 		protected string $charset = 'UTF-8';
 		protected string $contentType = 'text/html';
@@ -24,31 +24,16 @@
 
 		public static function configure(string $host, int $port = 1025, array $credentials = []): bool
 		{
-			if (!$host)
+			if (!$host || !$port || !$credentials)
 				return false;
 
-			try {
-				$mail = new PHPMailer(true);
-				$mail->isSMTP();
-				$mail->Host = $host;
-				$mail->Port = $port;
-				$mail->SMTPAuth = false;
+			self::$configure = [
+				'host' => $host,
+				'port' => $port,
+				'credentials' => $credentials
+			];
 
-				if ($credentials) {
-					$mail->SMTPAuth = true;
-					$mail->Username = $credentials['username'] ?? '';
-					$mail->Password = $credentials['password'] ?? '';
-				}
-
-				$mail->SMTPAutoTLS = false;
-				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
-				self::$mailer = $mail;
-				return true;
-			} catch (Exception $e) {
-				self::logError($e);
-				return false;
-			}
+			return true;
 		}
 
 		public static function to(string|array $emails): self
@@ -167,8 +152,31 @@
 
 		public function send(): bool
 		{
+			if ($conf = self::$configure) {
+				try {
+					$mail = new PHPMailer(true);
+					$mail->isSMTP();
+					$mail->Host = $conf['host'];
+					$mail->Port = $conf['port'];
+					$mail->SMTPAuth = false;
+
+					if ($conf['credentials']) {
+						$mail->SMTPAuth = true;
+						$mail->Username = $credentials['username'] ?? '';
+						$mail->Password = $credentials['password'] ?? '';
+					}
+
+					$mail->SMTPAutoTLS = false;
+					$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+
+					self::$mailer = $mail;
+				} catch (Exception $e) {
+					throw new Exception('Mailer Error: ' . $e->getMessage());
+				}
+			}
+
 			if (!self::$mailer)
-				return false;
+				throw new Exception('Mailer is not configured.');
 
 			try {
 				$mail = clone self::$mailer;
@@ -214,20 +222,7 @@
 				$mail->send();
 				return true;
 			} catch (Exception $e) {
-				self::logError($e);
-				return false;
+				throw new Exception('Mailer Error: ' . $e->getMessage());
 			}
-		}
-
-		private static function logError(Exception $e): void
-		{
-			if (!self::$logger)
-				self::$logger = new Logger('../logs', logFile: 'mail.log');
-
-			self::$logger->error($e->getMessage(), [
-				'file' => $e->getFile(),
-				'line' => $e->getLine(),
-				'trace' => $e->getTraceAsString()
-			]);
 		}
 	}

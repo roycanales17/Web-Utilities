@@ -247,7 +247,7 @@
 			$path = str_replace(['.', '\\'], '/', get_called_class());
 
 			// Normalize path
-			$bladePath = str_replace('.php', '.blade.php', "/{$blade}.php");
+			$bladePath = str_replace('.php', '.blade.php', "/{$blade}");
 
 			// The index file is expected to be in the same directory as the class file
 			$index = dirname($path) . "/$bladePath";

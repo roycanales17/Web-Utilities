@@ -86,8 +86,8 @@
 		}
 
 		public function failed(Closure $callback): void {
-			http_response_code(500);
 			if ($this->exception !== null) {
+				http_response_code(500);
 				$callback($this->exception);
 			}
 		}

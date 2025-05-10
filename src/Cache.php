@@ -4,6 +4,7 @@
 
 	use App\Utilities\Blueprints\CacheDriver;
 	use Closure;
+	use Exception;
 	use Memcached;
 	use Redis;
 
@@ -31,48 +32,34 @@
 
 		protected static function configureRedis(string $host, string $port): void
 		{
-			if (!class_exists('Redis')) {
-				self::throw('Redis class not found.');
-				return;
-			}
+			if (!class_exists('Redis'))
+				throw new Exception("Redis extension not installed");
 
 			$redis = new Redis();
-			if (!$redis->connect($host, (int) $port)) {
-				self::throw('Failed to connect to Redis server.');
-				return;
-			}
+			if (!$redis->connect($host, (int) $port))
+				throw new Exception("Could not connect to redis server");
 
 			self::$driver = $redis;
 		}
 
 		protected static function configureMemcached(string $host, string $port): void
 		{
-			if (!class_exists('Memcached')) {
-				self::throw('Memcached class not found.');
-				return;
-			}
+			if (!class_exists('Memcached'))
+				throw new Exception("Memcached extension not installed");
 
 			$memcached = new Memcached();
-			if (!$memcached->addServer($host, (int) $port)) {
-				self::throw('Failed to connect to Memcached server.');
-				return;
-			}
+			if (!$memcached->addServer($host, (int) $port))
+				throw new Exception("Could not connect to memcached server");
 
 			self::$driver = $memcached;
 		}
 
-		protected static function cache(): Memcached|Redis|false
+		protected static function cache(): Memcached|Redis
 		{
-			if (self::$driver) return self::$driver;
+			if (self::$driver)
+				return self::$driver;
 
-			self::throw('Cache is not configured.');
-			return false;
-		}
-
-		protected static function throw(string $message): void
-		{
-			if (self::$callback)
-				call_user_func(self::$callback, $message);
+			throw new Exception("Cache is not configured.");
 		}
 
 		public static function remember(string $key, callable $callback, int $expiration = 60): mixed
@@ -117,12 +104,14 @@
 		{
 			if ($cache = self::cache()) {
 				$data = $cache->get($key);
-				if ($data === false) return $default;
+				if ($data === false)
+					return $default;
 
 				$data = $cache instanceof Redis ? unserialize($data) : $data;
 				return is_array($data) && isset($data['data']) ? $data['data'] : $default;
 			}
-			return $default;
+
+			return false;
 		}
 
 		public static function delete(string $key): bool

@@ -10,24 +10,24 @@
 
 	class Cache
 	{
+		private static array $configured = [];
 		private static Memcached|Redis|null $driver = null;
 		private static ?Closure $callback = null;
 
 		public static function configure(
-			CacheDriver $type = CacheDriver::Memcached,
+			CacheDriver $driver = CacheDriver::Memcached,
 			string $server = '',
-			string $port = '',
-			?Closure $callback = null
+			string $port = ''
 		): void {
-			self::$callback = $callback;
 
 			if (!$server || !$port)
 				return;
 
-			match ($type) {
-				CacheDriver::Redis => self::configureRedis($server, $port),
-				CacheDriver::Memcached => self::configureMemcached($server, $port),
-			};
+			self::$configured = [
+				'driver' => $driver,
+				'server' => $server,
+				'port' => $port
+			];
 		}
 
 		protected static function configureRedis(string $host, string $port): void
@@ -56,6 +56,16 @@
 
 		protected static function cache(): Memcached|Redis
 		{
+			if (!($config = self::$driver)) {
+				$server = $config['server'];
+				$port = $config['port'];
+
+				match ($config['driver']) {
+					CacheDriver::Redis => self::configureRedis($server, $port),
+					CacheDriver::Memcached => self::configureMemcached($server, $port),
+				};
+			}
+
 			if (self::$driver)
 				return self::$driver;
 

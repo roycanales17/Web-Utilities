@@ -132,4 +132,18 @@
 
 			return false;
 		}
+
+		public static function getExpiration(string $key): mixed
+		{
+			if ($cache = self::cache()) {
+				$data = $cache->get($key);
+				if ($data === false)
+					return false;
+
+				$data = $cache instanceof Redis ? unserialize($data) : $data;
+				return $data['expires_at'] ?? false;
+			}
+
+			return false;
+		}
 	}

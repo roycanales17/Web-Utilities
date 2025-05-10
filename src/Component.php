@@ -63,6 +63,7 @@
 			
 						const form = new FormData();
 						form.append('_component', '$component');
+						form.append('_method', 'render');
 			
 						fetch("/api/stream-wire/{$component}", {
 							method: "POST",
@@ -92,16 +93,21 @@
 						.then(html => {
 							const wrapper = document.createElement('div');
 							wrapper.innerHTML = html;
-							const newFragment = wrapper.querySelector("[data-component='{$componentId}']");
+							const newFragment = wrapper.querySelector("[data-component='{$component}']");
 							if (newFragment) {
 								component.replaceWith(newFragment);
 								newFragment.querySelectorAll('script').forEach(oldScript => {
 									const newScript = document.createElement('script');
-									if (oldScript.src) {
+								
+									if (oldScript.src)
 										newScript.src = oldScript.src;
-									} else {
+								
+									if (oldScript.type)
+										newScript.type = oldScript.type;
+								
+									if (oldScript.textContent && !oldScript.src)
 										newScript.textContent = oldScript.textContent;
-									}
+										
 									document.head.appendChild(newScript).remove();
 								});
 							}
@@ -194,10 +200,10 @@
 			$dataAttributes = '';
 
 			foreach ([
-			 	'component' => $component,
-			 	'duration' => sprintf('%.2f', $durationMs),
-			 	'properties' => base64_encode(encrypt(json_encode($properties)))
-			] as $key => $value) {
+						 'component' => $component,
+						 'duration' => sprintf('%.2f', $durationMs),
+						 'properties' => base64_encode(encrypt(json_encode($properties)))
+					 ] as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 

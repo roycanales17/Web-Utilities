@@ -40,6 +40,89 @@
 		}
 
 		/**
+		 * Component skeleton loader
+		 *
+		 * @return string Component skeleton loader
+		 * @throws Exception
+		 */
+		private function preloader(): string
+		{
+			if (!method_exists($this, 'loader'))
+				throw new Exception('Loader function is required.');
+
+			$dataAttributes = '';
+			$componentId = $this->componentIdentifier;
+
+			foreach (['component' => $componentId] as $key => $value) {
+				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
+			}
+
+			$html = $this->loader();
+
+			return <<<HTML
+			<fragment class='component-container' {$dataAttributes}>
+				{$html}
+				<script>
+					(function() {
+						const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+						const component = document.querySelector("[data-component='{$componentId}']");
+						if (!component) return;
+			
+						const form = new FormData();
+						form.append('_component', '$componentId');
+			
+						fetch("/api/stream-wire/{$componentId}", {
+							method: "POST",
+							headers: {
+								"X-STREAM-WIRE": "true",
+								"X-CSRF-TOKEN": token
+							},
+							body: form
+						})
+						.then(response => {
+							if (!response.ok) {
+								console.error(
+									`%c❌ HTTP ERROR! %cStatus: \${response.status} 🚫`,
+									'color: red; font-weight: bold;',
+									'color: orange;'
+								);
+								if (response.status === 500) {
+									response.text().then(errorHtml => {
+										component.innerHTML += errorHtml;
+									});
+								}
+								return null;
+							}
+				
+							return response.text();
+						})
+						.then(html => {
+							const wrapper = document.createElement('div');
+							wrapper.innerHTML = html;
+							const newFragment = wrapper.querySelector("[data-component='{$componentId}']");
+							if (newFragment) {
+								component.replaceWith(newFragment);
+								newFragment.querySelectorAll('script').forEach(oldScript => {
+									const newScript = document.createElement('script');
+									if (oldScript.src) {
+										newScript.src = oldScript.src;
+									} else {
+										newScript.textContent = oldScript.textContent;
+									}
+									document.head.appendChild(newScript).remove();
+								});
+							}
+						})
+						.catch(error => {
+							console.error("Fetch error:", error);
+						});
+					})();
+				</script>
+			</fragment>
+			HTML;
+		}
+
+		/**
 		 * Fetches the public properties of the component as an associative array.
 		 *
 		 * @return array An array of public properties and their values.
@@ -93,15 +176,6 @@
 			}
 		}
 
-		/**
-		 * Placeholder function, coming soon.
-		 *
-		 * @return string A message indicating the feature is under development.
-		 */
-		public function preloader(): string
-		{
-			return 'Ajax requests';
-		}
 
 		/**
 		 * Parse the component's render output and return a formatted HTML string with data attributes.
@@ -110,10 +184,15 @@
 		 * @param string $identifier Optional identifier for the component.
 		 * @param float $startedTime Time when the component started.
 		 * @return string The rendered component wrapped in a <fragment> element with data attributes.
+		 * @throws Exception
 		 */
-		public function parse(string $identifier = '', float $startedTime = 0): string
+		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false): string
 		{
-			$html = str_replace(['<>', '</>'], '', $this->render());
+			if ($preloader)
+				return $this->preloader();
+
+			if (!method_exists($this, 'render'))
+				throw new Exception("Render function is required.");
 
 			// Calculate the duration of the component rendering.
 			$duration = hrtime(true) - ($identifier ? $startedTime : $this->startedTime);
@@ -123,11 +202,12 @@
 			$component = $identifier ?: base64_encode($this->componentIdentifier);
 			$properties = $this->fetchProperties();
 			$dataAttributes = '';
+
 			foreach ([
-						 'component' => $component,
-						 'duration' => sprintf('%.2f', $durationMs),
-						 'properties' => base64_encode(encrypt(json_encode($properties)))
-					 ] as $key => $value) {
+			 	'component' => $component,
+			 	'duration' => sprintf('%.2f', $durationMs),
+			 	'properties' => base64_encode(encrypt(json_encode($properties)))
+			] as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
@@ -135,6 +215,7 @@
 				$dataAttributes .= " data-id='" . $this->target . "'";
 			}
 
+			$html = str_replace(['<>', '</>'], '', $this->render());
 			return <<<HTML
 			<fragment class='component-container'{$dataAttributes}>
 				{$html}
@@ -154,9 +235,10 @@
 		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
+		 * @param string $blade Use to render the interface within the component directory.
 		 * @return string The rendered HTML content from the matched view file.
 		 */
-		protected function compile(array $data = []): string
+		protected function compile(array $data = [], string $blade = 'index'): string
 		{
 			ob_start();
 
@@ -164,8 +246,11 @@
 			$root = "../";
 			$path = str_replace(['.', '\\'], '/', get_called_class());
 
+			// Normalize path
+			$bladePath = str_replace('.php', '.blade.php', "/{$blade}.php");
+
 			// The index file is expected to be in the same directory as the class file
-			$index = dirname($path) . '/index';
+			$index = dirname($path) . "/$bladePath";
 
 			// Define the possible file extensions for the view
 			$extensions = ['.blade.php', '.php', '.html'];

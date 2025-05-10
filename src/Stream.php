@@ -52,10 +52,7 @@
 				$component->initialize($path, $data);
 
 				if ($asynchronous) {
-					if (method_exists($component, 'loader'))
-						echo($component->loader($data));
-
-					echo($component->preloader());
+					echo($component->parse(preloader: true));
 				} else {
 					echo($component->parse());
 				}

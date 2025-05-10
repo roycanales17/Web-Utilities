@@ -22,7 +22,8 @@
 
 		public function read($id): string|false
 		{
-			return DB::table($this->table)->select('data')->where('id', $id)->field();
+			$data = DB::table($this->table)->select('data')->where('id', $id)->field();
+			return $data ?: false;
 		}
 
 		public function write($id, $data): bool

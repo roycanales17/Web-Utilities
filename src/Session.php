@@ -66,7 +66,7 @@
 			$_SESSION[$key] = $value;
 		}
 
-		public static function get(string $key, mixed $default = null): mixed
+		public static function get(string $key, mixed $default = false): mixed
 		{
 			self::start();
 			return $_SESSION[$key] ?? $default;
@@ -86,16 +86,16 @@
 			}
 		}
 
-		public static function flash(string $key, mixed $value = null): mixed
+		public static function flash(string $key, mixed $value = false): mixed
 		{
 			self::start();
 
-			if ($value !== null) {
+			if ($value !== false) {
 				$_SESSION['__flash'][$key] = $value;
-				return null;
+				return false;
 			}
 
-			$flashValue = $_SESSION['__flash'][$key] ?? null;
+			$flashValue = $_SESSION['__flash'][$key] ?? false;
 			if (isset($_SESSION['__flash'][$key])) {
 				unset($_SESSION['__flash'][$key]);
 			}

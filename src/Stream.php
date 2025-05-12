@@ -56,7 +56,7 @@
 				}
 
 				if (!self::verifyComponent($component))
-					return response(['message' => 'Unauthorized'], 401)->json();
+					return '';
 
 				$component->initialize($path, $data);
 

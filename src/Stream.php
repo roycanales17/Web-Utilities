@@ -149,7 +149,7 @@
 
 						if (!self::verifyComponent($component)) {
 							if (self::$onFailed)
-								return call_user_func(self::$onFailed, ['message' => 'Unauthorized']);
+								return call_user_func(self::$onFailed, 401);
 
 							return response(['message' => 'Unauthorized'], 401)->json();
 						}
@@ -162,7 +162,9 @@
 				}
 			}
 
-			// Exit error stream wire message
+			if (self::$onFailed)
+				return call_user_func(self::$onFailed, 400);
+
 			return response(['message' => 'Invalid Request'], 400)->json();
 		}
 

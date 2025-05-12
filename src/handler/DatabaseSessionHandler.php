@@ -20,10 +20,10 @@
 			return true;
 		}
 
-		public function read($id): string|false
+		public function read($id): string
 		{
 			$data = DB::table($this->table)->select('data')->where('id', $id)->field();
-			return $data ?: false;
+			return $data ?? '';
 		}
 
 		public function write($id, $data): bool
@@ -57,10 +57,5 @@
 		{
 			$threshold = date('Y-m-d H:i:s', time() - $max_lifetime);
 			return (bool) DB::table($this->table)->where('last_activity', '<', $threshold)->delete();
-		}
-
-		public function session_close(): void
-		{
-
 		}
 	}

@@ -41,6 +41,7 @@
 					 * ## Available Methods:
 					 * - `init()` — Acts as a constructor for this component. Initialize internal state or dependencies here.
 					 * - `verify()` — Optional verification logic that runs before rendering the component.
+					 * - `loader()` — Displays the component's skeleton while it is processing.
 					 *
 					 * ## Properties:
 					 * - `target` — Use this property to allow the component to be triggered by other components.

@@ -3,6 +3,7 @@
 	namespace App\Utilities;
 
 	use App\Http\Authenticatable;
+	use Closure;
 	use Exception;
 	use App\Headers\Request;
 	use ReflectionException;
@@ -14,13 +15,17 @@
 		private static array $methodCache = [];
 		private static array $compiled = [];
 		private static array $authentication = [];
+		private static Closure|null $onFailed = null;
 
-		public static function configure(string|array $root, array $authentication = []): void
+		public static function configure(string|array $root, array $authentication = [], Closure|null $onFailed = null): void
 		{
 			self::$root = is_string($root) ? [$root] : $root;
 
 			if ($authentication)
 				self::$authentication = $authentication;
+
+			if ($onFailed)
+				self::$onFailed = $onFailed;
 		}
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
@@ -142,8 +147,12 @@
 						if ($orig_properties)
 							$component->models($orig_properties);
 
-						if (!self::verifyComponent($component))
+						if (!self::verifyComponent($component)) {
+							if (self::$onFailed)
+								return call_user_func(self::$onFailed, ['message' => 'Unauthorized']);
+
 							return response(['message' => 'Unauthorized'], 401)->json();
+						}
 
 						if ($function != 'render' && self::validateMethod($component, $function, $args))
 							call_user_func_array([$component, $function], $args);

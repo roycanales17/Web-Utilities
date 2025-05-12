@@ -56,7 +56,7 @@
 				}
 
 				if (!self::verifyComponent($component))
-					return '';
+					return ob_get_clean();
 
 				$component->initialize($path, $data);
 

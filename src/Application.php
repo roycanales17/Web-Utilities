@@ -57,8 +57,11 @@
 				}
 
 				Stream::load($conf['stream'] ?? '');
-				Session::configure($conf['session'] ?? []);
-				Session::start();
+
+				if (php_sapi_name() !== 'cli') {
+					Session::configure($conf['session'] ?? []);
+					Session::start();
+				}
 
 				define('CSRF_TOKEN', csrf_token());
 				foreach ($conf['preload_files'] ?? [] as $path) {

@@ -36,11 +36,20 @@
 				class {$className} extends Component
 				{
 					/**
-					 * This method is called automatically when the component is initialized and rendered.
-					 * If your component requires initialization logic or dependency injection, use the `init` method instead of the constructor.
+					 * Component Lifecycle and Configuration
 					 *
-					 * Interface: @see $basePath/index.blade.php
+					 * ## Available Methods:
+					 * - `init()` — Acts as a constructor for this component. Initialize internal state or dependencies here.
+					 * - `verify()` — Optional verification logic that runs before rendering the component.
+					 *
+					 * ## Properties:
+					 * - `target` — Use this property to allow the component to be triggered by other components.
+					 *   Example usage: `wire:target="YourComponentTarget"`
+					 *
+					 * See the component interface located at:
+					 * @see $basePath/index.blade.php
 					 */
+
 					public function render(): string
 					{
 						// Pass any necessary data inside the compile() method as an associative array.

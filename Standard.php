@@ -172,6 +172,9 @@
 	 */
 	function validate_token(): void
 	{
+		if (php_sapi_name() === 'cli')
+			return;
+
 		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token'))
 			exit(response(['message' => 'Bad Request'], 400)->json());
 	}

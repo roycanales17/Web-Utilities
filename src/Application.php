@@ -109,6 +109,9 @@
 				return;
 			}
 
+			if (php_sapi_name() === 'cli')
+				return;
+
 			$exception = $this->exception;
 			$file = urlencode($exception->getFile());
 			$line = $exception->getLine();

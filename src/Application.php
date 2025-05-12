@@ -56,8 +56,6 @@
 						DB::configure($connections[$default]);
 				}
 
-				Stream::load($conf['stream'] ?? '');
-
 				if (php_sapi_name() !== 'cli') {
 					Session::configure($conf['session'] ?? []);
 					Session::start();

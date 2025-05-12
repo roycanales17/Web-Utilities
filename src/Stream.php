@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use App\Http\Authenticatable;
 	use Exception;
 	use App\Headers\Request;
 	use ReflectionException;
@@ -12,10 +13,14 @@
 		private static array $root = [];
 		private static array $methodCache = [];
 		private static array $compiled = [];
+		private static array $authentication = [];
 
-		public static function load(string|array $root): void
+		public static function configure(string|array $root, array $authentication = []): void
 		{
 			self::$root = is_string($root) ? [$root] : $root;
+
+			if ($authentication)
+				self::$authentication = $authentication;
 		}
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
@@ -44,10 +49,14 @@
 			}
 
 			if ($component) {
+
 				if (!method_exists($component, 'initialize')) {
 					$className = is_object($component) ? get_class($component) : gettype($component);
 					throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
 				}
+
+				if (!self::verifyComponent($component))
+					return response(['message' => 'Unauthorized'], 401)->json();
 
 				$component->initialize($path, $data);
 
@@ -132,6 +141,9 @@
 
 						if ($orig_properties)
 							$component->models($orig_properties);
+
+						if (!self::verifyComponent($component))
+							return response(['message' => 'Unauthorized'], 401)->json();
 
 						if ($function != 'render' && self::validateMethod($component, $function, $args))
 							call_user_func_array([$component, $function], $args);
@@ -236,5 +248,32 @@
 			}
 
 			return false;
+		}
+
+		private static function verifyComponent($component): bool
+		{
+			// Check for Authenticatable trait
+			if (in_array(Authenticatable::class, class_uses($component))) {
+				if (empty(self::$authentication)) {
+					throw new Exception("Component uses Authenticatable trait but no authentication callback is configured.");
+				}
+
+				[$class, $method, $authArgs] = self::$authentication + [null, null, []];
+
+				if (!is_callable([$class, $method])) {
+					throw new Exception("Invalid authentication callback: {$class}::{$method} is not callable.");
+				}
+
+				if (!call_user_func_array([$class, $method], $authArgs)) {
+					return false;
+				}
+			}
+
+			// Check for a custom verify() method
+			if (method_exists($component, 'verify') && !call_user_func([$component, 'verify'])) {
+				return false;
+			}
+
+			return true;
 		}
 	}

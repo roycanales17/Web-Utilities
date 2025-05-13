@@ -91,7 +91,7 @@
 	 * @param bool $asynchronous Whether the stream is asynchronous.
 	 * @return string Rendered HTML output.
 	 */
-	function compile(string $path, array $data = [], bool $asynchronous = false): string
+	function stream(string $path, array $data = [], bool $asynchronous = false): string
 	{
 		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
 	}

@@ -65,7 +65,7 @@
 				/**
 				 * This file is rendered via the following component class:
 				 *
-				 * @see {$componentPath}::render()
+				 * @see {$componentPath}\\{$className}::render()
 				 */
 			@endphp
 			PHP;

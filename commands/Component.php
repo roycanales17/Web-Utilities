@@ -59,12 +59,13 @@
 				}
 			PHP;
 
+			$componentPath = implode('\\', array_map('ucfirst', array_merge($directories, [ $className ])));
 			$indexContent = <<<PHP
 			@php
 				/**
 				 * This file is rendered via the following component class:
 				 *
-				 * @see {$namespaceDeclaration}\\{$className}::render()
+				 * @see {$componentPath}::render()
 				 */
 			@endphp
 			PHP;

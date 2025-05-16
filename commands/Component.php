@@ -59,8 +59,18 @@
 				}
 			PHP;
 
+			$indexContent = <<<PHP
+			@php
+				/**
+				 * This file is rendered via the following component class:
+				 *
+				 * @see {$namespaceDeclaration}\\{$className}::render()
+				 */
+			@endphp
+			PHP;
+
 			// Create the PHP file
-			if ($this->create("$className.php", $content, $basePath) && $this->create('index.blade.php', '', $basePath)) {
+			if ($this->create("$className.php", $content, $basePath) && $this->create('index.blade.php', $indexContent, $basePath)) {
 				$this->success("✅ Component class file '{$className}.php' has been successfully created at '{$basePath}' and is ready for use.");
 			} else {
 				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");

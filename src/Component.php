@@ -225,7 +225,7 @@
 			return <<<HTML
 			<fragment class='component-container'{$dataAttributes}>
 				{$html}
-				<script>
+				<script id="__fragment__">
 					(function() {
 						if (typeof stream === 'function') {
 							stream("{$component}").finally(() => {

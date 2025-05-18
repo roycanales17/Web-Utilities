@@ -199,11 +199,19 @@
 			$properties = $this->fetchProperties();
 			$dataAttributes = '';
 
-			foreach ([
-				 'component' => $component,
-				 'duration' => ($duration = sprintf('%.2f', $durationMs)),
-				 'properties' => base64_encode(encrypt(json_encode($properties)))
-			] as $key => $value) {
+			// For development
+			$dev = defined('DEVELOPMENT') && DEVELOPMENT;
+
+			$extra = [];
+			if ($dev) {
+				$extra['real_name'] = get_called_class();
+			}
+
+			foreach (array_merge([
+				'component' => $component,
+				'duration' => ($duration = sprintf('%.2f', $durationMs)),
+				'properties' => base64_encode(encrypt(json_encode($properties)))
+			], $extra) as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
@@ -214,10 +222,6 @@
 				return $this->preloader($dataAttributes, $component);
 
 			$html = str_replace(['<>', '</>'], '', $this->render());
-			$dev = false;
-			if (defined('DEVELOPMENT'))
-				$dev = true;
-
 			return <<<HTML
 			<fragment class='component-container'{$dataAttributes}>
 				{$html}
@@ -227,11 +231,25 @@
 							stream("{$component}").finally(() => {
 								{$this->print(function() use ($dev, $component, $duration) {
 									if ($dev) {
+										$class = get_called_class();
+										$escapedClass = addslashes($class);
+										$escapedComponent = addslashes($component);
+										$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
+					
 										echo <<<HTML
-																console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
-																console.log(`Component: %c{$component}`, 'color: yellow;');
-																console.log(`Duration: %c{$duration} ms`, 'color: orange;');
-															HTML;
+										console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
+										
+										// Simple log for Class without collapsing
+										console.log(`Class: %c{$escapedClass}`, 'color: red;');
+										
+										// Collapsed group for Component with short preview
+										console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
+										console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
+										console.groupEnd();
+										
+										console.log(`Duration: %c{$duration} ms`, 'color: orange;');
+										console.log(' ');
+										HTML;
 									}
 								})}
 							});	

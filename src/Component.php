@@ -200,10 +200,10 @@
 			$dataAttributes = '';
 
 			foreach ([
-						 'component' => $component,
-						 'duration' => sprintf('%.2f', $durationMs),
-						 'properties' => base64_encode(encrypt(json_encode($properties)))
-					 ] as $key => $value) {
+				 'component' => $component,
+				 'duration' => ($duration = sprintf('%.2f', $durationMs)),
+				 'properties' => base64_encode(encrypt(json_encode($properties)))
+			] as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
@@ -214,12 +214,31 @@
 				return $this->preloader($dataAttributes, $component);
 
 			$html = str_replace(['<>', '</>'], '', $this->render());
+			$dev = false;
+			if (defined('DEVELOPMENT'))
+				$dev = true;
+
 			return <<<HTML
 			<fragment class='component-container'{$dataAttributes}>
 				{$html}
-				<script type="module">
-					import {init} from '../resources/libraries/streamdom/stream-wire.js';
-					init("{$component}");
+				<script>
+					(function() {
+						if (typeof stream === 'function') {
+							stream("{$component}").finally(() => {
+								{$this->print(function() use ($dev, $component, $duration) {
+									if ($dev) {
+										echo <<<HTML
+																console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
+																console.log(`Component: %c{$component}`, 'color: yellow;');
+																console.log(`Duration: %c{$duration} ms`, 'color: orange;');
+															HTML;
+									}
+								})}
+							});	
+						} else {
+							console.error("Stream wire is available");
+						}
+					})();
 				</script>
 			</fragment>
 

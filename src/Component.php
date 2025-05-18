@@ -50,7 +50,7 @@
 			if (!method_exists($this, 'loader'))
 				throw new Exception('Loader function is required.');
 
-			$html = $this->loader();
+			$html = $this->replaceHTML($this->loader(), $component);
 
 			return <<<HTML
 			<fragment class='component-container' {$dataAttributes}>
@@ -221,7 +221,7 @@
 			if ($preloader)
 				return $this->preloader($dataAttributes, $component);
 
-			$html = str_replace(['<>', '</>'], '', $this->render());
+			$html = $this->replaceHTML($this->render(), $component);
 			return <<<HTML
 			<fragment class='component-container'{$dataAttributes}>
 				{$html}
@@ -230,13 +230,13 @@
 						if (typeof stream === 'function') {
 							stream("{$component}").finally(() => {
 								{$this->print(function() use ($dev, $component, $duration) {
-									if ($dev) {
-										$class = get_called_class();
-										$escapedClass = addslashes($class);
-										$escapedComponent = addslashes($component);
-										$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
-					
-										echo <<<HTML
+				if ($dev) {
+					$class = get_called_class();
+					$escapedClass = addslashes($class);
+					$escapedComponent = addslashes($component);
+					$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
+
+					echo <<<HTML
 										console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
 										
 										// Simple log for Class without collapsing
@@ -250,8 +250,8 @@
 										console.log(`Duration: %c{$duration} ms`, 'color: orange;');
 										console.log(' ');
 										HTML;
-									}
-								})}
+				}
+			})}
 							});	
 						} else {
 							console.error("Stream wire is available");
@@ -324,5 +324,11 @@
 			}
 
 			return $callback;
+		}
+
+		private function replaceHTML(string $html, string $component): string
+		{
+			$html = str_replace(['<>', '</>'], '', $html);
+			return str_replace('StreamListener()', "StreamListener('$component')", $html);
 		}
 	}

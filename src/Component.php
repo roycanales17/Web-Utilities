@@ -9,9 +9,10 @@
 
 	abstract class Component
 	{
-		private string $componentIdentifier = '';  // Stores a unique identifier for the component.
-		private float $startedTime = 0;  // Tracks the time when the component was initialized.
-		private static array $registered = [];  // Holds a list of all registered component identifiers.
+		private static array $propertyNamesCache = [];
+		private string $componentIdentifier = '';
+		private float $startedTime = 0;
+		private static array $registered = [];
 
 		/**
 		 * Generates a unique identifier for the component using a time-based suffix.
@@ -45,12 +46,13 @@
 		 * @return string Component skeleton loader
 		 * @throws Exception
 		 */
-		private function preloader($dataAttributes, $component): string
+		private function preloader($component, $startedTime): string
 		{
 			if (!method_exists($this, 'loader'))
 				throw new Exception('Loader function is required.');
 
 			$html = $this->replaceHTML($this->loader(), $component);
+			$dataAttributes = $this->getAttributes($component, $startedTime);
 
 			return <<<HTML
 			<fragment class='component-container' {$dataAttributes}>
@@ -128,12 +130,21 @@
 		 */
 		private function fetchProperties(): array
 		{
-			$reflection = new ReflectionClass($this);
-			$publicProperties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+			$className = get_class($this);
+
+			if (!isset(self::$propertyNamesCache[$className])) {
+				$reflection = new ReflectionClass($this);
+				$publicProperties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+
+				self::$propertyNamesCache[$className] = array_map(
+					fn($prop) => $prop->getName(),
+					$publicProperties
+				);
+			}
 
 			$properties = [];
-			foreach ($publicProperties as $property) {
-				$properties[$property->getName()] = $property->getValue($this);
+			foreach (self::$propertyNamesCache[$className] as $propertyName) {
+				$properties[$propertyName] = $this->$propertyName;
 			}
 
 			return $properties;
@@ -190,40 +201,21 @@
 			if (!$preloader && !method_exists($this, 'render'))
 				throw new Exception("Render function is required.");
 
-			// Calculate the duration of the component rendering.
-			$duration = hrtime(true) - ($identifier ? $startedTime : $this->startedTime);
-			$durationMs = $duration / 1_000_000;
-
 			// Prepare data attributes for the component.
 			$component = $identifier ?: base64_encode($this->componentIdentifier);
-			$properties = $this->fetchProperties();
-			$dataAttributes = '';
+			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
 			$dev = defined('DEVELOPMENT') && DEVELOPMENT;
 
-			$extra = [];
-			if ($dev) {
-				$extra['class'] = get_called_class();
-			}
-
-			foreach (array_merge([
-				'component' => $component,
-				'duration' => ($duration = sprintf('%.2f', $durationMs)),
-				'properties' => base64_encode(encrypt(json_encode($properties)))
-			], $extra) as $key => $value) {
-				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
-			}
-
-			if (defined('static::TARGET'))
-				$dataAttributes .= " data-id='" . $this::TARGET . "'";
-
 			if ($preloader)
-				return $this->preloader($dataAttributes, $component);
+				return $this->preloader($component, $startedTime);
 
 			$html = $this->replaceHTML($this->render(), $component);
+			$duration = $this->calculateDuration($startedTime);
+
 			return <<<HTML
-			<fragment class='component-container'{$dataAttributes}>
+			<fragment class='component-container'{$this->getAttributes($component, $startedTime)}>
 				{$html}
 				<script id="__fragment__">
 					(function() {
@@ -261,6 +253,54 @@
 			</fragment>
 
 			HTML;
+		}
+
+		/**
+		 * Calculates the duration in milliseconds since the given start time.
+		 *
+		 * @param float $startedTime The start time in nanoseconds (from hrtime(true)).
+		 * @return string The duration in milliseconds formatted as a string with 2 decimal places.
+		 */
+		private function calculateDuration(float $startedTime): string
+		{
+			$duration = hrtime(true) - $startedTime;
+			$durationMs = $duration / 1_000_000;
+			return sprintf('%.2f', $durationMs);
+		}
+
+		/**
+		 * Generates HTML data attributes string for the component.
+		 *
+		 * Includes the component name, the duration since start time,
+		 * base64-encoded encrypted JSON properties, and optionally class and target id attributes.
+		 *
+		 * @param string $component The name of the component.
+		 * @param mixed $startedTime The start time used to calculate the duration.
+		 * @return string A string of HTML data attributes for embedding in a tag.
+		 */
+		private function getAttributes(string $component, mixed $startedTime): string
+		{
+			$dev = defined('DEVELOPMENT') && DEVELOPMENT;
+			$properties = $this->fetchProperties();
+
+			$extra = [];
+			if ($dev) {
+				$extra['class'] = get_called_class();
+			}
+
+			$dataAttributes = '';
+			foreach (array_merge([
+				'component' => $component,
+				'duration' => $this->calculateDuration($startedTime),
+				'properties' => base64_encode(encrypt(json_encode($properties)))
+			], $extra) as $key => $value) {
+				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
+			}
+
+			if (defined('static::TARGET'))
+				$dataAttributes .= " data-id='" . $this::TARGET . "'";
+
+			return $dataAttributes;
 		}
 
 		/**

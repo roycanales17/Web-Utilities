@@ -81,6 +81,8 @@
 		public static function capture(): string
 		{
 			$req = new Request();
+			$startedTime = hrtime(true);
+
 			if (Request::header('X-STREAM-WIRE')) {
 				$validate = $req->validate([
 					'_component' => 'required',
@@ -93,8 +95,6 @@
 					$method = $req->input('_method');
 					$properties = $req->input('_properties');
 					$models = $req->input('_models');
-
-					$startedTime = hrtime(true);
 					$identifier = $component;
 
 					$models = json_decode($models, true);

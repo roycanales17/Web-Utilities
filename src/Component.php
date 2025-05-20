@@ -204,7 +204,7 @@
 
 			$extra = [];
 			if ($dev) {
-				$extra['real_name'] = get_called_class();
+				$extra['class'] = get_called_class();
 			}
 
 			foreach (array_merge([
@@ -215,8 +215,8 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
-			if (property_exists($this, 'target'))
-				$dataAttributes .= " data-id='" . $this->target . "'";
+			if (defined('static::TARGET'))
+				$dataAttributes .= " data-id='" . $this::TARGET . "'";
 
 			if ($preloader)
 				return $this->preloader($dataAttributes, $component);
@@ -230,13 +230,13 @@
 						if (typeof stream === 'function') {
 							stream("{$component}").finally(() => {
 								{$this->print(function() use ($dev, $component, $duration) {
-				if ($dev) {
-					$class = get_called_class();
-					$escapedClass = addslashes($class);
-					$escapedComponent = addslashes($component);
-					$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
-
-					echo <<<HTML
+									if ($dev && count($_POST ?? [])) {
+										$class = get_called_class();
+										$escapedClass = addslashes($class);
+										$escapedComponent = addslashes($component);
+										$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
+					
+										echo <<<HTML
 										console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
 										
 										// Simple log for Class without collapsing
@@ -250,8 +250,8 @@
 										console.log(`Duration: %c{$duration} ms`, 'color: orange;');
 										console.log(' ');
 										HTML;
-				}
-			})}
+									}
+								})}
 							});	
 						} else {
 							console.error("Stream wire is available");

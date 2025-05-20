@@ -45,13 +45,17 @@
 	function encrypt(string $string): string {
 		$numbers = [];
 
-		foreach (str_split($string) as $char) {
+		foreach (mb_str_split($string) as $char) {
+			$ord = ord($char);
 			if (ctype_lower($char)) {
-				$numbers[] = 'L' . (ord($char) - ord('a') + 5);
+				$numbers[] = 'L' . ($ord - ord('a') + 5);
 			} elseif (ctype_upper($char)) {
-				$numbers[] = 'U' . (ord($char) - ord('A') + 5);
+				$numbers[] = 'U' . ($ord - ord('A') + 5);
+			} elseif (ctype_digit($char)) {
+				$numbers[] = 'D' . $char;
 			} else {
-				$numbers[] = 'X' . $char;
+				// Escape non-alphanumerics using hex
+				$numbers[] = 'X' . bin2hex($char);
 			}
 		}
 
@@ -69,12 +73,17 @@
 		$decoded = '';
 
 		foreach ($parts as $part) {
-			if (strpos($part, 'L') === 0) {
-				$decoded .= chr((int)substr($part, 1) + ord('a') - 5);
-			} elseif (strpos($part, 'U') === 0) {
-				$decoded .= chr((int)substr($part, 1) + ord('A') - 5);
-			} elseif (strpos($part, 'X') === 0) {
-				$decoded .= substr($part, 1);
+			$prefix = $part[0];
+			$data = substr($part, 1);
+
+			if ($prefix === 'L') {
+				$decoded .= chr((int)$data + ord('a') - 5);
+			} elseif ($prefix === 'U') {
+				$decoded .= chr((int)$data + ord('A') - 5);
+			} elseif ($prefix === 'D') {
+				$decoded .= $data;
+			} elseif ($prefix === 'X') {
+				$decoded .= hex2bin($data);
 			}
 		}
 

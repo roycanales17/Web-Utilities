@@ -225,7 +225,8 @@
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
 
-			$html = $this->replaceHTML($this->render(), $component);
+			$render = $this->render();
+			$html = $this->replaceHTML($render['content'] ?? '', $component);
 			$duration = $this->calculateDuration($startedTime);
 
 			return <<<HTML

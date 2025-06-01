@@ -179,7 +179,7 @@
 							return response($component->parse($identifier ?? '', $startedTime))->html();
 						} else {
 							return [
-								'content' => response($component->parse($identifier ?? '', $startedTime)),
+								'content' => $component->parse($identifier ?? '', $startedTime),
 								'target' => $component->getTarget()
 							];
 						}

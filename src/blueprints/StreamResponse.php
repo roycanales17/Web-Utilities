@@ -21,7 +21,7 @@
 				$response = Stream::capture($class, $method, $args, $models);
 
 				$target = $response['target'] ?? '';
-				$content = $response['content']['content'] ?? '';
+				$content = $response['content'] ?? '';
 				$code = $response['code'] ?? 200;
 
 				exit(response([

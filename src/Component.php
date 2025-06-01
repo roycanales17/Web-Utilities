@@ -6,7 +6,6 @@
 	use ReflectionClass;
 	use ReflectionProperty;
 	use App\Content\Blade;
-	use App\Utilities\Blueprints\StreamResponse;
 
 	abstract class Component
 	{
@@ -152,16 +151,6 @@
 		}
 
 		/**
-		 * This helps us to perform the stream without having to render the new html.
-		 *
-		 * @return StreamResponse
-		 */
-		public function execute(): StreamResponse
-		{
-			return new StreamResponse();
-		}
-
-		/**
 		 * Initializes the component by generating a unique identifier and calling the 'init' method if it exists.
 		 *
 		 * @deprecated Use the $this->init method instead, as it acts as the constructor.
@@ -198,17 +187,18 @@
 		}
 
 		/**
-		 * It retrieves the component identifier
+		 * Performs an Ajax-based redirection.
 		 *
-		 * @deprecated Do not use this method.
-		 * @return string
+		 * @param string $url
+		 * @param int $code
+		 * @param array $headers
+		 * @return void
 		 */
-		public function getTarget(): mixed {
-			$target = '';
-			if (defined('static::TARGET'))
-				$target = $this::TARGET;
-
-			return $target;
+		public function redirect(string $url, int $code = 200, array $headers = []): void {
+			redirect($url, $code, array_merge([
+				'Content-Type' => 'application/json',
+				'X-AJAX-REDIRECT' => '1',
+			], $headers));
 		}
 
 		/**
@@ -321,8 +311,10 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
-			if (defined('static::TARGET'))
-				$dataAttributes .= " data-id='" . $this::TARGET . "'";
+			if (method_exists(static::class, 'getIdentifier')) {
+				$componentDNA = static::getIdentifier();
+				$dataAttributes .= " data-id='{$componentDNA}'";
+			}
 
 			return $dataAttributes;
 		}
@@ -334,43 +326,107 @@
 		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
+		 * @param array $extend This allows us to load other component.
 		 * @param string $blade Use to render the interface within the component directory.
-		 * @return string The rendered HTML content from the matched view file.
+		 * @return array The rendered HTML content from the matched view file.
 		 */
-		protected function compile(array $data = [], string $blade = 'index'): string
+		protected function compile(array $data = [], array $extend = [], string $blade = 'index'): array
 		{
-			ob_start();
+			$loadBaseComponent = function() use ($data, $blade) {
+				ob_start();
 
-			// Set the root directory and determine the path of the class file
-			$root = "../";
-			$path = str_replace(['.', '\\'], '/', get_called_class());
+				// Set the root directory and determine the path of the class file
+				$root = "../";
+				$path = str_replace(['.', '\\'], '/', get_called_class());
 
-			// Normalize path
-			$bladePath = str_replace('.php', '.blade.php', "/{$blade}");
+				// Define the possible file extensions for the view
+				$extensions = ['.blade.php', '.php', '.html'];
 
-			// The index file is expected to be in the same directory as the class file
-			$index = dirname($path) . "/$bladePath";
+				// Check if $blade already has a valid extension
+				$hasExtension = false;
+				foreach ($extensions as $ext) {
+					if (str_ends_with($blade, $ext)) {
+						$hasExtension = true;
+						break;
+					}
+				}
 
-			// Define the possible file extensions for the view
-			$extensions = ['.blade.php', '.php', '.html'];
+				// Normalize path only if $blade has no extension
+				$bladePath = $hasExtension ? $blade : str_replace('.php', '.blade.php', "/{$blade}");
 
-			// Check each extension to see if the file exists in the directory
-			foreach ($extensions as $ext) {
-				if (file_exists($root . $index . $ext)) {
-					// If a matching file is found, set it as the skeleton to render
-					$skeleton = $index . $ext;
-					break;
+				// The index file is expected to be in the same directory as the class file
+				$index = dirname($path) . "/$bladePath";
+
+				// Check each extension to see if the file exists in the directory
+				foreach ($extensions as $ext) {
+					if (file_exists($root . $index . $ext)) {
+						// If a matching file is found, set it as the skeleton to render
+						$skeleton = $index . $ext;
+						break;
+					}
+				}
+
+				// Render the matched skeleton (view) file, passing the extracted data
+				if (isset($skeleton)) {
+					Blade::render($skeleton, extract: $data, onError: function ($trace) {
+						throw new Exception("{$trace['message']} in `{$trace['path']}`, line: `{$trace['line']}`", $trace['code']);
+					});
+				}
+
+				return ob_get_clean();
+			};
+
+			$extender = [];
+			if ($extend) {
+				$isSingleAction = isset($actions[0]) && is_string($actions[1] ?? null) && is_array($actions[2] ?? null);
+
+				$prepare = function($action) {
+					$class = $action[0] ?? '';
+					$method = $action[1] ?? '';
+					$args = $action[2] ?? [];
+
+					if ($class && class_exists($class)) {
+
+						if (self::class === $class)
+							throw new Exception("Class `{$class}` is not allowed from extender.");
+
+						$componentDNA = '';
+						if (method_exists($class, 'getIdentifier')) {
+							$componentDNA = $class::getIdentifier();
+						}
+
+						if ($componentDNA) {
+							return [
+								'target' => $componentDNA,
+								'method' => "$method(". json_encode($args, JSON_UNESCAPED_SLASHES) .")"
+							];
+						}
+
+						return [];
+					}
+
+					throw new \Exception("Stream Response: Class {$class} does not exist.");
+				};
+
+				if (!$isSingleAction) {
+					foreach ($extend as $action_r) {
+						$prepared = $prepare($action_r);
+						if ($prepared) {
+							$extender[] = $prepared;
+						}
+					}
+				} else {
+					$prepared = $prepare($extend);
+					if ($prepared) {
+						$extender[] = $prepared;
+					}
 				}
 			}
 
-			// Render the matched skeleton (view) file, passing the extracted data
-			if (isset($skeleton)) {
-				Blade::render($skeleton, extract: $data, onError: function ($trace) {
-					throw new Exception("{$trace['message']} in `{$trace['path']}`, line: `{$trace['line']}`", $trace['code']);
-				});
-			}
-
-			return ob_get_clean();
+			return [
+				'content' => $loadBaseComponent,
+				'extender' => $extender
+			];
 		}
 
 		/**

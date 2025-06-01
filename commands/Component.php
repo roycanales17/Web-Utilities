@@ -39,9 +39,11 @@
 					 * Component Lifecycle and Configuration
 					 *
 					 * ## Available Methods:
-					 * - `init()` — Acts as a constructor for this component. Initialize internal state or dependencies here.
-					 * - `verify()` — Optional verification logic that runs before rendering the component.
-					 * - `loader()` — Displays the component's skeleton while it is processing.
+					 * - `getIdentifier()` — Returns a unique identifier (or DNA) for the component.
+					 * - `redirect()` — Performs an Ajax-based redirection.
+					 * - `init()` — Serves as the component's initializer; use this to set up internal state or dependencies.
+					 * - `verify()` — (Optional) Runs pre-render validation or checks before displaying the component.
+					 * - `loader()` — Returns a loading skeleton or placeholder shown while the component is processing.
 					 *
 					 * ## Properties:
 					 * - `target` — Use this property to allow the component to be triggered by other components.
@@ -50,10 +52,8 @@
 					 * See the component interface located at:
 					 * @see $basePath/index.blade.php
 					 */
-
-					public function render(): string
+					public function render(): array
 					{
-						// Pass any necessary data inside the compile() method as an associative array.
 						return \$this->compile();
 					}
 				}

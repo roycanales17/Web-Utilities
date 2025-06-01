@@ -425,7 +425,7 @@
 			}
 
 			return [
-				'content' => $loadBaseComponent,
+				'content' => $loadBaseComponent(),
 				'extender' => $extender
 			];
 		}

@@ -6,7 +6,7 @@
 
 	class StreamResponse {
 
-		public function redirect(string $url, int $code = 302, array $headers = []): void {
+		public function redirect(string $url, int $code = 200, array $headers = []): void {
 			redirect($url, $code, array_merge([
 				'Content-Type' => 'application/json',
 				'X-AJAX-REDIRECT' => '1',

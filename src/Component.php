@@ -211,7 +211,7 @@
 		 * @return array|string The rendered component wrapped in a <fragment> element with data attributes.
 		 * @throws Exception
 		 */
-		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false): string|array
+		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false, bool $directSkeleton = true): string|array
 		{
 			if (!$preloader && !method_exists($this, 'render'))
 				throw new Exception("Render function is required.");
@@ -270,7 +270,7 @@
 
 			HTML;
 
-			if (Request::header('X-STREAM-WIRE')) {
+			if (!$directSkeleton) {
 				$render['content'] = $compiled;
 				return $render;
 			}

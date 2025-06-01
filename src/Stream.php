@@ -161,7 +161,7 @@
 							call_user_func_array([$component, $function], $args);
 						}
 
-						return response($component->parse($identifier ?? '', $startedTime))->json();
+						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
 					}
 				}
 			}

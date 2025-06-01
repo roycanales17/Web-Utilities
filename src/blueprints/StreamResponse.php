@@ -13,8 +13,9 @@
 			], $headers));
 		}
 
-		public function perform(array $action = []): void {
-			$isIndexedArray = array_keys($action) === range(0, count($action) - 1);
+		public function perform(array $actions = []): void {
+			$isSingleAction = isset($actions[0]) && is_string($actions[1] ?? null) && is_array($actions[2] ?? null);
+
 			$perform = function($action) {
 				$class = $action[0] ?? '';
 				$method = $action[1] ?? '';
@@ -42,12 +43,12 @@
 			};
 
 			$result = [];
-			if ($isIndexedArray) {
-				foreach ($action as $action_r) {
+			if ($isSingleAction) {
+				foreach ($actions as $action_r) {
 					$result[] = $perform($action_r);
 				}
 			} else {
-				$result[] = $perform($action);
+				$result[] = $perform($actions);
 			}
 
 			exit(response($result)->json());

@@ -203,8 +203,12 @@
 		 * @deprecated Do not use this method.
 		 * @return string
 		 */
-		public function getTarget(): string {
-			return $this::TARGET ?? '';
+		public function getTarget(): mixed {
+			$target = '';
+			if (defined('static::TARGET'))
+				$target = $this::TARGET;
+
+			return $target;
 		}
 
 		/**

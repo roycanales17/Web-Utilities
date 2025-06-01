@@ -78,52 +78,60 @@
 			return ob_get_clean();
 		}
 
-		public static function capture(): string
+		public static function capture(string $_className = '', string $_function = '', array $_args = [], array $_models = []): string|array
 		{
 			$req = new Request();
 			$startedTime = hrtime(true);
+			$skipValidation = !empty($_className);
 
-			if (Request::header('X-STREAM-WIRE')) {
+			if (Request::header('X-STREAM-WIRE') || $skipValidation) {
 				$validate = $req->validate([
 					'_component' => 'required',
 					'_method' => 'required'
 				]);
 
-				if ($validate->isSuccess()) {
+				if ($validate->isSuccess() || $skipValidation) {
 
-					$component = $req->input('_component');
-					$method = $req->input('_method');
-					$properties = $req->input('_properties');
-					$models = $req->input('_models');
-					$identifier = $component;
+					if (!$skipValidation) {
+						$component = $req->input('_component');
+						$method = $req->input('_method');
+						$properties = $req->input('_properties');
+						$models = $req->input('_models');
+						$identifier = $component;
 
-					$models = json_decode($models, true);
-					$path = base64_decode($component);
-					$path = str_replace('COMPONENT_', '', decrypt($path));
+						$models = json_decode($models, true);
+						$path = base64_decode($component);
+						$path = str_replace('COMPONENT_', '', decrypt($path));
 
-					$properties = base64_decode($properties);
-					$properties = decrypt($properties);
-					$properties = json_decode($properties, true);
+						$properties = base64_decode($properties);
+						$properties = decrypt($properties);
+						$properties = json_decode($properties, true);
 
-					$orig_properties = [];
-					foreach ($properties as $key_p => $value_p) {
-						$found = false;
+						$orig_properties = [];
+						foreach ($properties as $key_p => $value_p) {
+							$found = false;
 
-						foreach ($models as $key_m => $value_m) {
-							if ($key_p == $key_m) {
-								$orig_properties[$key_p] = $value_m;
-								$found = true;
-								break;
+							foreach ($models as $key_m => $value_m) {
+								if ($key_p == $key_m) {
+									$orig_properties[$key_p] = $value_m;
+									$found = true;
+									break;
+								}
 							}
+
+							if (!$found)
+								$orig_properties[$key_p] = $value_p;
 						}
 
-						if (!$found)
-							$orig_properties[$key_p] = $value_p;
+						$parsed = self::parse($method);
+						$function = $parsed['name'] ?? $method;
+						$args = $parsed['args'] ?? [];
+					} else {
+						$path = $_className;
+						$args = $_args;
+						$function = $_function;
+						$orig_properties = $_models;
 					}
-
-					$parsed = self::parse($method);
-					$function = $parsed['name'] ?? $method;
-					$args = $parsed['args'] ?? [];
 
 					$component = null;
 					if (class_exists($path)) {
@@ -148,24 +156,43 @@
 							$component->models($orig_properties);
 
 						if (!self::verifyComponent($component)) {
-							if (self::$onFailed)
-								return call_user_func(self::$onFailed, 401);
+							if (!$skipValidation) {
+								if (self::$onFailed)
+									return call_user_func(self::$onFailed, 401);
 
-							return response(['message' => 'Unauthorized'], 401)->json();
+								return response(['message' => 'Unauthorized'], 401)->json();
+							} else {
+								return [
+									'message' => 'Unauthorized',
+									'code' => 401
+								];
+							}
 						}
 
-						if ($function != 'render' && self::validateMethod($component, $function, $args))
+						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
 							call_user_func_array([$component, $function], $args);
+						}
 
-						return response($component->parse($identifier, $startedTime))->html();
+						if (!$skipValidation) {
+							return response($component->parse($identifier ?? '', $startedTime))->html();
+						} else {
+							return ['content' => response($component->parse($identifier ?? '', $startedTime))];
+						}
 					}
 				}
 			}
 
-			if (self::$onFailed)
-				return call_user_func(self::$onFailed, 400);
+			if (!$skipValidation) {
+				if (self::$onFailed)
+					return call_user_func(self::$onFailed, 400);
 
-			return response(['message' => 'Invalid Request'], 400)->json();
+				return response(['message' => 'Invalid Request'], 400)->json();
+			} else {
+				return [
+					'message' => 'Invalid Request',
+					'code' => 400
+				];
+			}
 		}
 
 		private static function validateMethod(object $class, string $method, array $args): bool

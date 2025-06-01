@@ -2,10 +2,11 @@
 
 	namespace App\Utilities;
 
-	use App\Content\Blade;
 	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;
+	use App\Content\Blade;
+	use App\Utilities\Blueprints\StreamResponse;
 
 	abstract class Component
 	{
@@ -148,6 +149,16 @@
 			}
 
 			return $properties;
+		}
+
+		/**
+		 * This helps us to perform the stream without having to render the new html.
+		 *
+		 * @return StreamResponse
+		 */
+		public function execute(): StreamResponse
+		{
+			return new StreamResponse();
 		}
 
 		/**

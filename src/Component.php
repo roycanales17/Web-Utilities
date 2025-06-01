@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use App\Headers\Request;
 	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;
@@ -207,10 +208,10 @@
 		 * @deprecated Do not use this function.
 		 * @param string $identifier Optional identifier for the component.
 		 * @param float $startedTime Time when the component started.
-		 * @return string The rendered component wrapped in a <fragment> element with data attributes.
+		 * @return array|string The rendered component wrapped in a <fragment> element with data attributes.
 		 * @throws Exception
 		 */
-		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false): string
+		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false): string|array
 		{
 			if (!$preloader && !method_exists($this, 'render'))
 				throw new Exception("Render function is required.");
@@ -229,7 +230,7 @@
 			$html = $this->replaceHTML($render['content'] ?? '', $component);
 			$duration = $this->calculateDuration($startedTime);
 
-			return <<<HTML
+			$compiled = <<<HTML
 			<fragment class='component-container'{$this->getAttributes($component, $startedTime)}>
 				{$html}
 				<script id="__fragment__">
@@ -268,6 +269,13 @@
 			</fragment>
 
 			HTML;
+
+			if (Request::header('X-STREAM-WIRE')) {
+				$render['content'] = $compiled;
+				return $render;
+			}
+
+			return $compiled;
 		}
 
 		/**

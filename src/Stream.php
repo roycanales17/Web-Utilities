@@ -171,6 +171,10 @@
 							}
 						}
 
+						if ($skipValidation) {
+							$component->initialize($path, $_models);
+						}
+
 						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
 							call_user_func_array([$component, $function], $args);
 						}

@@ -10,10 +10,11 @@
 
 	abstract class Component
 	{
+		private static array $registered = [];
 		private static array $propertyNamesCache = [];
+		private array $extender = [];
 		private string $componentIdentifier = '';
 		private float $startedTime = 0;
-		private static array $registered = [];
 
 		/**
 		 * Generates a unique identifier for the component using a time-based suffix.
@@ -329,17 +330,27 @@
 		}
 
 		/**
+		 * This allows us to perform other component.
+		 *
+		 * @param array $action
+		 * @return void
+		 */
+		protected function extender(array $action): void
+		{
+			$this->extender[] = $action;
+		}
+
+		/**
 		 * Compiles and returns the content of the view associated with the component.
 		 * This function looks for the `index` file in the same directory as the class and renders
 		 * the first file it finds with the extensions `.blade.php`, `.php`, or `.html`.
 		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
-		 * @param array $extend This allows us to load other component.
 		 * @param string $blade Use to render the interface within the component directory.
 		 * @return array The rendered HTML content from the matched view file.
 		 */
-		protected function compile(array $data = [], array $extend = [], string $blade = 'index'): array
+		protected function compile(array $data = [], string $blade = 'index'): array
 		{
 			$loadBaseComponent = function() use ($data, $blade) {
 				ob_start();
@@ -386,8 +397,8 @@
 			};
 
 			$extender = [];
-			if ($extend) {
-				$isSingleAction = isset($extend[0]) && is_string($extend[1] ?? null) && is_array($extend[2] ?? null);
+			if ($this->extender) {
+				$isSingleAction = isset($this->extender[0]) && is_string($this->extender[1] ?? null) && is_array($this->extender[2] ?? null);
 
 				$prepare = function($action) {
 					$class = $action[0] ?? '';
@@ -418,14 +429,14 @@
 				};
 
 				if (!$isSingleAction) {
-					foreach ($extend as $action_r) {
+					foreach ($this->extender as $action_r) {
 						$prepared = $prepare($action_r);
 						if ($prepared) {
 							$extender[] = $prepared;
 						}
 					}
 				} else {
-					$prepared = $prepare($extend);
+					$prepared = $prepare($this->extender);
 					if ($prepared) {
 						$extender[] = $prepared;
 					}

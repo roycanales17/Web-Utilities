@@ -13,23 +13,43 @@
 			], $headers));
 		}
 
-		public function perform(array $action = [], array $args = [], array $models = []): void {
-			$class = $action[0] ?? '';
-			$method = $action[1] ?? '';
+		public function perform(array $action = []): void {
+			$isIndexedArray = array_keys($action) === range(0, count($action) - 1);
+			$perform = function($action) {
+				$class = $action[0] ?? '';
+				$method = $action[1] ?? '';
+				$args = $action[2] ?? [];
 
-			if ($class && class_exists($class)) {
-				$response = Stream::capture($class, $method, $args, $models);
+				if ($class && class_exists($class)) {
+					$response = Stream::capture($class, $method, $args);
 
-				$target = $response['target'] ?? '';
-				$content = $response['content'] ?? '';
-				$code = $response['code'] ?? 200;
+					$target = $response['target'] ?? '';
+					$content = $response['content'] ?? '';
+					$code = $response['code'] ?? 200;
+					$message = $response['message'] ?? '';
 
-				exit(response([
-					'content' => $content,
-					'target' => $target
-				], $code)->json());
+					if ($code !== 200) {
+						throw new \Exception("Stream Response: {$message}");
+					}
+
+					return [
+						'content' => $content,
+						'target' => $target
+					];
+				}
+
+				throw new \Exception("Stream Response: Class {$class} does not exist.");
+			};
+
+			$result = [];
+			if ($isIndexedArray) {
+				foreach ($action as $action_r) {
+					$result[] = $perform($action_r);
+				}
+			} else {
+				$result[] = $perform($action);
 			}
 
-			throw new \Exception("Stream Response: Class {$class} does not exist.");
+			exit(response($result)->json());
 		}
 	}

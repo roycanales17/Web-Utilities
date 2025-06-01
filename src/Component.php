@@ -387,7 +387,7 @@
 
 			$extender = [];
 			if ($extend) {
-				$isSingleAction = isset($actions[0]) && is_string($actions[1] ?? null) && is_array($actions[2] ?? null);
+				$isSingleAction = isset($extend[0]) && is_string($extend[1] ?? null) && is_array($extend[2] ?? null);
 
 				$prepare = function($action) {
 					$class = $action[0] ?? '';
@@ -407,7 +407,7 @@
 						if ($componentDNA) {
 							return [
 								'target' => $componentDNA,
-								'method' => "$method(". json_encode($args, JSON_UNESCAPED_SLASHES) .")"
+								'method' => $method . '(' . implode(', ', array_map('json_encode', $args)) . ')'
 							];
 						}
 

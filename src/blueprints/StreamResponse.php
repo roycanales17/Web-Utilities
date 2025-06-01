@@ -19,11 +19,14 @@
 
 			if ($class && class_exists($class)) {
 				$response = Stream::capture($class, $method, $args, $models);
+
+				$target = $response['target'] ?? '';
 				$content = $response['content'] ?? '';
 				$code = $response['code'] ?? 200;
 
 				exit(response([
-					'content' => $content
+					'content' => $content,
+					'target' => $target
 				], $code)->json());
 			}
 

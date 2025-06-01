@@ -80,6 +80,8 @@
 
 		public static function capture(string $_className = '', string $_function = '', array $_args = [], array $_models = []): string|array
 		{
+			/** @var Component $component */
+
 			$req = new Request();
 			$startedTime = hrtime(true);
 			$skipValidation = !empty($_className);
@@ -176,7 +178,10 @@
 						if (!$skipValidation) {
 							return response($component->parse($identifier ?? '', $startedTime))->html();
 						} else {
-							return ['content' => response($component->parse($identifier ?? '', $startedTime))];
+							return [
+								'content' => response($component->parse($identifier ?? '', $startedTime)),
+								'target' => $component->getTarget()
+							];
 						}
 					}
 				}

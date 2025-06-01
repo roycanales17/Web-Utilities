@@ -197,6 +197,15 @@
 			}
 		}
 
+		/**
+		 * It retrieves the component identifier
+		 *
+		 * @deprecated Do not use this method.
+		 * @return string
+		 */
+		public function getTarget(): string {
+			return $this::TARGET ?? '';
+		}
 
 		/**
 		 * Parse the component's render output and return a formatted HTML string with data attributes.

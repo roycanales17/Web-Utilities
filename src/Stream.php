@@ -182,9 +182,15 @@
 						if (!$skipValidation) {
 							return response($component->parse($identifier ?? '', $startedTime))->html();
 						} else {
+							$content = '';
+							$target = $component->getTarget();
+							if ($target) {
+								$content = $component->parse($identifier ?? '', $startedTime);
+							}
+
 							return [
-								'content' => $component->parse($identifier ?? '', $startedTime),
-								'target' => $component->getTarget()
+								'content' => $content,
+								'target' => $target
 							];
 						}
 					}

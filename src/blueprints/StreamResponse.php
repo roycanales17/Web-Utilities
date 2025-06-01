@@ -43,7 +43,7 @@
 			};
 
 			$result = [];
-			if ($isSingleAction) {
+			if (!$isSingleAction) {
 				foreach ($actions as $action_r) {
 					$result[] = $perform($action_r);
 				}

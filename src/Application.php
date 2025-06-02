@@ -2,10 +2,11 @@
 
 	namespace App\Utilities;
 
-	use App\Utilities\Exception\ApplicationException;
 	use App\Database\DB;
 	use App\Headers\Request;
 	use Closure;
+	use Error;
+	use Exception;
 
 	class Application
 	{
@@ -23,18 +24,17 @@
 
 		function __construct(Closure $callback, string $summary, string $configPath, string $envPath, string $errorPath) {
 			try {
-				ob_start();
 				$this->errorPath = $errorPath;
 				$this->startTracking();
 
 				if (!file_exists($configPath))
-					self::error("Configuration file is required. " . (empty($configPath) ? '' : "path: `$configPath`"));
+					throw new Exception("Configuration file is required. " . (empty($configPath) ? '' : "path: `$configPath`"));
 
 				Request::capture();
 				Config::load($envPath);
 
 				if (!is_array($conf = require($configPath)))
-					self::error("Invalid config file structure at `$configPath`");
+					throw new Exception("Invalid config file structure at `$configPath`");
 
 				foreach ($conf['defines'] ?? [] as $key => $value) {
 					if (is_string($key) && !defined($key)) {
@@ -75,7 +75,7 @@
 
 				validate_token();
 				$callback($conf);
-			} catch (ApplicationException $e) {
+			} catch (Exception|Error $e) {
 				$this->exception = $e;
 				$this->throw();
 			} finally {
@@ -83,14 +83,7 @@
 				if (is_null($this->exception) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET' && isset($_GET[$summary])) {
 					$this->summary();
 				}
-
-				if (ob_get_length())
-					ob_end_clean();
 			}
-		}
-
-		public static function error(string $message, int $code = 500, array $ConfigLoader = []): void {
-			throw new ApplicationException($message, $code, "ConfigLoader", $ConfigLoader);
 		}
 
 		public function failed(Closure $callback): void {
@@ -119,9 +112,6 @@
 
 			if (php_sapi_name() === 'cli')
 				return;
-
-			if (ob_get_level())
-				ob_end_clean();
 
 			$exception = $this->exception;
 			$file = urlencode($exception->getFile());

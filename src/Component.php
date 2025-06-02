@@ -51,7 +51,7 @@
 		private function preloader($component, $startedTime): string
 		{
 			if (!method_exists($this, 'loader'))
-				throw new Exception('Loader function is required.');
+				Application::error('Loader function is required.');
 
 			$html = $this->replaceHTML($this->loader(), $component);
 			$dataAttributes = $this->getAttributes($component, $startedTime);
@@ -252,7 +252,7 @@
 		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false, bool $directSkeleton = true): string|array
 		{
 			if (!$preloader && !method_exists($this, 'render'))
-				throw new Exception("Render function is required.");
+				Application::error("Render function is required.");
 
 			// Prepare data attributes for the component.
 			$component = $identifier ?: base64_encode($this->componentIdentifier);
@@ -382,13 +382,13 @@
 			}
 
 			if (!$class || !$method)
-				throw new Exception("Both class and method must be provided.");
+				Application::error("Both class and method must be provided.");
 
 			if (!class_exists($class))
-				throw new Exception("Class {$class} does not exist.");
+				Application::error("Class {$class} does not exist.");
 
 			if (!method_exists($class, $method))
-				throw new Exception("Method {$method} does not exist.");
+				Application::error("Method {$method} does not exist.");
 
 			$this->extender[] = $action;
 		}
@@ -442,7 +442,9 @@
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($blade_path)) {
 					Blade::render($blade_path, extract: $data, onError: function ($trace) {
-						throw new Exception("Blade rendering error in '{$trace['path']}': {$trace['message']} on line {$trace['line']}.");
+						Application::error("Blade rendering error in '{$trace['path']}': {$trace['message']} on line {$trace['line']}.", $trace['code'], [
+							'paths' => $trace['traces']
+						]);
 					});
 				}
 
@@ -461,10 +463,10 @@
 					if ($class && class_exists($class)) {
 
 						if (self::class === $class)
-							throw new Exception("Class `{$class}` is not allowed from extender.");
+							Application::error("Class `{$class}` is not allowed from extender.");
 
 						if (!method_exists($class, $method))
-							throw new Exception("Class `{$method}` is not allowed from extender.");
+							Application::error("Class `{$method}` is not allowed from extender.");
 
 						$componentDNA = '';
 						if (method_exists($class, 'getIdentifier')) {

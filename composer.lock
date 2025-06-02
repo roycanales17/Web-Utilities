@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6b9c8f501dc6711dab07105dcb3a8be",
+    "content-hash": "a275d6453979959fdc06a6d5b761d24b",
     "packages": [
         {
             "name": "phpmailer/phpmailer",
@@ -223,16 +223,16 @@
         },
         {
             "name": "roy404/request",
-            "version": "v3.0.7",
+            "version": "v3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Input-Request.git",
-                "reference": "1c5ddda4271ec7c9ef77ea0fc6a6b6007ffc827d"
+                "reference": "193cc96dcf746d3af7951e5b627982d80ef9af86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/1c5ddda4271ec7c9ef77ea0fc6a6b6007ffc827d",
-                "reference": "1c5ddda4271ec7c9ef77ea0fc6a6b6007ffc827d",
+                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/193cc96dcf746d3af7951e5b627982d80ef9af86",
+                "reference": "193cc96dcf746d3af7951e5b627982d80ef9af86",
                 "shasum": ""
             },
             "require": {
@@ -267,9 +267,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Input-Request/issues",
-                "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.7"
+                "source": "https://github.com/roycanales17/Input-Request/tree/v3.0.9"
             },
-            "time": "2025-06-01T04:33:52+00:00"
+            "time": "2025-06-01T05:24:40+00:00"
         },
         {
             "name": "roy404/schema",
@@ -323,7 +323,10 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1"
+        "php": "^8.1",
+        "ext-openssl": "*",
+        "ext-mbstring": "*",
+        "ext-ctype": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

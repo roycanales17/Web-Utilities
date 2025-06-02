@@ -32,6 +32,9 @@
         "roy404/artisan": "^1.0",
         "roy404/eloquent": "^1.0",
         "phpmailer/phpmailer": "^6.9",
-        "roy404/schema": "^1.0"
+        "roy404/schema": "^1.0",
+      "ext-openssl": "*",
+      "ext-mbstring": "*",
+      "ext-ctype": "*"
     }
 }

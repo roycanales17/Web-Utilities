@@ -441,8 +441,8 @@
 
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($skeleton)) {
-					Blade::render($skeleton, extract: $data, onError: function ($trace) {
-						throw new Exception($trace['message'], $trace['code']);
+					Blade::render($skeleton, extract: $data, onError: function ($trace) use ($skeleton) {
+						throw new Exception("Blade rendering error in '$skeleton': {$trace['message']} (Code: {$trace['code']}) on line {$trace['line']}.");
 					});
 				}
 

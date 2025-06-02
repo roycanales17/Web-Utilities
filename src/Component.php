@@ -428,21 +428,21 @@
 				$bladePath = $hasExtension ? $blade : str_replace('.php', '.blade.php', "/{$blade}");
 
 				// The index file is expected to be in the same directory as the class file
-				$index = dirname($path) . "/$bladePath";
+				$index = dirname($path) . $bladePath;
 
 				// Check each extension to see if the file exists in the directory
 				foreach ($extensions as $ext) {
 					if (file_exists($root . $index . $ext)) {
 						// If a matching file is found, set it as the skeleton to render
-						$skeleton = $index . $ext;
+						$blade_path = $index . $ext;
 						break;
 					}
 				}
 
 				// Render the matched skeleton (view) file, passing the extracted data
-				if (isset($skeleton)) {
-					Blade::render($skeleton, extract: $data, onError: function ($trace) use ($skeleton) {
-						throw new Exception("Blade rendering error in '$skeleton': {$trace['message']} (Code: {$trace['code']}) on line {$trace['line']}.");
+				if (isset($blade_path)) {
+					Blade::render($blade_path, extract: $data, onError: function ($trace) use ($blade_path) {
+						throw new Exception("Blade rendering error in '$blade_path': {$trace['message']} on line {$trace['line']}.");
 					});
 				}
 

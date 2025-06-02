@@ -198,26 +198,32 @@
 
 		private static function parse(string $actionString): ?array
 		{
-			if (!preg_match('/^([\w]+)\((.*)\)$/s', trim($actionString), $matches)) {
+			$actionString = trim($actionString);
+
+			if (!preg_match('/^([\w]+)\((.*)\)$/s', $actionString, $matches)) {
 				return null;
 			}
 
 			$functionName = $matches[1];
-			$argsString = $matches[2];
+			$argsString = trim($matches[2]);
 
-			// Wrap in brackets to make it a JSON array
-			$json = "[$argsString]";
+			$jsonArgsString = preg_replace_callback(
+				"/'(.*?)'/s",
+				fn($m) => '"' . str_replace('"', '\\"', $m[1]) . '"',
+				$argsString
+			);
+
+			$json = "[$jsonArgsString]";
 
 			$args = json_decode($json, true);
 
-			// Ensure it's properly decoded
 			if (!is_array($args)) {
 				return null;
 			}
 
 			return [
 				'name' => $functionName,
-				'args' => $args
+				'args' => $args,
 			];
 		}
 

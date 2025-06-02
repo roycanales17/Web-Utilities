@@ -91,21 +91,6 @@
 	}
 
 	/**
-	 * Compiles a Blade view and returns the output.
-	 *
-	 * Used to render both normal views and "stream" components (like Livewire).
-	 *
-	 * @param string $path         Path to the blade view.
-	 * @param array  $data         Variables passed to the view.
-	 * @param bool $asynchronous Whether the stream is asynchronous.
-	 * @return string Rendered HTML output.
-	 */
-	function stream(string $path, array $data = [], bool $asynchronous = false): string
-	{
-		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
-	}
-
-	/**
 	 * Launches a CLI session using the internal Terminal class.
 	 *
 	 * @param array  $args The CLI arguments passed in (e.g., from $_SERVER['argv']).
@@ -186,4 +171,195 @@
 
 		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token'))
 			exit(response(['message' => 'Bad Request'], 400)->json());
+	}
+
+	/**
+	 * Limit a string to a given length, appending an ending if truncated.
+	 *
+	 * @param string $value The input string
+	 * @param int $limit Maximum length allowed
+	 * @param string $end String to append if truncated (default '...')
+	 * @return string The limited string
+	 */
+	function str_limit(string $value, int $limit = 100, string $end = '...'): string {
+		if (mb_strlen($value) <= $limit) {
+			return $value;
+		}
+
+		return rtrim(mb_substr($value, 0, $limit)) . $end;
+	}
+
+	/**
+	 * Compiles a Blade view and returns the output.
+	 *
+	 * Used to render both normal views and "stream" components (like Livewire).
+	 *
+	 * @param string $path         Path to the blade view.
+	 * @param array  $data         Variables passed to the view.
+	 * @param bool $asynchronous Whether the stream is asynchronous.
+	 * @return string Rendered HTML output.
+	 */
+	function stream(string $path, array $data = [], bool $asynchronous = false): string
+	{
+		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
+	}
+
+	/**
+	 * This performs the component function request itself.
+	 * NOTE: The returned string should be output raw in Blade with {!! !!} to avoid HTML escaping.
+	 *
+	 * Example usage:
+	 * <button wire:click='{!! execute([MyClass::class, "method"], $arg) !!}'></button>
+	 *
+	 * @param array $action [className, methodName]
+	 * @param mixed ...$argv Method arguments
+	 * @return string generated wire attributes
+	 */
+	function execute(array $action, ...$argv): string {
+		$action[2] = false;
+		return target($action, ...$argv);
+	}
+
+	/**
+	 * This performs the other component request.
+	 * NOTE: The returned string should be output raw in Blade with {!! !!} to avoid HTML escaping.
+	 *
+	 * Example usage:
+	 * <button wire:click='{!! target([MyClass::class, "method"], $arg) !!}'></button>
+	 *
+	 * @param array $action [className, methodName]
+	 * @param mixed ...$argv Method arguments
+	 * @return string generated wire attributes
+	 */
+	function target(array $action, ...$argv): string {
+		$class = $action[0] ?? null;
+		$method = $action[1] ?? null;
+		$isTarget = $action[2] ?? true;
+
+		if (!is_string($method) || !method_exists($class, $method)) {
+			throw new \InvalidArgumentException("Invalid target action method '{$method}'.");
+		}
+
+		$encodedArgs = [];
+		foreach ($argv as $arg) {
+			$jsonArg = json_encode($arg, JSON_UNESCAPED_SLASHES);
+			if (is_string($arg)) {
+				$jsonArg = "'" . trim($jsonArg, '"') . "'";
+			}
+			$encodedArgs[] = $jsonArg;
+		}
+		$argsString = implode(', ', $encodedArgs);
+
+		/** @var App\Utilities\Component $class */
+		if ($isTarget) {
+			if (method_exists($class, 'getIdentifier')) {
+				$identifier = $class::getIdentifier();
+				$wireTarget = 'wire:target="' . $identifier;
+			} else {
+				throw new Exception("`getIdentifier` method is required for target action '" . json_encode($action) . "'.");
+			}
+		}
+
+		return $method . '(' . $argsString . ')" ' . ($wireTarget ?? '');
+	}
+
+	/**
+	 * Create a cookie with a default 'custom:' prefix in its name.
+	 *
+	 * @param string $name Cookie base name
+	 * @param mixed $value Value to set in cookie
+	 * @param int $expire Expiration time in seconds
+	 * @return mixed Result of cookie() function
+	 */
+	function createCookie(string $name, mixed $value = null, int $expire = 3600): mixed
+	{
+		$prefix = config('COOKIE_PREFIX', 'custom');
+		return cookie("$prefix:$name", $value, $expire);
+	}
+
+	/**
+	 * Fetch a cookie with a default 'custom:' prefix in its name.
+	 * Returns $default if cookie is not found.
+	 *
+	 * @param string $name Cookie base name
+	 * @param mixed $default Default value if cookie not found
+	 * @return mixed Cookie value or default
+	 */
+	function fetchCookie(string $name, mixed $default = false): mixed
+	{
+		$prefix = config('COOKIE_PREFIX', 'custom');
+		return cookie("$prefix:$name") ?? $default;
+	}
+
+	/**
+	 * Delete a cookie with a default 'custom:' prefix in its name.
+	 *
+	 * @param string $name Cookie base name
+	 * @return mixed Result of cookie() function
+	 */
+	function deleteCookie(string $name): mixed
+	{
+		$prefix = config('COOKIE_PREFIX', 'custom');
+		return cookie("$prefix:$name", null, -1);
+	}
+
+	/**
+	 * Set, get, or delete encrypted cookies.
+	 *
+	 * - If $value is null and $expire is 0, returns the decrypted cookie value.
+	 * - If $value is null and $expire is negative, deletes the cookie.
+	 * - Otherwise, sets an encrypted cookie with the given value and expiration.
+	 *
+	 * Encryption uses AES-256-CBC with a key from config('APP_COOKIE_PASSWORD').
+	 *
+	 * @param string $name Cookie name
+	 * @param mixed $value Value to set, or null to get/delete
+	 * @param int $expire Expiration time in seconds; 0 for session, negative to delete
+	 * @param string $path Cookie path
+	 * @param string $domain Cookie domain
+	 * @param bool $secure Secure flag (HTTPS only)
+	 * @param bool $httponly HttpOnly flag
+	 * @return mixed Decrypted cookie value on get, true on set/delete, or null if not found
+	 */
+	function cookie(string $name, $value = null, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true): mixed
+	{
+		$key = config('APP_COOKIE_PASSWORD', '123');
+		$cipher = 'AES-256-CBC';
+
+		$encrypt = function ($data) use ($cipher, $key) {
+			$iv = random_bytes(openssl_cipher_iv_length($cipher));
+			$json = json_encode($data); // Safely handle arrays, ints, strings, etc.
+			$encrypted = openssl_encrypt($json, $cipher, $key, 0, $iv);
+			return base64_encode($iv . $encrypted);
+		};
+
+		$decrypt = function ($data) use ($cipher, $key) {
+			$decoded = base64_decode($data);
+			if (!$decoded) return null;
+
+			$ivlen = openssl_cipher_iv_length($cipher);
+			$iv = substr($decoded, 0, $ivlen);
+			$encrypted = substr($decoded, $ivlen);
+			$decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
+			return json_decode($decrypted, true); // Decoded back to array/int/etc.
+		};
+
+		// GET
+		if ($value === null && $expire === 0) {
+			return isset($_COOKIE[$name]) ? $decrypt($_COOKIE[$name]) : null;
+		}
+
+		// REMOVE
+		if ($value === null && $expire < 0) {
+			setcookie($name, '', time() - 3600, $path, $domain, $secure, $httponly);
+			unset($_COOKIE[$name]);
+			return true;
+		}
+
+		// SET
+		$encrypted = $encrypt($value);
+		setcookie($name, $encrypted, $expire > 0 ? time() + $expire : 0, $path, $domain, $secure, $httponly);
+		$_COOKIE[$name] = $encrypted;
+
+		return true;
 	}

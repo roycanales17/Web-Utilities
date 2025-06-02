@@ -88,8 +88,10 @@
 			if (Request::header('X-STREAM-WIRE')) {
 
 				$validate = $req->validate([
-					'_component' => 'required',
-					'_method' => 'required'
+					'_component' => 'required|string',
+					'_method' => 'required|string',
+					'_properties' => 'string',
+					'_models' => 'string'
 				]);
 
 				if ($validate->isSuccess()) {

@@ -2,7 +2,6 @@
 
 	namespace App\Utilities;
 
-	use App\Headers\Request;
 	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;
@@ -12,6 +11,7 @@
 	{
 		private static array $registered = [];
 		private static array $propertyNamesCache = [];
+		private static array $reflectionCache = [];
 		private array $extender = [];
 		private string $componentIdentifier = '';
 		private float $startedTime = 0;
@@ -181,10 +181,47 @@
 		 */
 		public function models(array $models): void
 		{
-			foreach ($models as $key => $value) {
-				if (property_exists($this, $key)) {
-					$this->$key = $value;
+			$class = static::class;
+			if (!isset(self::$reflectionCache[$class])) {
+				$ref = new \ReflectionClass($this);
+				$props = [];
+
+				foreach ($ref->getProperties() as $prop) {
+					$props[$prop->getName()] = $prop;
 				}
+
+				self::$reflectionCache[$class] = $props;
+			}
+
+			$properties = self::$reflectionCache[$class];
+			$isMatched = function(string $type, mixed $value): bool {
+				return match ($type) {
+					'int'    => is_int($value),
+					'float'  => is_float($value),
+					'string' => is_string($value),
+					'bool'   => is_bool($value),
+					'array'  => is_array($value),
+					'object' => is_object($value),
+					default  => $value instanceof $type,
+				};
+			};
+
+			foreach ($models as $key => $value) {
+				if (!isset($properties[$key])) {
+					continue;
+				}
+
+				$prop = $properties[$key];
+
+				if ($prop->hasType()) {
+					$type = $prop->getType()->getName();
+
+					if (!$isMatched($type, $value)) {
+						continue;
+					}
+				}
+
+				$this->$key = $value;
 			}
 		}
 
@@ -263,7 +300,7 @@
 								})}
 							});	
 						} else {
-							console.error("Stream wire is available");
+							console.error("Stream wire is not available");
 						}
 					})();
 				</script>
@@ -335,8 +372,24 @@
 		 * @param array $action
 		 * @return void
 		 */
-		protected function extender(array $action): void
+		protected function extender(array $action, ...$args): void
 		{
+			$class = $action[0] ?? '';
+			$method = $action[1] ?? '';
+
+			if (!isset($action[2])) {
+				$action[2] = $args;
+			}
+
+			if (!$class || !$method)
+				throw new Exception("Both class and method must be provided.");
+
+			if (!class_exists($class))
+				throw new Exception("Class {$class} does not exist.");
+
+			if (!method_exists($class, $method))
+				throw new Exception("Method {$method} does not exist.");
+
 			$this->extender[] = $action;
 		}
 
@@ -389,7 +442,7 @@
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($skeleton)) {
 					Blade::render($skeleton, extract: $data, onError: function ($trace) {
-						throw new Exception("{$trace['message']} in `{$trace['path']}`, line: `{$trace['line']}`", $trace['code']);
+						throw new Exception($trace['message'], $trace['code']);
 					});
 				}
 
@@ -409,6 +462,9 @@
 
 						if (self::class === $class)
 							throw new Exception("Class `{$class}` is not allowed from extender.");
+
+						if (!method_exists($class, $method))
+							throw new Exception("Class `{$method}` is not allowed from extender.");
 
 						$componentDNA = '';
 						if (method_exists($class, 'getIdentifier')) {

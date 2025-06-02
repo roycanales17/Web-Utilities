@@ -196,20 +196,28 @@
 			return $providedParams >= $requiredParams && $providedParams <= $totalParams;
 		}
 
-		private static function parse(string $actionString): null|array
+		private static function parse(string $actionString): ?array
 		{
-			preg_match('/^([\w]+)\((.*)\)$/', $actionString, $matches);
-
-			if (!$matches)
+			if (!preg_match('/^([\w]+)\((.*)\)$/s', trim($actionString), $matches)) {
 				return null;
+			}
 
 			$functionName = $matches[1];
-			$paramsString = $matches[2];
-			$params = preg_split('/,(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/', $paramsString);
+			$argsString = $matches[2];
+
+			// Wrap in brackets to make it a JSON array
+			$json = "[$argsString]";
+
+			$args = json_decode($json, true);
+
+			// Ensure it's properly decoded
+			if (!is_array($args)) {
+				return null;
+			}
 
 			return [
 				'name' => $functionName,
-				'args' => array_map(fn($param) => trim($param, " '\""), $params)
+				'args' => $args
 			];
 		}
 

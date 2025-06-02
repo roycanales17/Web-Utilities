@@ -39,15 +39,11 @@
 					 * Component Lifecycle and Configuration
 					 *
 					 * ## Available Methods:
-					 * - `getIdentifier()` — Returns a unique identifier (or DNA) for the component.
+					 * - `getIdentifier()` — Requires if we allow the component to be executed on the frontend.
 					 * - `redirect()` — Performs an Ajax-based redirection.
 					 * - `init()` — Serves as the component's initializer; use this to set up internal state or dependencies.
 					 * - `verify()` — (Optional) Runs pre-render validation or checks before displaying the component.
 					 * - `loader()` — Returns a loading skeleton or placeholder shown while the component is processing.
-					 *
-					 * ## Properties:
-					 * - `target` — Use this property to allow the component to be triggered by other components.
-					 *   Example usage: `wire:target="YourComponentTarget"`
 					 *
 					 * See the component interface located at:
 					 * @see $basePath/index.blade.php
@@ -62,6 +58,7 @@
 			$componentPath = implode('\\', array_map('ucfirst', array_merge($directories, [ $className ])));
 			$indexContent = <<<PHP
 			@php
+				use {$componentPath}\\{$className};
 				/**
 				 * This file is rendered via the following component class:
 				 *

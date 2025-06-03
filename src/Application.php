@@ -24,6 +24,7 @@
 
 		function __construct(Closure $callback, string $summary, string $configPath, string $envPath, string $errorPath) {
 			try {
+				ob_start();
 				$this->errorPath = $errorPath;
 				$this->startTracking();
 
@@ -76,9 +77,17 @@
 				validate_token();
 				$callback($conf);
 			} catch (Exception|Error $e) {
+				while (ob_get_level() > 0) {
+					ob_end_clean();
+				}
+
 				$this->exception = $e;
 				$this->throw();
 			} finally {
+				if (ob_get_level() > 0) {
+					ob_end_flush();
+				}
+
 				$this->endTracking();
 				if (is_null($this->exception) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET' && isset($_GET[$summary])) {
 					$this->summary();

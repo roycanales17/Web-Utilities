@@ -128,10 +128,7 @@
 		if (file_exists($root . $bladePath))
 			$mainPath = $bladePath;
 
-		Blade::render($mainPath, extract: $data, onError: function ($trace) {
-			throw new Exception($trace['message'], $trace['code']);
-		});
-
+		Blade::render($mainPath, extract: $data);
 		return ob_get_clean();
 	}
 

@@ -233,6 +233,10 @@
 		$method = $action[1] ?? null;
 		$isTarget = $action[2] ?? true;
 
+		if (!class_exists($class)) {
+			throw new Exception('Class not found: ' . $class);
+		}
+		
 		if (!is_string($method) || !method_exists($class, $method)) {
 			throw new \InvalidArgumentException("Invalid target action method '{$method}'.");
 		}

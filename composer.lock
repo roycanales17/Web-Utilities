@@ -134,16 +134,16 @@
         },
         {
             "name": "roy404/blades",
-            "version": "v1.2.1",
+            "version": "v1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Blades-Compiler.git",
-                "reference": "c3216c515f4d1289af33b2c7ad2a5b0c65dbf47d"
+                "reference": "6a7869946a7e84c84c01d04d892c8eeedd4ae724"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Blades-Compiler/zipball/c3216c515f4d1289af33b2c7ad2a5b0c65dbf47d",
-                "reference": "c3216c515f4d1289af33b2c7ad2a5b0c65dbf47d",
+                "url": "https://api.github.com/repos/roycanales17/Blades-Compiler/zipball/6a7869946a7e84c84c01d04d892c8eeedd4ae724",
+                "reference": "6a7869946a7e84c84c01d04d892c8eeedd4ae724",
                 "shasum": ""
             },
             "require": {
@@ -152,7 +152,10 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "App\\Content\\": "src/"
+                    "App\\View\\Compilers\\": "src/",
+                    "App\\View\\Compilers\\Scheme\\": "src/scheme",
+                    "App\\View\\Compilers\\Builder\\": "src/builder",
+                    "App\\View\\Compilers\\Templates\\": "src/templates"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -172,9 +175,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Blades-Compiler/issues",
-                "source": "https://github.com/roycanales17/Blades-Compiler/tree/v1.2.1"
+                "source": "https://github.com/roycanales17/Blades-Compiler/tree/v1.2.3"
             },
-            "time": "2025-06-03T09:32:49+00:00"
+            "time": "2025-06-04T13:47:37+00:00"
         },
         {
             "name": "roy404/eloquent",

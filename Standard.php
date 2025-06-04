@@ -1,10 +1,10 @@
 <?php
 
-	use App\Content\Blade;
 	use App\Headers\Request;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\Console\Terminal;
+	use App\View\Compilers\Blade;
 
 	/**
 	 * Retrieves a configuration value by key.
@@ -128,7 +128,7 @@
 		if (file_exists($root . $bladePath))
 			$mainPath = $bladePath;
 
-		Blade::render($mainPath, extract: $data);
+		Blade::load($mainPath, $data);
 		return ob_get_clean();
 	}
 

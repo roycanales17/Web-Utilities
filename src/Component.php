@@ -441,7 +441,7 @@
 
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($blade_path)) {
-					Blade::load($blade_path, $data);
+					Blade::load($root . $blade_path, $data);
 				}
 
 				return ob_get_clean();

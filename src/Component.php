@@ -2,10 +2,10 @@
 
 	namespace App\Utilities;
 
+	use App\View\Compilers\Blade;
 	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;
-	use App\Content\Blade;
 
 	abstract class Component
 	{
@@ -441,7 +441,7 @@
 
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($blade_path)) {
-					Blade::render($blade_path, extract: $data);
+					Blade::load($blade_path, $data);
 				}
 
 				return ob_get_clean();

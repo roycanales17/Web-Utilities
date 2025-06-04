@@ -128,7 +128,7 @@
 		if (file_exists($root . $bladePath))
 			$mainPath = $bladePath;
 
-		Blade::load($mainPath, $data);
+		Blade::load('../'. $mainPath, $data);
 		return ob_get_clean();
 	}
 

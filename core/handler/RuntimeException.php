@@ -3,7 +3,6 @@
 	namespace App\Bootstrap\Handler;
 
 	use Closure;
-	use ReflectionException;
 	use ReflectionFunction;
 	use Throwable;
 
@@ -85,8 +84,13 @@
 				exit();
 			}
 
-			// Default fallback
-			error_log("Unhandled exception: " . $e->getMessage());
-			error_log("Trace:". $e->getTraceAsString());
+			echo '<pre>';
+			print_r([
+				'message' => $e->getMessage(),
+				'code' => $e->getCode(),
+				'file' => $e->getFile(),
+				'line' => $e->getLine(),
+			]);
+			echo '</pre>';
 		}
 	}

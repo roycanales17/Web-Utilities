@@ -3,7 +3,7 @@
 	namespace Commands;
 	
 	use App\Console\Command;
-	use App\Utilities\Server;
+	use App\utilities\Server;
 	use Illuminate\Database\Facades\Blueprint;
 	use Illuminate\Database\Facades\Schema;
 

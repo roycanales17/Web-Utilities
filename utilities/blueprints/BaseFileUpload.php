@@ -1,6 +1,6 @@
 <?php
 
-	namespace App\Utilities\Blueprints;
+	namespace App\utilities\Blueprints;
 
 	use Aws\S3\S3Client;
 

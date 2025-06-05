@@ -1,6 +1,6 @@
 <?php
 
-	namespace App\Utilities\Blueprints;
+	namespace App\utilities\Blueprints;
 
 	enum CacheDriver: string {
 		case Memcached = 'memcached';

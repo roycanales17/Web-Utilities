@@ -1,8 +1,8 @@
 <?php
 
-	namespace App\Utilities\Handler;
+	namespace App\utilities\Handler;
 
-	use App\Utilities\Mail;
+	use App\utilities\Mail;
 
 	abstract class Mailable
 	{

@@ -31,7 +31,7 @@
 			
 				{$namespaceDeclaration}
 				
-				use App\Utilities\Component;
+				use App\utilities\Component;
 				
 				class {$className} extends Component
 				{

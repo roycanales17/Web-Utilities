@@ -2,13 +2,14 @@
 
 	namespace App\Utilities;
 
-	use App\Utilities\Handler\DatabaseSessionHandler;
+	use App\utilities\Handler\DatabaseSessionHandler;
 	// use App\Utilities\Handler\RedisSessionHandler;
 
 	class Session
 	{
 		public static function configure(array $config): void
 		{
+
 			if (session_status() === PHP_SESSION_NONE) {
 
 				// Set default driver

@@ -2,7 +2,7 @@
 
 	namespace App\Utilities;
 
-	use App\Utilities\Blueprints\BaseFileUpload;
+	use App\utilities\Blueprints\BaseFileUpload;
 
 	class Storage
 	{

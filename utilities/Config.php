@@ -2,7 +2,7 @@
 
 	namespace App\Utilities;
 
-	class Config
+	final class Config
 	{
 		protected static array $config = [];
 
@@ -24,6 +24,9 @@
 
 		public static function get(string $key, mixed $default = null): mixed
 		{
+			if (defined($key))
+				return constant($key);
+
 			$keys = explode('.', $key);
 			$value = self::$config;
 

@@ -1,10 +1,21 @@
 <?php
 
 	use App\Headers\Request;
+	use App\Console\Terminal;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
-	use App\Console\Terminal;
 	use App\View\Compilers\Blade;
+
+	/**
+	 * Retrieves a session value by key.
+	 *
+	 * @param string $key
+	 * @return mixed
+	 */
+	function session(string $key): mixed
+	{
+		return Session::get($key);
+	}
 
 	/**
 	 * Retrieves a configuration value by key.
@@ -15,9 +26,6 @@
 	 */
 	function config(string $key, mixed $default = null): mixed
 	{
-		if (defined($key))
-			return constant($key);
-
 		return Config::get($key, $default);
 	}
 
@@ -118,17 +126,17 @@
 	{
 		ob_start();
 
-		$root = config('APP_ROOT');
-		$root = rtrim($root, '/');
+		$root = rtrim(config('APP_ROOT', dirname(__DIR__)), '/');
+		$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
 
-		$path = str_replace('.', '/', $path);
-		$normalizedPath = preg_replace('/\.php$/', '', trim($path, '/'));
-		$bladePath = str_replace('.php', '.blade.php', $mainPath = "/views/{$normalizedPath}.php");
+		$mainPath = "/views/{$normalizedPath}.php";
+		$bladePath = "/views/{$normalizedPath}.blade.php";
 
-		if (file_exists($root . $bladePath))
+		if (file_exists($root . $bladePath)) {
 			$mainPath = $bladePath;
+		}
 
-		Blade::load(realpath('..'.$mainPath), $data);
+		Blade::load(realpath('..' . $mainPath), $data);
 		return ob_get_clean();
 	}
 
@@ -191,14 +199,15 @@
 	 *
 	 * Used to render both normal views and "stream" components (like Livewire).
 	 *
-	 * @param string $path         Path to the blade view.
-	 * @param array  $data         Variables passed to the view.
+	 * @param string $path Path to the blade view.
+	 * @param array $data Variables passed to the view.
 	 * @param bool $asynchronous Whether the stream is asynchronous.
 	 * @return string Rendered HTML output.
+	 * @throws App\View\Compilers\scheme\CompilerException
 	 */
 	function stream(string $path, array $data = [], bool $asynchronous = false): string
 	{
-		return Blade::compile(App\Utilities\Stream::render($path, $data, $asynchronous));
+		return Blade::compile(App\utilities\Stream::render($path, $data, $asynchronous));
 	}
 
 	/**
@@ -211,6 +220,7 @@
 	 * @param array $action [className, methodName]
 	 * @param mixed ...$argv Method arguments
 	 * @return string generated wire attributes
+	 * @throws Exception
 	 */
 	function execute(array $action, ...$argv): string {
 		$action[2] = false;
@@ -227,6 +237,7 @@
 	 * @param array $action [className, methodName]
 	 * @param mixed ...$argv Method arguments
 	 * @return string generated wire attributes
+	 * @throws Exception
 	 */
 	function target(array $action, ...$argv): string {
 		$class = $action[0] ?? null;
@@ -251,7 +262,7 @@
 		}
 		$argsString = implode(', ', $encodedArgs);
 
-		/** @var App\Utilities\Component $class */
+		/** @var App\utilities\Component $class */
 		if ($isTarget) {
 			if (method_exists($class, 'getIdentifier')) {
 				$identifier = $class::getIdentifier();

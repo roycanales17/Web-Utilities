@@ -1,9 +1,6 @@
 <?php
 
-	namespace Core;
-
-	use App\Utilities\Cache;
-	use App\Utilities\Server;
+	namespace App\Utilities;
 
 	class RateLimiter
 	{

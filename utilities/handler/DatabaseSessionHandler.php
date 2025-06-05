@@ -1,9 +1,9 @@
 <?php
 
-	namespace App\Utilities\Handler;
+	namespace App\utilities\Handler;
 
 	use App\Database\DB;
-	use App\Utilities\Server;
+	use App\utilities\Server;
 	use SessionHandlerInterface;
 
 	class DatabaseSessionHandler implements SessionHandlerInterface

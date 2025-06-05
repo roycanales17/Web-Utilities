@@ -2,15 +2,25 @@
 
 	namespace App\Bootstrap\Helper;
 
+	use App\Bootstrap\Exceptions\AppException;
 	use App\Database\DB;
 	use App\Utilities\Session;
 
 	trait Configuration
 	{
+		private string $configPath = '';
 		private array $config = [];
 
-		protected function setConfiguration(array $config): void {
-			$this->config = $config;
+		protected function setupConfig(): void {
+			if (!is_array($configPath = require($this->config))) {
+				throw new AppException('Config file path is not valid');
+			}
+
+			$this->config = $configPath;
+		}
+
+		protected function setConfiguration(string $config): void {
+			$this->configPath = $config;
 		}
 
 		protected function setGlobalDefines(): void {

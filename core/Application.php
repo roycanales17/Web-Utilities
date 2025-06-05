@@ -42,6 +42,7 @@
 				Request::capture();
 				Config::load($this->envPath);
 
+				$this->setupConfig();
 				$this->setGlobalDefines();
 				$this->setDevelopment();
 				$this->setDatabaseConfig();
@@ -105,14 +106,6 @@
 				case !file_exists($configPath):
 					$this->throwError('Configuration file does not exist');
 					break;
-
-				case !is_array($configPath = require($configPath)):
-					$this->throwError('Configuration file is not an array');
-					break;
-			}
-
-			if (!is_array($configPath)) {
-				$configPath = [];
 			}
 
 			$this->setConfiguration($configPath);

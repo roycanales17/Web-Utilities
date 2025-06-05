@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a275d6453979959fdc06a6d5b761d24b",
+    "content-hash": "e6b9c8f501dc6711dab07105dcb3a8be",
     "packages": [
         {
             "name": "phpmailer/phpmailer",
@@ -134,16 +134,16 @@
         },
         {
             "name": "roy404/blades",
-            "version": "v1.2.3",
+            "version": "v1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Blades-Compiler.git",
-                "reference": "6a7869946a7e84c84c01d04d892c8eeedd4ae724"
+                "reference": "86acc84512397b86f305c81ff7612e1aa83e4018"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Blades-Compiler/zipball/6a7869946a7e84c84c01d04d892c8eeedd4ae724",
-                "reference": "6a7869946a7e84c84c01d04d892c8eeedd4ae724",
+                "url": "https://api.github.com/repos/roycanales17/Blades-Compiler/zipball/86acc84512397b86f305c81ff7612e1aa83e4018",
+                "reference": "86acc84512397b86f305c81ff7612e1aa83e4018",
                 "shasum": ""
             },
             "require": {
@@ -175,9 +175,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Blades-Compiler/issues",
-                "source": "https://github.com/roycanales17/Blades-Compiler/tree/v1.2.3"
+                "source": "https://github.com/roycanales17/Blades-Compiler/tree/v1.2.5"
             },
-            "time": "2025-06-04T13:47:37+00:00"
+            "time": "2025-06-04T14:30:09+00:00"
         },
         {
             "name": "roy404/eloquent",
@@ -326,10 +326,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1",
-        "ext-openssl": "*",
-        "ext-mbstring": "*",
-        "ext-ctype": "*"
+        "php": "^8.1"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

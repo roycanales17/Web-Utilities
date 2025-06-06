@@ -7,6 +7,7 @@
 	use App\Database\DB;
 	use App\Routes\Route;
 	use App\Utilities\Cache;
+	use App\Utilities\Config;
 	use App\Utilities\Mail;
 	use App\Utilities\Session;
 	use App\Utilities\Stream;
@@ -35,6 +36,7 @@
 		protected function setGlobalDefines(): void {
 			foreach ($this->config['defines'] ?? [] as $key => $value) {
 				if (is_string($key) && !defined($key)) {
+					Config::set($key, $value);
 					define($key, $value);
 				}
 			}

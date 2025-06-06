@@ -24,9 +24,6 @@
 
 		public static function get(string $key, mixed $default = null): mixed
 		{
-			if (defined($key))
-				return constant($key);
-
 			$keys = explode('.', $key);
 			$value = self::$config;
 

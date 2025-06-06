@@ -31,21 +31,17 @@
 	use App\Bootstrap\Handler\RuntimeException;
 	use App\Bootstrap\Exceptions\AppException;
 
-	$app = Application::boot();
-	$app->withExceptions(function(RuntimeException $exception) {
-		$exception->report(function(AppException $exception) {
-			echo '<pre>';
-			print_r([
-				'message' => $exception->getMessage(),
-				'code' => $exception->getCode(),
-				'file' => $exception->getFile(),
-				'line' => $exception->getLine(),
-			]);
-			echo '</pre>';
-		});
-	});
-
-	$app->run(function($conf) {
-		echo 'Hello World!';
-		throw new AppException('This is a test!');
-	});
+	Application::boot()
+		->withExceptions(function(RuntimeException $exception) {
+			$exception->report(function(AppException $exception) {
+				echo '<pre>';
+				print_r([
+					'message' => $exception->getMessage(),
+					'code' => $exception->getCode(),
+					'file' => $exception->getFile(),
+					'line' => $exception->getLine(),
+				]);
+				echo '</pre>';
+			});
+		}
+	);

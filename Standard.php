@@ -4,6 +4,7 @@
 	use App\Console\Terminal;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
+	use App\Utilities\Stream;
 	use App\View\Compilers\Blade;
 
 	/**
@@ -267,12 +268,13 @@
 
 		/** @var App\utilities\Component $class */
 		if ($isTarget) {
+			$identifier = '';
 			if (method_exists($class, 'getIdentifier')) {
 				$identifier = $class::getIdentifier();
-				$wireTarget = 'wire:target="' . $identifier;
-			} else {
-				throw new Exception("`getIdentifier` method is required for target action '" . json_encode($action) . "'.");
 			}
+
+			$identifier = encryption(get_called_class(). "___" . $identifier, Stream::password());
+			$wireTarget = 'wire:target="' . $identifier;
 		}
 
 		return $method . '(' . $argsString . ')" ' . ($wireTarget ?? '');
@@ -339,29 +341,10 @@
 	function cookie(string $name, $value = null, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true): mixed
 	{
 		$key = config('APP_COOKIE_PASSWORD', '123');
-		$cipher = 'AES-256-CBC';
-
-		$encrypt = function ($data) use ($cipher, $key) {
-			$iv = random_bytes(openssl_cipher_iv_length($cipher));
-			$json = json_encode($data); // Safely handle arrays, ints, strings, etc.
-			$encrypted = openssl_encrypt($json, $cipher, $key, 0, $iv);
-			return base64_encode($iv . $encrypted);
-		};
-
-		$decrypt = function ($data) use ($cipher, $key) {
-			$decoded = base64_decode($data);
-			if (!$decoded) return null;
-
-			$ivlen = openssl_cipher_iv_length($cipher);
-			$iv = substr($decoded, 0, $ivlen);
-			$encrypted = substr($decoded, $ivlen);
-			$decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-			return json_decode($decrypted, true); // Decoded back to array/int/etc.
-		};
 
 		// GET
 		if ($value === null && $expire === 0) {
-			return isset($_COOKIE[$name]) ? $decrypt($_COOKIE[$name]) : null;
+			return isset($_COOKIE[$name]) ? decryption($_COOKIE[$name], $key) : null;
 		}
 
 		// REMOVE
@@ -372,9 +355,29 @@
 		}
 
 		// SET
-		$encrypted = $encrypt($value);
+		$encrypted = encryption($value, $key);
 		setcookie($name, $encrypted, $expire > 0 ? time() + $expire : 0, $path, $domain, $secure, $httponly);
 		$_COOKIE[$name] = $encrypted;
 
 		return true;
+	}
+
+	function encryption(mixed $data, string|int $key) {
+		$cipher = 'AES-256-CBC';
+		$iv = random_bytes(openssl_cipher_iv_length($cipher));
+		$json = json_encode($data);
+		$encrypted = openssl_encrypt($json, $cipher, $key, 0, $iv);
+		return base64_encode($iv . $encrypted);
+	}
+
+	function decryption(mixed $data, string|int $key) {
+		$cipher = 'AES-256-CBC';
+		$decoded = base64_decode($data);
+		if (!$decoded) return null;
+
+		$ivlen = openssl_cipher_iv_length($cipher);
+		$iv = substr($decoded, 0, $ivlen);
+		$encrypted = substr($decoded, $ivlen);
+		$decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
+		return json_decode($decrypted, true);
 	}

@@ -358,11 +358,13 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
+			$componentDNA = '';
 			if (method_exists(static::class, 'getIdentifier')) {
 				$componentDNA = static::getIdentifier();
-				$dataAttributes .= " data-id='{$componentDNA}'";
 			}
 
+			$componentDNA = encryption(get_called_class(). "___" . $componentDNA, Stream::password());
+			$dataAttributes .= " data-id='{$componentDNA}'";
 			return $dataAttributes;
 		}
 
@@ -469,6 +471,7 @@
 							$componentDNA = $class::getIdentifier();
 						}
 
+						$componentDNA = encryption(get_called_class(). "___" . $componentDNA, Stream::password());
 						if ($componentDNA) {
 							return [
 								'target' => $componentDNA,

@@ -34,44 +34,26 @@
 				return $html;
 
 			ob_start();
-
-			$component = null;
 			if (class_exists($path)) {
 				$component = new $path();
 			} else {
-				foreach (self::$root as $rootPath) {
-					$path = preg_replace('/\.php$/', '', $path);
-					$normalizedPath = str_replace('\\', '/', $path);
-
-					foreach (['.blade.php', '.php'] as $extension) {
-						$full_path = $rootPath . $normalizedPath . $extension;
-						if (file_exists($full_path)) {
-							$component = require $full_path;
-							break 2;
-						}
-					}
-				}
+				throw new Exception("Class {$path} does not exist.");
 			}
 
-			if ($component) {
+			if (!method_exists($component, 'initialize')) {
+				$className = is_object($component) ? get_class($component) : gettype($component);
+				throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
+			}
 
-				if (!method_exists($component, 'initialize')) {
-					$className = is_object($component) ? get_class($component) : gettype($component);
-					throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
-				}
+			if (!self::verifyComponent($component))
+				return ob_get_clean();
 
-				if (!self::verifyComponent($component))
-					return ob_get_clean();
+			$component->initialize($path, $data);
 
-				$component->initialize($path, $data);
-
-				if ($asynchronous) {
-					echo($component->parse(preloader: true));
-				} else {
-					echo($component->parse());
-				}
+			if ($asynchronous) {
+				echo($component->parse(preloader: true));
 			} else {
-				throw new Exception("Unable to locate compiled file '{$path}'.");
+				echo($component->parse());
 			}
 
 			# Capture the content
@@ -91,12 +73,14 @@
 					'_component' => 'required|string',
 					'_method' => 'required|string',
 					'_properties' => 'string',
-					'_models' => 'string'
+					'_models' => 'string',
+					'_target' => 'string'
 				]);
 
 				if ($validate->isSuccess()) {
 
 					$component = $req->input('_component');
+					$target = $req->input('_target');
 					$method = $req->input('_method');
 					$properties = $req->input('_properties');
 					$models = $req->input('_models');
@@ -130,41 +114,38 @@
 					$function = $parsed['name'] ?? $method;
 					$args = $parsed['args'] ?? [];
 
-					$component = null;
+					if ($target) {
+						$target = decryption($target, self::password());
+						$target = explode('___', $target);
+						$target = $target[0] ?? '';
+						$identifier = $target[1] ?? '';
+
+						if ($target) {
+							$path = $target;
+						}
+					}
+
 					if (class_exists($path)) {
 						$component = new $path();
 					} else {
-						foreach (self::$root as $rootPath) {
-							$normalizedPath = ltrim($path, '/');
-
-							foreach (['.blade.php', '.php'] as $extension) {
-								$full_path = $rootPath . $normalizedPath . $extension;
-								if (file_exists($full_path)) {
-									$component = require $full_path;
-									break 2;
-								}
-							}
-						}
+						throw new Exception("Class {$path} does not exist.");
 					}
 
-					if ($component) {
+					if ($orig_properties)
+						$component->models($orig_properties );
 
-						if ($orig_properties)
-							$component->models($orig_properties );
+					if (!self::verifyComponent($component)) {
+						if (self::$onFailed)
+							return call_user_func(self::$onFailed, 401);
 
-						if (!self::verifyComponent($component)) {
-							if (self::$onFailed)
-								return call_user_func(self::$onFailed, 401);
-
-							return response(['message' => 'Unauthorized'], 401)->json();
-						}
-
-						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
-							call_user_func_array([$component, $function], $args);
-						}
-
-						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
+						return response(['message' => 'Unauthorized'], 401)->json();
 					}
+
+					if ($function != 'render' && self::validateMethod($component, $function, $args)) {
+						call_user_func_array([$component, $function], $args);
+					}
+
+					return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
 				}
 			}
 
@@ -306,5 +287,9 @@
 			}
 
 			return true;
+		}
+
+		public static function password(): string {
+			return 'stream-wire';
 		}
 	}

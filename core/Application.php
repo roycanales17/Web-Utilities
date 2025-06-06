@@ -80,8 +80,6 @@
 				}
 
 				Request::capture();
-				Config::load($this->envPath);
-
 				$this->setupConfig();
 				$this->setGlobalDefines();
 				$this->setDevelopment();

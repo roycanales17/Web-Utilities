@@ -110,7 +110,7 @@
 
 		protected function setupRoutingAndCapture(): string {
 			ob_start();
-			foreach ($conf['routes'] ?? [] as $route) {
+			foreach ($this->config['routes'] ?? [] as $route) {
 				Route::configure(
 					root: $route['root'] ?? "../routes",
 					routes: $route['routes'] ?? ['web.php'],

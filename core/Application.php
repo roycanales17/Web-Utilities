@@ -32,7 +32,7 @@
 		/**
 		 * @throws Throwable
 		 */
-		public function run( Closure $callback): void {
+		public function run(Closure $callback): void {
 			try {
 				$this->performance = new Performance(true);
 				if ($this->isBufferedError()) {

@@ -273,7 +273,7 @@
 				$identifier = $class::getIdentifier();
 			}
 
-			$identifier = encryption(get_called_class(). "___" . $identifier, Stream::password());
+			$identifier = encryption($class. "___" . $identifier, Stream::password());
 			$wireTarget = 'wire:target="' . $identifier;
 		}
 

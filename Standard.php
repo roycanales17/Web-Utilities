@@ -27,7 +27,7 @@
 	function config(string $key, mixed $default = null): mixed
 	{
 		if (Config::isEmpty()) {
-			Config::load('../.env');
+			Config::load('.env');
 		}
 
 		return Config::get($key, $default);

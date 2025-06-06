@@ -4,6 +4,7 @@
 
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Database\DB;
+	use App\Utilities\Config;
 	use App\Utilities\Session;
 
 	trait Configuration
@@ -26,6 +27,7 @@
 		protected function setGlobalDefines(): void {
 			foreach ($this->config['defines'] ?? [] as $key => $value) {
 				if (is_string($key) && !defined($key)) {
+					Config::set($key, $value);
 					define($key, $value);
 				}
 			}

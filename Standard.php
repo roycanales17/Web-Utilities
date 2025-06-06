@@ -130,17 +130,16 @@
 	{
 		ob_start();
 
-		$root = rtrim(config('APP_ROOT', dirname(__DIR__)), '/');
 		$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
 
-		$mainPath = "/views/{$normalizedPath}.php";
-		$bladePath = "/views/{$normalizedPath}.blade.php";
+		$mainPath = "../views/{$normalizedPath}.php";
+		$bladePath = "../views/{$normalizedPath}.blade.php";
 
-		if (file_exists($root . $bladePath)) {
+		if (file_exists($bladePath)) {
 			$mainPath = $bladePath;
 		}
 
-		Blade::load(realpath('..' . $mainPath), $data);
+		Blade::load($mainPath, $data);
 		return ob_get_clean();
 	}
 

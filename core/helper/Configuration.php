@@ -12,6 +12,10 @@
 		private string $configPath = '';
 		private array $config = [];
 
+		protected function getConfig(): array {
+			return $this->config;
+		}
+
 		protected function setupConfig(): void {
 			if (!is_array($configPath = require($this->configPath))) {
 				throw new AppException('Config file path is not valid');

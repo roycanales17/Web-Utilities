@@ -52,7 +52,7 @@
 				define('CSRF_TOKEN', csrf_token());
 				validate_token();
 
-				echo $this->capture($callback);
+				$callback($this->getConfig());
 
 			} catch (Exception|Throwable $e) {
 				if ($this->runtimeHandler) {
@@ -66,12 +66,6 @@
 					print_r($this->performance->generateSummary());
 				}
 			}
-		}
-
-		private function capture(Closure $callback): string {
-			ob_start();
-			$callback($this->config);
-			return ob_get_clean();
 		}
 
 		/**

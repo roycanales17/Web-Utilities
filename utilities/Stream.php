@@ -88,10 +88,10 @@
 
 					$models = json_decode($models, true);
 					$path = base64_decode($component);
-					$path = str_replace('COMPONENT_', '', decrypt($path));
+					$path = str_replace('COMPONENT_', '', simple_decrypt($path));
 
 					$properties = base64_decode($properties);
-					$properties = decrypt($properties);
+					$properties = simple_decrypt($properties);
 					$properties = json_decode($properties, true);
 
 					$orig_properties = [];
@@ -115,7 +115,7 @@
 					$args = $parsed['args'] ?? [];
 
 					if ($target) {
-						$target = decryption($target, self::password());
+						$target = decrypt_deterministic($target, self::password());
 						$target = explode('___', $target);
 						$target = $target[0] ?? '';
 						$identifier = $target[1] ?? '';
@@ -226,7 +226,7 @@
 				foreach ($compiledArray as $encodedPath => $html) {
 					if (is_string($html) && is_string($encodedPath)) {
 						$decoded = base64_decode($encodedPath);
-						$compiledPath = str_replace('COMPONENT_', '', decrypt($decoded));
+						$compiledPath = str_replace('COMPONENT_', '', simple_decrypt($decoded));
 						$normalizedCompiledPath = strtolower(preg_replace('/\.php$/i', '', $compiledPath));
 
 						// Group all compiled HTMLs by compiled path
@@ -243,7 +243,7 @@
 							foreach ($compiledArray as $encodedPath2 => $html2) {
 								if (is_string($html2) && is_string($encodedPath2)) {
 									$decoded2 = base64_decode($encodedPath2);
-									$compiledPath2 = str_replace('COMPONENT_', '', decrypt($decoded2));
+									$compiledPath2 = str_replace('COMPONENT_', '', simple_decrypt($decoded2));
 									$normalizedCompiledPath2 = strtolower(preg_replace('/\.php$/i', '', $compiledPath2));
 
 									if ($normalizedTargetPath === $normalizedCompiledPath2) {

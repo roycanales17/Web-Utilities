@@ -6,6 +6,10 @@
 	{
 		protected static array $config = [];
 
+		public static function isEmpty(): bool {
+			return empty(self::$config);
+		}
+
 		public static function load(string $path): void
 		{
 			if (file_exists($path)) {

@@ -19,7 +19,6 @@
 		use Configuration;
 
 		private static ?self $app = null;
-		private string $envPath = '';
 		private Performance $performance;
 		private ?RuntimeException $runtimeHandler = null;
 		private ?StreamWireConfig $streamWireConfig = null;
@@ -40,25 +39,6 @@
 		public function withStreamWire(Closure $callback): self {
 			$this->streamWireConfig = new StreamWireConfig();
 			$callback($this->streamWireConfig);
-			return $this;
-		}
-
-		/**
-		 * Set the path to the environment configuration.
-		 */
-		public function withEnvironment(string $envPath): self
-		{
-			switch (true) {
-				case empty(trim($envPath)):
-					$this->throwError('Environment file is required');
-					break;
-
-				case !file_exists($envPath):
-					$this->throwError('Environment file does not exist');
-					break;
-			}
-
-			$this->envPath = $envPath;
 			return $this;
 		}
 

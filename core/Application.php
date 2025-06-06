@@ -3,7 +3,6 @@
 
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Bootstrap\Handler\RuntimeException;
-	use App\Bootstrap\Handler\StreamWireConfig;
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Helper\Configuration;
 	use App\Bootstrap\Helper\Performance;
@@ -19,9 +18,9 @@
 		use Configuration;
 
 		private static ?self $app = null;
+		private string $envPath = '';
 		private Performance $performance;
 		private ?RuntimeException $runtimeHandler = null;
-		private ?StreamWireConfig $streamWireConfig = null;
 
 		public static function boot(): self {
 			if (!isset(self::$app)) {
@@ -31,14 +30,66 @@
 		}
 
 		/**
-		 * Allows us to use stream wire feature.
-		 *
-		 * @param Closure $callback
-		 * @return $this
+		 * @throws Throwable
 		 */
-		public function withStreamWire(Closure $callback): self {
-			$this->streamWireConfig = new StreamWireConfig();
-			$callback($this->streamWireConfig);
+		public function run( Closure $callback): void {
+			try {
+				$this->performance = new Performance(true);
+				if ($this->isBufferedError()) {
+					throw new AppException($this->getErrorMessage());
+				}
+
+				Request::capture();
+				Config::load($this->envPath);
+
+				$this->setupConfig();
+				$this->setGlobalDefines();
+				$this->setDevelopment();
+				$this->setDatabaseConfig();
+				$this->setSessionConfig();
+				$this->setPreloadFiles();
+
+				define('CSRF_TOKEN', csrf_token());
+				validate_token();
+
+				echo $this->capture($callback);
+
+			} catch (Exception|Throwable $e) {
+				if ($this->runtimeHandler) {
+					$this->runtimeHandler->handle($e);
+				} else {
+					throw $e;
+				}
+			} finally {
+				$this->performance->end();
+				if (request()->query('SHOW_PERFORMANCE') === true) {
+					print_r($this->performance->generateSummary());
+				}
+			}
+		}
+
+		private function capture(Closure $callback): string {
+			ob_start();
+			$callback($this->config);
+			return ob_get_clean();
+		}
+
+		/**
+		 * Set the path to the environment configuration.
+		 */
+		public function withEnvironment(string $envPath): self
+		{
+			switch (true) {
+				case empty(trim($envPath)):
+					$this->throwError('Environment file is required');
+					break;
+
+				case !file_exists($envPath):
+					$this->throwError('Environment file does not exist');
+					break;
+			}
+
+			$this->envPath = $envPath;
 			return $this;
 		}
 
@@ -69,44 +120,6 @@
 			$this->runtimeHandler = new RuntimeException();
 			$callback($this->runtimeHandler);
 			return $this;
-		}
-
-		public function __destruct()
-		{
-			try {
-				$this->performance = new Performance(true);
-				if ($this->isBufferedError()) {
-					throw new AppException($this->getErrorMessage());
-				}
-
-				Request::capture();
-				$this->setupConfig();
-				$this->setGlobalDefines();
-				$this->setDevelopment();
-				$this->setDatabaseConfig();
-				$this->setSessionConfig();
-				$this->setPreloadFiles();
-				$this->setStreamWire($this->streamWireConfig);
-				$this->setupCacheDriver();
-				$this->setupMailingService();
-
-				define('CSRF_TOKEN', csrf_token());
-				validate_token();
-
-				echo($this->setupRoutingAndCapture());
-
-			} catch (Exception|Throwable $e) {
-				if ($this->runtimeHandler) {
-					$this->runtimeHandler->handle($e);
-				} else {
-					throw $e;
-				}
-			} finally {
-				$this->performance->end();
-				if (request()->query('SHOW_PERFORMANCE') === true) {
-					print_r($this->performance->generateSummary());
-				}
-			}
 		}
 
 		/**

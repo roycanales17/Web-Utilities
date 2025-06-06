@@ -25,7 +25,7 @@
 		private function generateComponentIdentifier(string $component): string
 		{
 			$timeIdentifier = substr(hrtime(true), -5);
-			$baseId = simple_encrypt("COMPONENT_" . $component) . "-{" . $timeIdentifier . "}";
+			$baseId = encrypt("COMPONENT_" . $component) . "-{" . $timeIdentifier . "}";
 			$existing = array_filter(
 				self::$registered,
 				fn($id) => str_starts_with($id, $baseId . "-[")
@@ -353,18 +353,16 @@
 			foreach (array_merge([
 				'component' => $component,
 				'duration' => $this->calculateDuration($startedTime),
-				'properties' => base64_encode(simple_encrypt(json_encode($properties)))
+				'properties' => base64_encode(encrypt(json_encode($properties)))
 			], $extra) as $key => $value) {
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
-			$componentDNA = '';
 			if (method_exists(static::class, 'getIdentifier')) {
 				$componentDNA = static::getIdentifier();
+				$dataAttributes .= " data-id='{$componentDNA}'";
 			}
 
-			$componentDNA = encrypt_deterministic(get_called_class(). "___" . $componentDNA, Stream::password());
-			$dataAttributes .= " data-id='{$componentDNA}'";
 			return $dataAttributes;
 		}
 
@@ -471,7 +469,6 @@
 							$componentDNA = $class::getIdentifier();
 						}
 
-						$componentDNA = encrypt_deterministic(get_called_class(). "___" . $componentDNA, Stream::password());
 						if ($componentDNA) {
 							return [
 								'target' => $componentDNA,

@@ -34,26 +34,44 @@
 				return $html;
 
 			ob_start();
+
+			$component = null;
 			if (class_exists($path)) {
 				$component = new $path();
 			} else {
-				throw new Exception("Class {$path} does not exist.");
+				foreach (self::$root as $rootPath) {
+					$path = preg_replace('/\.php$/', '', $path);
+					$normalizedPath = str_replace('\\', '/', $path);
+
+					foreach (['.blade.php', '.php'] as $extension) {
+						$full_path = $rootPath . $normalizedPath . $extension;
+						if (file_exists($full_path)) {
+							$component = require $full_path;
+							break 2;
+						}
+					}
+				}
 			}
 
-			if (!method_exists($component, 'initialize')) {
-				$className = is_object($component) ? get_class($component) : gettype($component);
-				throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
-			}
+			if ($component) {
 
-			if (!self::verifyComponent($component))
-				return ob_get_clean();
+				if (!method_exists($component, 'initialize')) {
+					$className = is_object($component) ? get_class($component) : gettype($component);
+					throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
+				}
 
-			$component->initialize($path, $data);
+				if (!self::verifyComponent($component))
+					return ob_get_clean();
 
-			if ($asynchronous) {
-				echo($component->parse(preloader: true));
+				$component->initialize($path, $data);
+
+				if ($asynchronous) {
+					echo($component->parse(preloader: true));
+				} else {
+					echo($component->parse());
+				}
 			} else {
-				echo($component->parse());
+				throw new Exception("Unable to locate compiled file '{$path}'.");
 			}
 
 			# Capture the content
@@ -73,14 +91,12 @@
 					'_component' => 'required|string',
 					'_method' => 'required|string',
 					'_properties' => 'string',
-					'_models' => 'string',
-					'_target' => 'string'
+					'_models' => 'string'
 				]);
 
 				if ($validate->isSuccess()) {
 
 					$component = $req->input('_component');
-					$target = $req->input('_target');
 					$method = $req->input('_method');
 					$properties = $req->input('_properties');
 					$models = $req->input('_models');
@@ -88,10 +104,10 @@
 
 					$models = json_decode($models, true);
 					$path = base64_decode($component);
-					$path = str_replace('COMPONENT_', '', simple_decrypt($path));
+					$path = str_replace('COMPONENT_', '', decrypt($path));
 
 					$properties = base64_decode($properties);
-					$properties = simple_decrypt($properties);
+					$properties = decrypt($properties);
 					$properties = json_decode($properties, true);
 
 					$orig_properties = [];
@@ -114,38 +130,41 @@
 					$function = $parsed['name'] ?? $method;
 					$args = $parsed['args'] ?? [];
 
-					if ($target) {
-						$target = decrypt_deterministic($target, self::password());
-						$target = explode('___', $target);
-						$target = $target[0] ?? '';
-						$identifier = $target[1] ?? '';
-
-						if ($target) {
-							$path = $target;
-						}
-					}
-
+					$component = null;
 					if (class_exists($path)) {
 						$component = new $path();
 					} else {
-						throw new Exception("Class {$path} does not exist.");
+						foreach (self::$root as $rootPath) {
+							$normalizedPath = ltrim($path, '/');
+
+							foreach (['.blade.php', '.php'] as $extension) {
+								$full_path = $rootPath . $normalizedPath . $extension;
+								if (file_exists($full_path)) {
+									$component = require $full_path;
+									break 2;
+								}
+							}
+						}
 					}
 
-					if ($orig_properties)
-						$component->models($orig_properties );
+					if ($component) {
 
-					if (!self::verifyComponent($component)) {
-						if (self::$onFailed)
-							return call_user_func(self::$onFailed, 401);
+						if ($orig_properties)
+							$component->models($orig_properties );
 
-						return response(['message' => 'Unauthorized'], 401)->json();
+						if (!self::verifyComponent($component)) {
+							if (self::$onFailed)
+								return call_user_func(self::$onFailed, 401);
+
+							return response(['message' => 'Unauthorized'], 401)->json();
+						}
+
+						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
+							call_user_func_array([$component, $function], $args);
+						}
+
+						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
 					}
-
-					if ($function != 'render' && self::validateMethod($component, $function, $args)) {
-						call_user_func_array([$component, $function], $args);
-					}
-
-					return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
 				}
 			}
 
@@ -226,7 +245,7 @@
 				foreach ($compiledArray as $encodedPath => $html) {
 					if (is_string($html) && is_string($encodedPath)) {
 						$decoded = base64_decode($encodedPath);
-						$compiledPath = str_replace('COMPONENT_', '', simple_decrypt($decoded));
+						$compiledPath = str_replace('COMPONENT_', '', decrypt($decoded));
 						$normalizedCompiledPath = strtolower(preg_replace('/\.php$/i', '', $compiledPath));
 
 						// Group all compiled HTMLs by compiled path
@@ -243,7 +262,7 @@
 							foreach ($compiledArray as $encodedPath2 => $html2) {
 								if (is_string($html2) && is_string($encodedPath2)) {
 									$decoded2 = base64_decode($encodedPath2);
-									$compiledPath2 = str_replace('COMPONENT_', '', simple_decrypt($decoded2));
+									$compiledPath2 = str_replace('COMPONENT_', '', decrypt($decoded2));
 									$normalizedCompiledPath2 = strtolower(preg_replace('/\.php$/i', '', $compiledPath2));
 
 									if ($normalizedTargetPath === $normalizedCompiledPath2) {
@@ -287,9 +306,5 @@
 			}
 
 			return true;
-		}
-
-		public static function password(): string {
-			return 'stream-wire';
 		}
 	}

@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use App\Bootstrap\Exceptions\StreamException;
 	use App\Http\Authenticatable;
 	use Closure;
 	use Exception;
@@ -15,17 +16,13 @@
 		private static array $methodCache = [];
 		private static array $compiled = [];
 		private static array $authentication = [];
-		private static Closure|null $onFailed = null;
 
-		public static function configure(string|array $root, array $authentication = [], Closure|null $onFailed = null): void
+		public static function configure(string|array $root, array $authentication = []): void
 		{
 			self::$root = is_string($root) ? [$root] : $root;
 
 			if ($authentication)
 				self::$authentication = $authentication;
-
-			if ($onFailed)
-				self::$onFailed = $onFailed;
 		}
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
@@ -57,7 +54,7 @@
 
 				if (!method_exists($component, 'initialize')) {
 					$className = is_object($component) ? get_class($component) : gettype($component);
-					throw new Exception("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
+					throw new StreamException("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
 				}
 
 				if (!self::verifyComponent($component))
@@ -71,7 +68,7 @@
 					echo($component->parse());
 				}
 			} else {
-				throw new Exception("Unable to locate compiled file '{$path}'.");
+				throw new StreamException("Unable to locate compiled file '{$path}'.");
 			}
 
 			# Capture the content
@@ -153,10 +150,7 @@
 							$component->models($orig_properties );
 
 						if (!self::verifyComponent($component)) {
-							if (self::$onFailed)
-								return call_user_func(self::$onFailed, 401);
-
-							return response(['message' => 'Unauthorized'], 401)->json();
+							throw new StreamException('Unauthorized', 401);
 						}
 
 						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
@@ -168,10 +162,7 @@
 				}
 			}
 
-			if (self::$onFailed)
-				return call_user_func(self::$onFailed, 400);
-
-			return response(['message' => 'Invalid Request'], 400)->json();
+			throw new StreamException('Invalid Request', 400);
 		}
 
 		private static function validateMethod(object $class, string $method, array $args): bool
@@ -286,13 +277,13 @@
 			// Check for Authenticatable trait
 			if (in_array(Authenticatable::class, class_uses($component))) {
 				if (empty(self::$authentication)) {
-					throw new Exception("Component uses Authenticatable trait but no authentication callback is configured.");
+					throw new StreamException("Component uses Authenticatable trait but no authentication callback is configured.");
 				}
 
 				[$class, $method, $authArgs] = self::$authentication + [null, null, []];
 
 				if (!is_callable([$class, $method])) {
-					throw new Exception("Invalid authentication callback: {$class}::{$method} is not callable.");
+					throw new StreamException("Invalid authentication callback: {$class}::{$method} is not callable.");
 				}
 
 				if (!call_user_func_array([$class, $method], $authArgs)) {
@@ -308,3 +299,44 @@
 			return true;
 		}
 	}
+
+//	private static function perform(array $action, array $params): void
+//	{
+//		$class = $action[0] ?? null;
+//		$method = $action[1] ?? null;
+//
+//		if (!$class || !$method) {
+//			throw new StreamException('Invalid Request', 400);
+//		}
+//
+//		if (!method_exists($class, $method)) {
+//			throw new StreamException('Invalid Request', 400);
+//		}
+//
+//		$paramsValue = [];
+//		$reflection = new ReflectionMethod($class, $method);
+//
+//		foreach ($reflection->getParameters() as $index => $param) {
+//
+//			$type = $param->getType();
+//			$typeName = $type?->getName();
+//			$key = $param->getName();
+//			$value = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
+//
+//			if ($typeName && class_exists($typeName)) {
+//				$paramsValue[] = new $typeName();
+//			} else {
+//				$paramsValue[] = $params[$index] ?? null;
+//			}
+//		}
+//
+//		$classReflection = new ReflectionClass($reflection->class);
+//		$constructor = $classReflection->getConstructor();
+//
+//		if ($constructor && $constructor->getNumberOfRequiredParameters() > 0) {
+//			throw new \InvalidArgumentException($reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() . " requires construct params.");
+//		}
+//
+//		$instance = $classReflection->newInstance();
+//		$reflection->invokeArgs($instance, $paramsValue);
+//	}

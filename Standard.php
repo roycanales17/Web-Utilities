@@ -5,6 +5,7 @@
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
+	use App\utilities\Handler\StreamHandler;
 
 	/**
 	 * Retrieves a session value by key.
@@ -200,82 +201,16 @@
 	/**
 	 * Compiles a Blade view and returns the output.
 	 *
-	 * Used to render both normal views and "stream" components (like Livewire).
+	 * Used to render both normal views and "stream" components.
 	 *
 	 * @param string $path Path to the blade view.
 	 * @param array $data Variables passed to the view.
 	 * @param bool $asynchronous Whether the stream is asynchronous.
-	 * @return string Rendered HTML output.
-	 * @throws App\View\Compilers\scheme\CompilerException
+	 * @return StreamHandler Rendered HTML output.
 	 */
-	function stream(string $path, array $data = [], bool $asynchronous = false): string
+	function stream(string $path, array $data = [], bool $asynchronous = false): StreamHandler
 	{
-		return Blade::compile(App\utilities\Stream::render($path, $data, $asynchronous));
-	}
-
-	/**
-	 * This performs the component function request itself.
-	 * NOTE: The returned string should be output raw in Blade with {!! !!} to avoid HTML escaping.
-	 *
-	 * Example usage:
-	 * <button wire:click='{!! execute([MyClass::class, "method"], $arg) !!}'></button>
-	 *
-	 * @param array $action [className, methodName]
-	 * @param mixed ...$argv Method arguments
-	 * @return string generated wire attributes
-	 * @throws Exception
-	 */
-	function execute(array $action, ...$argv): string {
-		$action[2] = false;
-		return target($action, ...$argv);
-	}
-
-	/**
-	 * This performs the other component request.
-	 * NOTE: The returned string should be output raw in Blade with {!! !!} to avoid HTML escaping.
-	 *
-	 * Example usage:
-	 * <button wire:click='{!! target([MyClass::class, "method"], $arg) !!}'></button>
-	 *
-	 * @param array $action [className, methodName]
-	 * @param mixed ...$argv Method arguments
-	 * @return string generated wire attributes
-	 * @throws Exception
-	 */
-	function target(array $action, ...$argv): string {
-		$class = $action[0] ?? null;
-		$method = $action[1] ?? null;
-		$isTarget = $action[2] ?? true;
-
-		if (!class_exists($class)) {
-			throw new Exception('Class not found: ' . $class);
-		}
-		
-		if (!is_string($method) || !method_exists($class, $method)) {
-			throw new \InvalidArgumentException("Invalid target action method '{$method}'.");
-		}
-
-		$encodedArgs = [];
-		foreach ($argv as $arg) {
-			$jsonArg = json_encode($arg, JSON_UNESCAPED_SLASHES);
-			if (is_string($arg)) {
-				$jsonArg = "'" . trim($jsonArg, '"') . "'";
-			}
-			$encodedArgs[] = $jsonArg;
-		}
-		$argsString = implode(', ', $encodedArgs);
-
-		/** @var App\utilities\Component $class */
-		if ($isTarget) {
-			if (method_exists($class, 'getIdentifier')) {
-				$identifier = $class::getIdentifier();
-				$wireTarget = 'wire:target="' . $identifier;
-			} else {
-				throw new Exception("`getIdentifier` method is required for target action '" . json_encode($action) . "'.");
-			}
-		}
-
-		return $method . '(' . $argsString . ')" ' . ($wireTarget ?? '');
+		return new StreamHandler($path, $data, $asynchronous);
 	}
 
 	/**

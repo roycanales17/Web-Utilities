@@ -330,7 +330,9 @@
 				if ($typeName && class_exists($typeName)) {
 					$paramsValue[] = new $typeName();
 				} else {
-					$paramsValue[] = $params[$index] ?? null;
+					if (isset($params[$index])) {
+						$paramsValue[] = $params[$index];
+					}
 				}
 			}
 

@@ -208,7 +208,7 @@
 	 * @param bool $asynchronous Whether the stream is asynchronous.
 	 * @return StreamHandler Rendered HTML output.
 	 */
-	function stream(string $path, array $data = [], bool $asynchronous = false): StreamHandler
+	function stream(string $path = '', array $data = [], bool $asynchronous = false): StreamHandler
 	{
 		return new StreamHandler($path, $data, $asynchronous);
 	}

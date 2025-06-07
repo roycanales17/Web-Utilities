@@ -334,6 +334,6 @@
 				}
 			}
 
-			call_user_func_array([$class, $method], $paramsValue);
+			$class->{$method}(...$paramsValue);
 		}
 	}

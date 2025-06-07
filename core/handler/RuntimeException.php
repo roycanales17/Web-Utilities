@@ -2,6 +2,7 @@
 
 	namespace App\Bootstrap\Handler;
 
+	use App\Utilities\Config;
 	use Closure;
 	use ReflectionFunction;
 	use Throwable;
@@ -73,7 +74,7 @@
 			// Dispatch to registered handler if available
 			foreach ($this->reportCallbacks as $type => $callback) {
 				if ($e instanceof $type) {
-					$callback($e);
+					echo($callback($e));
 					return;
 				}
 			}
@@ -84,13 +85,15 @@
 				exit();
 			}
 
-			echo '<pre>';
-			print_r([
-				'message' => $e->getMessage(),
-				'code' => $e->getCode(),
-				'file' => $e->getFile(),
-				'line' => $e->getLine(),
-			]);
-			echo '</pre>';
+			if (Config::get('DEVELOPMENT')) {
+				echo '<pre>';
+				print_r([
+					'message' => $e->getMessage(),
+					'code' => $e->getCode(),
+					'file' => $e->getFile(),
+					'line' => $e->getLine(),
+				]);
+				echo '</pre>';
+			}
 		}
 	}

@@ -75,6 +75,9 @@
 			return ob_get_clean();
 		}
 
+		/**
+		 * @throws StreamException
+		 */
 		public static function capture(): string
 		{
 			/** @var Component $component */
@@ -153,8 +156,12 @@
 							throw new StreamException('Unauthorized', 401);
 						}
 
-						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
-							call_user_func_array([$component, $function], $args);
+						if ($function != 'render') {
+							try {
+								self::perform([$component, $function], $args);
+							} catch (Exception $e) {
+								throw new StreamException($e->getMessage(), 401);
+							}
 						}
 
 						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
@@ -298,45 +305,35 @@
 
 			return true;
 		}
-	}
 
-//	private static function perform(array $action, array $params): void
-//	{
-//		$class = $action[0] ?? null;
-//		$method = $action[1] ?? null;
-//
-//		if (!$class || !$method) {
-//			throw new StreamException('Invalid Request', 400);
-//		}
-//
-//		if (!method_exists($class, $method)) {
-//			throw new StreamException('Invalid Request', 400);
-//		}
-//
-//		$paramsValue = [];
-//		$reflection = new ReflectionMethod($class, $method);
-//
-//		foreach ($reflection->getParameters() as $index => $param) {
-//
-//			$type = $param->getType();
-//			$typeName = $type?->getName();
-//			$key = $param->getName();
-//			$value = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
-//
-//			if ($typeName && class_exists($typeName)) {
-//				$paramsValue[] = new $typeName();
-//			} else {
-//				$paramsValue[] = $params[$index] ?? null;
-//			}
-//		}
-//
-//		$classReflection = new ReflectionClass($reflection->class);
-//		$constructor = $classReflection->getConstructor();
-//
-//		if ($constructor && $constructor->getNumberOfRequiredParameters() > 0) {
-//			throw new \InvalidArgumentException($reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() . " requires construct params.");
-//		}
-//
-//		$instance = $classReflection->newInstance();
-//		$reflection->invokeArgs($instance, $paramsValue);
-//	}
+		private static function perform(array $action, array $params): void
+		{
+			$class = $action[0] ?? null;
+			$method = $action[1] ?? null;
+
+			if (!$class || !$method) {
+				throw new StreamException('Invalid Request', 400);
+			}
+
+			if (!method_exists($class, $method)) {
+				throw new StreamException('Invalid Request', 400);
+			}
+
+			$paramsValue = [];
+			$reflection = new ReflectionMethod($class, $method);
+
+			foreach ($reflection->getParameters() as $index => $param) {
+
+				$type = $param->getType();
+				$typeName = $type?->getName();
+
+				if ($typeName && class_exists($typeName)) {
+					$paramsValue[] = new $typeName();
+				} else {
+					$paramsValue[] = $params[$index] ?? null;
+				}
+			}
+
+			call_user_func_array([$class, $method], $paramsValue);
+		}
+	}

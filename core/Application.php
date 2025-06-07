@@ -34,11 +34,13 @@
 		 */
 		public function run(Closure $callback): void {
 			try {
-				while (ob_get_level() > 0) {
-					ob_end_clean();
-				}
+				if (php_sapi_name() !== 'cli') {
+					while (ob_get_level() > 0) {
+						ob_end_clean();
+					}
 
-				ob_start();
+					ob_start();
+				}
 
 				$this->performance = new Performance(true);
 				if ($this->isBufferedError()) {
@@ -61,10 +63,12 @@
 				// This display the content page
 				$callback($this->getConfig());
 
-				ob_end_flush();
+				if (php_sapi_name() !== 'cli') {
+					ob_end_flush();
+				}
 
 			} catch (Exception|Throwable $e) {
-				if (Config::get('DEVELOPMENT')) {
+				if (php_sapi_name() !== 'cli' && Config::get('DEVELOPMENT')) {
 					while (ob_get_level() > 0) {
 						ob_end_clean();
 					}

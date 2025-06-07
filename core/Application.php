@@ -34,6 +34,12 @@
 		 */
 		public function run(Closure $callback): void {
 			try {
+				while (ob_get_level() > 0) {
+					ob_end_clean();
+				}
+
+				ob_start();
+
 				$this->performance = new Performance(true);
 				if ($this->isBufferedError()) {
 					throw new AppException($this->getErrorMessage());
@@ -52,9 +58,18 @@
 				define('CSRF_TOKEN', csrf_token());
 				validate_token();
 
+				// This display the content page
 				$callback($this->getConfig());
 
+				ob_end_flush();
+
 			} catch (Exception|Throwable $e) {
+				if (Config::get('DEVELOPMENT')) {
+					while (ob_get_level() > 0) {
+						ob_end_clean();
+					}
+				}
+
 				if ($this->runtimeHandler) {
 					$this->runtimeHandler->handle($e);
 				} else {

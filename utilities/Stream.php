@@ -2,14 +2,11 @@
 
 	namespace App\Utilities;
 
-	use App\Bootstrap\Exceptions\StreamException;
 	use App\Http\Authenticatable;
 	use Closure;
 	use Exception;
 	use App\Headers\Request;
-	use ReflectionClass;
 	use ReflectionException;
-	use ReflectionFunction;
 	use ReflectionMethod;
 
 	class Stream
@@ -18,13 +15,17 @@
 		private static array $methodCache = [];
 		private static array $compiled = [];
 		private static array $authentication = [];
+		private static Closure|null $onFailed = null;
 
-		public static function configure(string|array $root, array $authentication = []): void
+		public static function configure(string|array $root, array $authentication = [], Closure|null $onFailed = null): void
 		{
 			self::$root = is_string($root) ? [$root] : $root;
 
 			if ($authentication)
 				self::$authentication = $authentication;
+
+			if ($onFailed)
+				self::$onFailed = $onFailed;
 		}
 
 		public static function render(string $path, array $data = [], $asynchronous = false): string
@@ -77,10 +78,6 @@
 			return ob_get_clean();
 		}
 
-		/**
-		 * @throws ReflectionException
-		 * @throws StreamException
-		 */
 		public static function capture(): string
 		{
 			/** @var Component $component */
@@ -156,11 +153,14 @@
 							$component->models($orig_properties );
 
 						if (!self::verifyComponent($component)) {
-							throw new StreamException('Unauthorized', 401);
+							if (self::$onFailed)
+								return call_user_func(self::$onFailed, 401);
+
+							return response(['message' => 'Unauthorized'], 401)->json();
 						}
 
-						if ($function != 'render') {
-							self::perform([$component, $function], $args);
+						if ($function != 'render' && self::validateMethod($component, $function, $args)) {
+							call_user_func_array([$component, $function], $args);
 						}
 
 						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
@@ -168,65 +168,34 @@
 				}
 			}
 
-			throw new StreamException('Invalid Request', 400);
+			if (self::$onFailed)
+				return call_user_func(self::$onFailed, 400);
+
+			return response(['message' => 'Invalid Request'], 400)->json();
 		}
 
-		/**
-		 * @throws ReflectionException
-		 * @throws StreamException
-		 */
-		private static function perform(array $action, array $params): void
+		private static function validateMethod(object $class, string $method, array $args): bool
 		{
-			$class = $action[0] ?? null;
-			$method = $action[1] ?? null;
+			if (!method_exists($class, $method))
+				return false;
 
-			if (!$class || !$method) {
-				throw new StreamException('Invalid Request', 400);
-			}
+			$className = get_class($class);
+			$cacheKey = $className . '::' . $method;
 
-			if (!method_exists($class, $method)) {
-				throw new StreamException('Invalid Request', 400);
-			}
-
-			$paramsValue = [];
-			$reflection = new ReflectionMethod($class, $method);
-
-			foreach ($reflection->getParameters() as $param) {
-
-				$type = $param->getType();
-				$typeName = $type?->getName();
-				$key = $param->getName();
-				$value = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
-
-				if ($typeName && class_exists($typeName)) {
-					$paramsValue[] = new $typeName();
-
-				} elseif ($params && in_array($key, array_keys($params))) {
-					$paramsValue[] = $params[$key];
-				} else {
-					if (!$value) {
-						$paramsValue[] = match ($typeName ?? 'default') {
-							'int', 'float' => 0,
-							'string'       => '',
-							'bool'         => false,
-							'array'        => [],
-							default        => null,
-						};
-					} else {
-						$paramsValue[] = $value;
-					}
+			if (!isset(self::$methodCache[$cacheKey])) {
+				try {
+					self::$methodCache[$cacheKey] = new ReflectionMethod($class, $method);
+				} catch (ReflectionException $e) {
+					return false;
 				}
 			}
 
-			$classReflection = new ReflectionClass($reflection->class);
-			$constructor = $classReflection->getConstructor();
+			$reflection = self::$methodCache[$cacheKey];
+			$requiredParams = $reflection->getNumberOfRequiredParameters();
+			$totalParams = $reflection->getNumberOfParameters();
+			$providedParams = count($args);
 
-			if ($constructor && $constructor->getNumberOfRequiredParameters() > 0) {
-				throw new \InvalidArgumentException($reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() . " requires construct params.");
-			}
-
-			$instance = $classReflection->newInstance();
-			$reflection->invokeArgs($instance, $paramsValue);
+			return $providedParams >= $requiredParams && $providedParams <= $totalParams;
 		}
 
 		private static function parse(string $actionString): ?array
@@ -317,13 +286,13 @@
 			// Check for Authenticatable trait
 			if (in_array(Authenticatable::class, class_uses($component))) {
 				if (empty(self::$authentication)) {
-					throw new StreamException("Component uses Authenticatable trait but no authentication callback is configured.");
+					throw new Exception("Component uses Authenticatable trait but no authentication callback is configured.");
 				}
 
 				[$class, $method, $authArgs] = self::$authentication + [null, null, []];
 
 				if (!is_callable([$class, $method])) {
-					throw new StreamException("Invalid authentication callback: {$class}::{$method} is not callable.");
+					throw new Exception("Invalid authentication callback: {$class}::{$method} is not callable.");
 				}
 
 				if (!call_user_func_array([$class, $method], $authArgs)) {

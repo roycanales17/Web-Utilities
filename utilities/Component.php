@@ -492,8 +492,13 @@
 				return ob_get_clean();
 			};
 
+			$baseComponent = '';
+			if (!$this->skipCompile) {
+				$baseComponent = $loadBaseComponent();
+			}
+
 			return [
-				'content' => $loadBaseComponent(),
+				'content' => $baseComponent,
 				'extender' => $this->prepareExtender()
 			];
 		}

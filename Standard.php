@@ -178,8 +178,12 @@
 		if (php_sapi_name() === 'cli')
 			return;
 
-		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token'))
+		if (!in_array(Request::method(), ['GET', 'HEAD', 'OPTIONS']) && request()->header('X-CSRF-TOKEN') !== Session::get('csrf_token')) {
+			if (Config::get('DEVELOPMENT')) {
+				exit(response(['message' => 'Invalid token'], 400)->json());
+			}
 			exit(response(['message' => 'Bad Request'], 400)->json());
+		}
 	}
 
 	/**

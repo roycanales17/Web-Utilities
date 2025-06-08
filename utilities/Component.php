@@ -2,6 +2,8 @@
 
 	namespace App\Utilities;
 
+	use App\View\Compilers\scheme\CompilerException;
+	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\Blade;
 	use Exception;
 	use ReflectionClass;
@@ -15,6 +17,7 @@
 		private array $extender = [];
 		private string $componentIdentifier = '';
 		private float $startedTime = 0;
+		private bool $skipCompile = false;
 
 		/**
 		 * Generates a unique identifier for the component using a time-based suffix.
@@ -264,49 +267,57 @@
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
 
-			$render = $this->render();
+			if ($this->skipCompile) {
+				$render = [
+					'content' => '',
+					'extender' => $this->prepareExtender()
+				];
+			} else {
+				$render = $this->render();
+			}
+
 			$html = $this->replaceHTML($render['content'] ?? '', $component);
 			$duration = $this->calculateDuration($startedTime);
 
 			$compiled = <<<HTML
-			<fragment class='component-container'{$this->getAttributes($component, $startedTime)}>
-				{$html}
-				<script id="__fragment__">
-					(function() {
-						if (typeof stream === 'function') {
-							stream("{$component}").finally(() => {
-								{$this->print(function() use ($dev, $component, $duration) {
-									if ($dev && count($_POST ?? [])) {
-										$class = get_called_class();
-										$escapedClass = addslashes($class);
-										$escapedComponent = addslashes($component);
-										$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
-					
-										echo <<<HTML
-										console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
-										
-										// Simple log for Class without collapsing
-										console.log(`Class: %c{$escapedClass}`, 'color: red;');
-										
-										// Collapsed group for Component with short preview
-										console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
-										console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
-										console.groupEnd();
-										
-										console.log(`Duration: %c{$duration} ms`, 'color: orange;');
-										console.log(' ');
-										HTML;
-									}
-								})}
-							});	
-						} else {
-							console.error("Stream wire is not available");
-						}
-					})();
-				</script>
-			</fragment>
+				<fragment class='component-container'{$this->getAttributes($component, $startedTime)}>
+					{$html}
+					<script id="__fragment__">
+						(function() {
+							if (typeof stream === 'function') {
+								stream("{$component}").finally(() => {
+									{$this->print(function() use ($dev, $component, $duration) {
+										if ($dev && count($_POST ?? [])) {
+											$class = get_called_class();
+											$escapedClass = addslashes($class);
+											$escapedComponent = addslashes($component);
+											$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
+						
+											echo <<<HTML
+																							console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
+																							
+																							// Simple log for Class without collapsing
+																							console.log(`Class: %c{$escapedClass}`, 'color: red;');
+																							
+																							// Collapsed group for Component with short preview
+																							console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
+																							console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
+																							console.groupEnd();
+																							
+																							console.log(`Duration: %c{$duration} ms`, 'color: orange;');
+																							console.log(' ');
+																							HTML;
+										}
+									})}
+								});	
+							} else {
+								console.error("Stream wire is not available");
+							}
+						})();
+					</script>
+				</fragment>
 
-			HTML;
+				HTML;
 
 			if (!$directSkeleton) {
 				$render['content'] = $compiled;
@@ -370,7 +381,9 @@
 		 * This allows us to perform other component.
 		 *
 		 * @param array $action
+		 * @param mixed ...$args
 		 * @return void
+		 * @throws StreamException
 		 */
 		protected function extender(array $action, ...$args): void
 		{
@@ -382,15 +395,46 @@
 			}
 
 			if (!$class || !$method)
-				throw new Exception("Both class and method must be provided.");
+				throw new StreamException("Both class and method must be provided.");
 
 			if (!class_exists($class))
-				throw new Exception("Class {$class} does not exist.");
+				throw new StreamException("Class {$class} does not exist.");
 
 			if (!method_exists($class, $method))
-				throw new Exception("Method {$method} does not exist.");
+				throw new StreamException("Method {$method} does not exist.");
 
 			$this->extender[] = $action;
+		}
+
+		/**
+		 * Smart action to run extender and exit at one action.
+		 *
+		 * @throws StreamException
+		 */
+		private function invokeAndExit(array $actions, ...$args): void
+		{
+			if ($actions) {
+				if (is_array($actions[0])) {
+					foreach ($actions as $action) {
+						$this->extender($action, $args ?: ($action[2] ?? []));
+					}
+				} else {
+					$this->extender($actions, $args);
+				}
+			}
+			$this->exit();
+		}
+
+		/**
+		 * This skip the render function.
+		 *
+		 * @return void
+		 */
+		protected function exit(): void
+		{
+			if (!$this->skipCompile) {
+				$this->skipCompile = true;
+			}
 		}
 
 		/**
@@ -402,6 +446,7 @@
 		 * @param array $data Data to be passed to the view for rendering.
 		 * @param string $blade Use to render the interface within the component directory.
 		 * @return array The rendered HTML content from the matched view file.
+		 * @throws CompilerException
 		 */
 		protected function compile(array $data = [], string $blade = 'index'): array
 		{
@@ -447,6 +492,37 @@
 				return ob_get_clean();
 			};
 
+			return [
+				'content' => $loadBaseComponent(),
+				'extender' => $this->prepareExtender()
+			];
+		}
+
+		/**
+		 * Outputs the result of a callback or returns the value if it's not a callable.
+		 *
+		 * @param mixed $callback The callback function or value to print.
+		 * @return mixed The result of the callback or the original value.
+		 */
+		protected function print(mixed $callback): mixed
+		{
+			if (is_object($callback)) {
+				ob_start();
+				echo $callback();
+				return ob_get_clean();
+			}
+
+			return $callback;
+		}
+
+		/**
+		 * This prepares the extender.
+		 *
+		 * @return array
+		 * @throws Exception
+		 */
+		private function prepareExtender(): array
+		{
 			$extender = [];
 			if ($this->extender) {
 				$isSingleAction = isset($this->extender[0]) && is_string($this->extender[1] ?? null) && is_array($this->extender[2] ?? null);
@@ -497,27 +573,7 @@
 				}
 			}
 
-			return [
-				'content' => $loadBaseComponent(),
-				'extender' => $extender
-			];
-		}
-
-		/**
-		 * Outputs the result of a callback or returns the value if it's not a callable.
-		 *
-		 * @param mixed $callback The callback function or value to print.
-		 * @return mixed The result of the callback or the original value.
-		 */
-		protected function print(mixed $callback): mixed
-		{
-			if (is_object($callback)) {
-				ob_start();
-				echo $callback();
-				return ob_get_clean();
-			}
-
-			return $callback;
+			return $extender;
 		}
 
 		private function replaceHTML(string $html, string $component): string

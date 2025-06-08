@@ -411,7 +411,7 @@
 		 *
 		 * @throws StreamException
 		 */
-		private function invokeAndExit(array $actions, ...$args): void
+		protected function invokeAndExit(array $actions, ...$args): void
 		{
 			if ($actions) {
 				if (is_array($actions[0])) {

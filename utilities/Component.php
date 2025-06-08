@@ -416,10 +416,10 @@
 			if ($actions) {
 				if (is_array($actions[0])) {
 					foreach ($actions as $action) {
-						$this->extender($action, $args ?: ($action[2] ?? []));
+						$this->extender($action, ...($args ?: ($action[2] ?? [])));
 					}
 				} else {
-					$this->extender($actions, $args);
+					$this->extender($actions, ...$args);
 				}
 			}
 			$this->exit();

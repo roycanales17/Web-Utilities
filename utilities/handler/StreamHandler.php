@@ -52,9 +52,15 @@
 
 			$encodedArgs = [];
 			foreach ($argv as $arg) {
-				$jsonArg = json_encode($arg, JSON_UNESCAPED_SLASHES);
-				if (is_string($arg)) {
-					$jsonArg = "'" . trim($jsonArg, '"') . "'";
+				if (is_array($arg)) {
+					$json = json_encode($arg);
+					$json = str_replace('"', "'", $json);
+					$jsonArg = trim($json, '"');
+				} else {
+					$jsonArg = json_encode($arg, JSON_UNESCAPED_SLASHES);
+					if (is_string($arg)) {
+						$jsonArg = "'" . trim($jsonArg, '"') . "'";
+					}
 				}
 				$encodedArgs[] = $jsonArg;
 			}

@@ -284,7 +284,7 @@
 		private static function verifyComponent(Component $component): bool
 		{
 			if (!is_subclass_of($component, Component::class)) {
-				throw new StreamException("Component '{$component::class}' does not implement " . Component::class);
+				throw new StreamException("Component '".get_class($component)."' does not implement " . Component::class);
 			}
 
 			// Check for Authenticatable trait

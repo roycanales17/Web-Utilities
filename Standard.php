@@ -6,6 +6,8 @@
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
 	use App\utilities\Handler\StreamHandler;
+	use App\Bootstrap\Exceptions\StreamException;
+	use App\View\Compilers\scheme\CompilerException;
 
 	/**
 	 * Retrieves a session value by key.
@@ -38,6 +40,7 @@
 	 * Returns a CSRF token stored in the session.
 	 *
 	 * @return string
+	 * @throws Exception
 	 */
 	function csrf_token(): string
 	{
@@ -124,15 +127,14 @@
 	 * Renders a PHP or Blade view file and returns the rendered content.
 	 *
 	 * @param string $path View path using dot notation (e.g., 'users.profile').
-	 * @param array  $data Data to be extracted and passed into the view.
+	 * @param array $data Data to be extracted and passed into the view.
 	 * @return string Rendered HTML content.
+	 * @throws CompilerException
 	 */
 	function view(string $path, array $data = []): string
 	{
 		ob_start();
-
 		$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
-
 		$mainPath = "../views/{$normalizedPath}.php";
 		$bladePath = "../views/{$normalizedPath}.blade.php";
 
@@ -227,8 +229,7 @@
 	 */
 	function createCookie(string $name, mixed $value = null, int $expire = 3600): mixed
 	{
-		$prefix = config('COOKIE_PREFIX', 'custom');
-		return cookie("$prefix:$name", $value, $expire);
+		return cookie(config('COOKIE_PREFIX', 'custom').":$name", $value, $expire);
 	}
 
 	/**
@@ -241,8 +242,7 @@
 	 */
 	function fetchCookie(string $name, mixed $default = false): mixed
 	{
-		$prefix = config('COOKIE_PREFIX', 'custom');
-		return cookie("$prefix:$name") ?? $default;
+		return cookie(config('COOKIE_PREFIX', 'custom').":$name") ?? $default;
 	}
 
 	/**
@@ -253,8 +253,7 @@
 	 */
 	function deleteCookie(string $name): mixed
 	{
-		$prefix = config('COOKIE_PREFIX', 'custom');
-		return cookie("$prefix:$name", null, -1);
+		return cookie(config('COOKIE_PREFIX', 'custom').":$name", null, -1);
 	}
 
 	/**
@@ -277,7 +276,7 @@
 	 */
 	function cookie(string $name, $value = null, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true): mixed
 	{
-		$key = config('APP_COOKIE_PASSWORD', '123');
+		$key = config('APP_COOKIE_PASSWORD', 'f2dg23asd3141saf');
 		$cipher = 'AES-256-CBC';
 
 		$encrypt = function ($data) use ($cipher, $key) {

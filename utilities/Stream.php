@@ -4,7 +4,6 @@
 
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\Http\Authenticatable;
-	use Closure;
 	use Exception;
 	use App\Headers\Request;
 	use ReflectionException;

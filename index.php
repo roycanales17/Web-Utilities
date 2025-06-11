@@ -13,14 +13,19 @@
 			'App\\Http\\'                  => __DIR__ . '/http/',
 		];
 
-		foreach ($namespaces as $namespace => $baseDir) {
-			if (str_starts_with($class, $namespace)) {
-				$relativeClass = substr($class, strlen($namespace));
-				$file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+		$path = str_replace('\\', '/', $class) . '.php';
+		if (file_exists($path)) {
+			require_once $path;
+		} else {
+			foreach ($namespaces as $namespace => $baseDir) {
+				if (str_starts_with($class, $namespace)) {
+					$relativeClass = substr($class, strlen($namespace));
+					$file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
 
-				if (file_exists($file)) {
-					require_once $file;
-					return;
+					if (file_exists($file)) {
+						require_once $file;
+						return;
+					}
 				}
 			}
 		}

@@ -8,7 +8,6 @@
 	use App\Bootstrap\Helper\Performance;
 	use App\Utilities\Cache;
 	use App\Utilities\Mail;
-	use App\Utilities\Stream;
 	use App\Routes\Route;
 	use App\Utilities\Config;
 	use App\Headers\Request;
@@ -57,15 +56,14 @@
 				$this->setDatabaseConfig();
 				$this->setSessionConfig();
 				$this->setPreloadFiles();
+				$this->setStreamAuthentication(run: true);
 
+				// Validate/Configure CSRF token
 				define('CSRF_TOKEN', csrf_token());
 				validate_token();
 
 				// Configurations
 				$conf = $this->getConfig();
-
-				// Configure Stream
-				Stream::configure($conf['stream'] ?? '');
 
 				// Configure cache
 				if ($cache = $conf['cache']['driver'] ?? '') {
@@ -98,9 +96,7 @@
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
 						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
-					)->routes(function($routes) {
-						# App\Utilities\Config::set('routes', $routes);
-					})->captured($route['captured']);
+					)->captured($route['captured']);
 				}
 
 				if (php_sapi_name() !== 'cli') {
@@ -146,6 +142,12 @@
 			return $this;
 		}
 
+		public function withStreamAuthentication(array $action): self
+		{
+			$this->setStreamAuthentication($action);
+			return $this;
+		}
+
 		/**
 		 * Set the path to the application configuration.
 		 */
@@ -170,8 +172,7 @@
 		 */
 		public function withExceptions(Closure $callback): self
 		{
-			$this->runtimeHandler = new RuntimeException();
-			$callback($this->runtimeHandler);
+			$callback($this->runtimeHandler = new RuntimeException());
 			return $this;
 		}
 

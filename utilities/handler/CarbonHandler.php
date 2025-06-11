@@ -1,6 +1,6 @@
 <?php
 
-	namespace App\utilities\Handler;
+	namespace App\Utilities\Handler;
 
 	use DateTimeZone;
 	use DateTime;

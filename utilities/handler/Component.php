@@ -1,10 +1,11 @@
 <?php
 
-	namespace App\Utilities;
+	namespace App\Utilities\Handler;
 
-	use App\View\Compilers\scheme\CompilerException;
 	use App\Bootstrap\Exceptions\StreamException;
+	use App\Utilities\Config;
 	use App\View\Compilers\Blade;
+	use App\View\Compilers\scheme\CompilerException;
 	use Exception;
 	use ReflectionClass;
 	use ReflectionProperty;

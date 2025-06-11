@@ -3,9 +3,10 @@
 	namespace App\Utilities;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\Http\Authenticatable;
-	use Exception;
 	use App\Headers\Request;
+	use App\Http\Authenticatable;
+	use App\Utilities\handler\Component;
+	use Exception;
 	use ReflectionException;
 	use ReflectionMethod;
 

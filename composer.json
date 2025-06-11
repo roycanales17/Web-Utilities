@@ -10,7 +10,7 @@
             "App\\Bootstrap\\Exceptions\\": "exceptions",
             "App\\Bootstrap\\Handler\\": "core/handler",
             "App\\Bootstrap\\Helper\\": "core/helper",
-            "App\\utilities\\Handler\\": "utilities/handler",
+            "App\\Utilities\\Handler\\": "utilities/handler",
             "App\\Utilities\\Blueprints\\": "utilities/blueprints",
             "App\\Utilities\\": "utilities",
             "App\\Bootstrap\\": "core",

@@ -1,9 +1,8 @@
 <?php
 
-	namespace App\utilities\Handler;
+	namespace App\Utilities\Handler;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\Utilities\Component;
 	use App\Utilities\Stream;
 	use App\View\Compilers\Blade;
 	use App\View\Compilers\scheme\CompilerException;

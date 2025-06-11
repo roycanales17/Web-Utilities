@@ -31,8 +31,6 @@
 			
 				{$namespaceDeclaration}
 				
-				use App\utilities\Component;
-				
 				class {$className} extends Component
 				{
 					/**

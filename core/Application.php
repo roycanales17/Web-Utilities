@@ -6,6 +6,10 @@
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Helper\Configuration;
 	use App\Bootstrap\Helper\Performance;
+	use App\Utilities\Cache;
+	use App\Utilities\Mail;
+	use App\Utilities\Stream;
+	use App\Routes\Route;
 	use App\Utilities\Config;
 	use App\Headers\Request;
 	use Closure;
@@ -29,10 +33,7 @@
 			return self::$app;
 		}
 
-		/**
-		 * @throws Throwable
-		 */
-		public function run(Closure $callback): void {
+		public function run(Closure|null $callback = null): void {
 			try {
 				if (php_sapi_name() !== 'cli') {
 					while (ob_get_level() > 0) {
@@ -60,8 +61,47 @@
 				define('CSRF_TOKEN', csrf_token());
 				validate_token();
 
+				// Configurations
+				$conf = $this->getConfig();
+
+				// Configure Stream
+				Stream::configure($conf['stream'] ?? '');
+
+				// Configure cache
+				if ($cache = $conf['cache']['driver'] ?? '') {
+					$cache_attr = $conf['cache'][$cache];
+					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
+				}
+
+				// Configure mail
+				$mail = $conf['mailing'] ?? [];
+				if (!empty($mail['enabled'])) {
+					$credentials = [];
+
+					if (!empty($mail['username']) && !empty($mail['password'])) {
+						$credentials = [
+							'username' => $mail['username'],
+							'password' => $mail['password'],
+						];
+					}
+
+					Mail::configure($mail['host'], $mail['port'], $credentials);
+				}
+
 				// This display the content page
-				$callback($this->getConfig());
+				if ($callback) $callback();
+
+				// Configure Routes
+				foreach ($conf['routes'] ?? [] as $route) {
+					Route::configure(
+						root: $route['root'] ?? "../routes",
+						routes: $route['routes'] ?? ['web.php'],
+						prefix: $route['prefix'] ?? '',
+						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
+					)->routes(function($routes) {
+						# App\Utilities\Config::set('routes', $routes);
+					})->captured($route['captured']);
+				}
 
 				if (php_sapi_name() !== 'cli') {
 					ob_end_flush();

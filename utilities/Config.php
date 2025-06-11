@@ -2,14 +2,36 @@
 
 	namespace App\Utilities;
 
+	/**
+	 * Class Config
+	 *
+	 * A utility class for loading and accessing configuration values.
+	 */
 	final class Config
 	{
+		/**
+		 * The configuration data loaded from a file.
+		 *
+		 * @var array<string, mixed>
+		 */
 		protected static array $config = [];
 
+		/**
+		 * Checks if the configuration is empty.
+		 *
+		 * @return bool True if configuration is empty, false otherwise.
+		 */
 		public static function isEmpty(): bool {
 			return empty(self::$config);
 		}
 
+		/**
+		 * Loads configuration from a .env-style file.
+		 * Lines starting with '#' are treated as comments and ignored.
+		 *
+		 * @param string $path The full path to the config file.
+		 * @return void
+		 */
 		public static function load(string $path): void
 		{
 			if (file_exists($path)) {
@@ -26,6 +48,14 @@
 			}
 		}
 
+		/**
+		 * Retrieves a configuration value using dot notation.
+		 * Supports casting from string to boolean, number, null, or JSON if applicable.
+		 *
+		 * @param string $key     The configuration key (e.g., "app.debug").
+		 * @param mixed  $default The default value to return if key is not found.
+		 * @return mixed The configuration value or the default.
+		 */
 		public static function get(string $key, mixed $default = null): mixed
 		{
 			$keys = explode('.', $key);
@@ -41,6 +71,13 @@
 			return self::castValue($value);
 		}
 
+		/**
+		 * Sets a configuration value using dot notation.
+		 *
+		 * @param string $key   The configuration key (e.g., "database.host").
+		 * @param mixed  $value The value to set.
+		 * @return void
+		 */
 		public static function set(string $key, mixed $value): void
 		{
 			$keys = explode('.', $key);
@@ -56,6 +93,16 @@
 			$config = $value;
 		}
 
+		/**
+		 * Attempts to cast a string value into an appropriate native type:
+		 * - JSON arrays/objects
+		 * - Boolean
+		 * - Null
+		 * - Integer or Float
+		 *
+		 * @param mixed $value The value to cast.
+		 * @return mixed The cast value.
+		 */
 		protected static function castValue(mixed $value): mixed
 		{
 			if (!is_string($value))

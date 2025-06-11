@@ -63,7 +63,7 @@
 			<fragment class='component-container' {$dataAttributes}>
 				{$html}
 				<script>
-					document.addEventListener("DOMContentLoaded", function () {
+					(function() {
 						const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 						const component = document.querySelector("[data-component='{$component}']");
 						if (!component) return;
@@ -122,7 +122,7 @@
 						.catch(error => {
 							console.error("Fetch error:", error);
 						});
-					});
+					})();
 				</script>
 			</fragment>
 			HTML;

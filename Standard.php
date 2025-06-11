@@ -205,18 +205,17 @@
 	}
 
 	/**
-	 * Compiles a Blade view and returns the output.
-	 *
 	 * Used to render both normal views and "stream" components.
 	 *
-	 * @param string|array $class Path to the blade view.
-	 * @param array $data Variables passed to the view.
-	 * @param bool $asynchronous Whether the stream is asynchronous.
-	 * @return StreamHandler Rendered HTML output.
+	 * @param string|array $action  	The class and method to invoke, either as a string or [class, method, optional args].
+	 * @param array $constructParams  	Parameters to pass to the class constructor (if needed).
+	 * @param bool $asynchronous  		Whether the stream should run asynchronously.
+	 * @return StreamHandler 			Rendered HTML output or Stream actions methods for blade content.
+	 * @throws StreamException
 	 */
-	function stream(string $class = '', array $data = [], bool $asynchronous = false): StreamHandler
+	function stream(string|array $action = '', array $constructParams = [], bool $asynchronous = false): StreamHandler
 	{
-		return new StreamHandler($class, $data, $asynchronous);
+		return new StreamHandler($action, $constructParams, $asynchronous);
 	}
 
 	/**

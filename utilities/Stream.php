@@ -9,7 +9,7 @@
 	use ReflectionException;
 	use ReflectionMethod;
 
-	class Stream
+	final class Stream
 	{
 		private static array $methodCache = [];
 		private static array $compiled = [];
@@ -24,12 +24,12 @@
 		 */
 		public static function authentication(array $authentication = []): void
 		{
-			$class = $authentication[0] ?? null;
-			$method = $authentication[1] ?? null;
 			if ($authentication) {
-				if (class_exists($class) && method_exists($class, $method)) {
+				$class = $authentication[0] ?? null;
+				$method = $authentication[1] ?? null;
+
+				if (!class_exists($class) || !method_exists($class, $method))
 					throw new StreamException("Invalid authentication method '{$class}::{$method}'.");
-				}
 
 				self::$authentication = $authentication;
 			}
@@ -40,12 +40,33 @@
 		 *
 		 * @throws StreamException
 		 */
-		public static function render(string $class, array $data = [], $asynchronous = false): string
+		public static function render(array|string $action, array $constructParams = [], $asynchronous = false): string
 		{
-			if (!$data && ($html = self::isCompiled($class)))
+			if (!$constructParams && is_string($action) && $html = self::isCompiled($action))
 				return $html;
 
 			ob_start();
+			$class = $action;
+			$method = null;
+			$args = [];
+
+			if ($action && is_array($action)) {
+				[$class, $method] = $action + [null, null];
+
+				if (!$class || !$method) {
+					throw new StreamException("Both class and method must be provided.");
+				}
+
+				if (!class_exists($class)) {
+					throw new StreamException("Class {$class} does not exist.");
+				}
+
+				if (!method_exists($class, $method)) {
+					throw new StreamException("Method {$method} does not exist.");
+				}
+
+				$args = $action[2] ?? [];
+			}
 
 			if (class_exists($class)) {
 				$component = new $class();
@@ -53,7 +74,10 @@
 				if (!self::verifyComponent($component))
 					return ob_get_clean();
 
-				$component->initialize($class, $data);
+				$component->initialize($class, $constructParams);
+				if ($method) {
+					$component->$method($args);
+				}
 
 				if ($asynchronous) {
 					echo($component->parse(preloader: true));
@@ -77,15 +101,11 @@
 		 * @return string
 		 * @throws StreamException
 		 */
-		public static function capture(): string
+		public static function capture(Request $req): string
 		{
-			/** @var Component $component */
-
-			$req = new Request();
 			$startedTime = hrtime(true);
 
 			if (Request::header('X-STREAM-WIRE')) {
-
 				$validate = $req->validate([
 					'_component' => 'required|string',
 					'_method' => 'required|string',
@@ -94,7 +114,6 @@
 				]);
 
 				if ($validate->isSuccess()) {
-
 					$component = $req->input('_component');
 					$method = $req->input('_method');
 					$properties = $req->input('_properties');
@@ -130,10 +149,11 @@
 					$args = $parsed['args'] ?? [];
 
 					if (class_exists($class)) {
+						/** @var Component $component */
 						$component = new $class();
 
 						if ($orig_properties)
-							$component->models($orig_properties );
+							$component->models($orig_properties);
 
 						if (!self::verifyComponent($component)) {
 							throw new StreamException('Unauthorized', 401);
@@ -183,10 +203,8 @@
 		private static function parse(string $actionString): ?array
 		{
 			$actionString = trim($actionString);
-
-			if (!preg_match('/^([\w]+)\((.*)\)$/s', $actionString, $matches)) {
+			if (!preg_match('/^([\w]+)\((.*)\)$/s', $actionString, $matches))
 				return null;
-			}
 
 			$functionName = $matches[1];
 			$argsString = trim($matches[2]);
@@ -198,12 +216,10 @@
 			);
 
 			$json = "[$jsonArgsString]";
-
 			$args = json_decode($json, true);
 
-			if (!is_array($args)) {
+			if (!is_array($args))
 				return null;
-			}
 
 			return [
 				'name' => $functionName,
@@ -214,17 +230,15 @@
 		private static function isCompiled(string $path): string|bool
 		{
 			$compiledJson = request()->post('_compiled');
-
 			if ($compiledJson) {
-				$compiledArray = json_decode($compiledJson, true);
 
-				if (!is_array($compiledArray)) {
+				$compiledArray = json_decode($compiledJson, true);
+				if (!is_array($compiledArray))
 					return false;
-				}
 
 				$normalizedTargetPath = strtolower(preg_replace('/\.php$/i', '', $path));
-
 				foreach ($compiledArray as $encodedPath => $html) {
+
 					if (is_string($html) && is_string($encodedPath)) {
 						$decoded = base64_decode($encodedPath);
 						$compiledPath = str_replace('COMPONENT_', '', decrypt($decoded));
@@ -266,10 +280,10 @@
 		/**
 		 * @throws StreamException
 		 */
-		private static function verifyComponent($component): bool
+		private static function verifyComponent(Component $component): bool
 		{
 			if (!is_subclass_of($component, Component::class)) {
-				throw new StreamException("Component '{$component}' does not implement " . Component::class);
+				throw new StreamException("Component '{$component::class}' does not implement " . Component::class);
 			}
 
 			// Check for Authenticatable trait
@@ -297,13 +311,16 @@
 			return true;
 		}
 
+		/**
+		 * @throws StreamException
+		 */
 		private static function perform(array $action, array $params): void
 		{
 			$class = $action[0] ?? null;
 			$method = $action[1] ?? null;
 
 			if (!$class || !$method) {
-				throw new StreamException('Class/Method is not set.', 400);
+				throw new StreamException('Class and method must be provided', 400);
 			}
 
 			if (!method_exists($class, $method)) {
@@ -314,7 +331,6 @@
 			$reflection = new ReflectionMethod($class, $method);
 
 			foreach ($reflection->getParameters() as $index => $param) {
-
 				$type = $param->getType();
 				$typeName = $type?->getName();
 
@@ -327,6 +343,10 @@
 				}
 			}
 
-			$class->{$method}(...$paramsValue);
+			try {
+				$class->{$method}(...$paramsValue);
+			} catch (Exception $e) {
+				throw new StreamException($e->getMessage(), 400);
+			}
 		}
 	}

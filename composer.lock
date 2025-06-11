@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6b9c8f501dc6711dab07105dcb3a8be",
+    "content-hash": "f0ee1d57d4a1fcb3836e4940e6668efe",
     "packages": [
         {
             "name": "phpmailer/phpmailer",
@@ -273,6 +273,54 @@
                 "source": "https://github.com/roycanales17/Input-Request/tree/v3.1.0"
             },
             "time": "2025-06-09T10:03:34+00:00"
+        },
+        {
+            "name": "roy404/routes",
+            "version": "v4.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roycanales17/Web-Routes.git",
+                "reference": "c16ec1e7b5013349969878d8dab593411d0f193e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roycanales17/Web-Routes/zipball/c16ec1e7b5013349969878d8dab593411d0f193e",
+                "reference": "c16ec1e7b5013349969878d8dab593411d0f193e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "App\\Routes\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robroy Canales",
+                    "email": "canales.robroy123@gmail.com",
+                    "homepage": "https://github.com/roycanales17",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A routing library that provides an intuitive, object-oriented way to define and manage HTTP routes in your PHP application, supporting route grouping, middleware, and custom route handling.",
+            "keywords": [
+                "http",
+                "middleware",
+                "php",
+                "routing"
+            ],
+            "support": {
+                "issues": "https://github.com/roycanales17/Web-Routes/issues",
+                "source": "https://github.com/roycanales17/Web-Routes/tree/v4.1.0"
+            },
+            "time": "2025-06-04T14:34:35+00:00"
         },
         {
             "name": "roy404/schema",

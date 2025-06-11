@@ -5,7 +5,7 @@
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
-	use App\utilities\Handler\StreamHandler;
+	use App\Utilities\Handler\StreamHandler;
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\scheme\CompilerException;
 

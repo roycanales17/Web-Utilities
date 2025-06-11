@@ -1,8 +1,8 @@
 <?php
 
-	namespace App\utilities\Blueprints;
+	namespace App\Utilities\Blueprints;
 
-	use App\utilities\Handler\CarbonHandler;
+	use App\Utilities\Handler\CarbonHandler;
 
 	class BaseCarbon extends CarbonHandler
 	{

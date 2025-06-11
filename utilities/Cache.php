@@ -2,7 +2,7 @@
 
 	namespace App\Utilities;
 
-	use App\utilities\Blueprints\CacheDriver;
+	use App\Utilities\Blueprints\CacheDriver;
 	use Closure;
 	use Exception;
 	use Memcached;

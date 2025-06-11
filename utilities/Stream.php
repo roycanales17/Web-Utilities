@@ -11,55 +11,49 @@
 
 	class Stream
 	{
-		private static array $root = [];
 		private static array $methodCache = [];
 		private static array $compiled = [];
 		private static array $authentication = [];
 
-		public static function configure(string|array $root, array $authentication = []): void
+		/**
+		 * This helps us to add authentication for each component by applying 'use Authenticatable'
+		 *
+		 * @param array $authentication
+		 * @return void
+		 * @throws StreamException
+		 */
+		public static function authentication(array $authentication = []): void
 		{
-			self::$root = is_string($root) ? [$root] : $root;
+			$class = $authentication[0] ?? null;
+			$method = $authentication[1] ?? null;
+			if ($authentication) {
+				if (class_exists($class) && method_exists($class, $method)) {
+					throw new StreamException("Invalid authentication method '{$class}::{$method}'.");
+				}
 
-			if ($authentication)
 				self::$authentication = $authentication;
+			}
 		}
 
-		public static function render(string $path, array $data = [], $asynchronous = false): string
+		/**
+		 * This render the class component.
+		 *
+		 * @throws StreamException
+		 */
+		public static function render(string $class, array $data = [], $asynchronous = false): string
 		{
-			if (!$data && ($html = self::isCompiled($path)))
+			if (!$data && ($html = self::isCompiled($class)))
 				return $html;
 
 			ob_start();
 
-			$component = null;
-			if (class_exists($path)) {
-				$component = new $path();
-			} else {
-				foreach (self::$root as $rootPath) {
-					$path = preg_replace('/\.php$/', '', $path);
-					$normalizedPath = str_replace('\\', '/', $path);
-
-					foreach (['.blade.php', '.php'] as $extension) {
-						$full_path = $rootPath . $normalizedPath . $extension;
-						if (file_exists($full_path)) {
-							$component = require $full_path;
-							break 2;
-						}
-					}
-				}
-			}
-
-			if ($component) {
-
-				if (!method_exists($component, 'initialize')) {
-					$className = is_object($component) ? get_class($component) : gettype($component);
-					throw new StreamException("Component of type `$className` at path `$path` is invalid: missing required `initialize` method.");
-				}
+			if (class_exists($class)) {
+				$component = new $class();
 
 				if (!self::verifyComponent($component))
 					return ob_get_clean();
 
-				$component->initialize($path, $data);
+				$component->initialize($class, $data);
 
 				if ($asynchronous) {
 					echo($component->parse(preloader: true));
@@ -67,7 +61,7 @@
 					echo($component->parse());
 				}
 			} else {
-				throw new StreamException("Unable to locate compiled file '{$path}'.");
+				throw new StreamException("Unable to locate class component '{$class}'.");
 			}
 
 			# Capture the content
@@ -75,6 +69,12 @@
 		}
 
 		/**
+		 * @throws StreamException
+		 */
+		/**
+		 * This capture the stream wire request.
+		 *
+		 * @return string
 		 * @throws StreamException
 		 */
 		public static function capture(): string
@@ -102,8 +102,8 @@
 					$identifier = $component;
 
 					$models = json_decode($models, true);
-					$path = base64_decode($component);
-					$path = str_replace('COMPONENT_', '', decrypt($path));
+					$class = base64_decode($component);
+					$class = str_replace('COMPONENT_', '', decrypt($class));
 
 					$properties = base64_decode($properties);
 					$properties = decrypt($properties);
@@ -129,24 +129,8 @@
 					$function = $parsed['name'] ?? $method;
 					$args = $parsed['args'] ?? [];
 
-					$component = null;
-					if (class_exists($path)) {
-						$component = new $path();
-					} else {
-						foreach (self::$root as $rootPath) {
-							$normalizedPath = ltrim($path, '/');
-
-							foreach (['.blade.php', '.php'] as $extension) {
-								$full_path = $rootPath . $normalizedPath . $extension;
-								if (file_exists($full_path)) {
-									$component = require $full_path;
-									break 2;
-								}
-							}
-						}
-					}
-
-					if ($component) {
+					if (class_exists($class)) {
+						$component = new $class();
 
 						if ($orig_properties)
 							$component->models($orig_properties );
@@ -163,6 +147,7 @@
 							}
 						}
 
+						// This performs the $this->render function...
 						return response($component->parse($identifier ?? '', $startedTime, directSkeleton: false))->json();
 					}
 				}
@@ -278,8 +263,15 @@
 			return false;
 		}
 
+		/**
+		 * @throws StreamException
+		 */
 		private static function verifyComponent($component): bool
 		{
+			if (!is_subclass_of($component, Component::class)) {
+				throw new StreamException("Component '{$component}' does not implement " . Component::class);
+			}
+
 			// Check for Authenticatable trait
 			if (in_array(Authenticatable::class, class_uses($component))) {
 				if (empty(self::$authentication)) {
@@ -311,11 +303,11 @@
 			$method = $action[1] ?? null;
 
 			if (!$class || !$method) {
-				throw new StreamException('Invalid Request', 400);
+				throw new StreamException('Class/Method is not set.', 400);
 			}
 
 			if (!method_exists($class, $method)) {
-				throw new StreamException('Invalid Request', 400);
+				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.");
 			}
 
 			$paramsValue = [];

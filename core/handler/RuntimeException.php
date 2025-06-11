@@ -4,6 +4,7 @@
 
 	use App\Utilities\Config;
 	use Closure;
+	use ReflectionException;
 	use ReflectionFunction;
 	use Throwable;
 
@@ -16,6 +17,7 @@
 
 		/**
 		 * Register a callback to handle a specific type of exception.
+		 * @throws ReflectionException
 		 */
 		public function report(Closure $closure): void {
 			$ref = new ReflectionFunction($closure);
@@ -92,6 +94,7 @@
 					'code' => $e->getCode(),
 					'file' => $e->getFile(),
 					'line' => $e->getLine(),
+					'trace' => $e->getTrace(),
 				]);
 				echo '</pre>';
 			}

@@ -45,13 +45,13 @@
 		 *
 		 * @param CacheDriver $driver The cache driver type (Redis or Memcached).
 		 * @param string $server The cache server host.
-		 * @param string $port The cache server port.
+		 * @param int $port The cache server port.
 		 * @return void
 		 */
 		public static function configure(
 			CacheDriver $driver = CacheDriver::Memcached,
 			string $server = '',
-			string $port = ''
+			int $port = 0
 		): void {
 			if (!$server || !$port) {
 				return;

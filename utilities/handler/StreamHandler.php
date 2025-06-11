@@ -52,7 +52,7 @@
 						throw new StreamException("Class '$action' does not exist");
 					}
 
-					if (is_subclass_of($action, Component::class)) {
+					if (!is_subclass_of($action, Component::class)) {
 						throw new StreamException("Class '$action' does not extend Component");
 					}
 

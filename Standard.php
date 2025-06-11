@@ -207,14 +207,14 @@
 	 *
 	 * Used to render both normal views and "stream" components.
 	 *
-	 * @param string $path Path to the blade view.
+	 * @param string|array $class Path to the blade view.
 	 * @param array $data Variables passed to the view.
 	 * @param bool $asynchronous Whether the stream is asynchronous.
 	 * @return StreamHandler Rendered HTML output.
 	 */
-	function stream(string $path = '', array $data = [], bool $asynchronous = false): StreamHandler
+	function stream(string $class = '', array $data = [], bool $asynchronous = false): StreamHandler
 	{
-		return new StreamHandler($path, $data, $asynchronous);
+		return new StreamHandler($class, $data, $asynchronous);
 	}
 
 	/**

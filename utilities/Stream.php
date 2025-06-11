@@ -5,7 +5,7 @@
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\Headers\Request;
 	use App\Http\Authenticatable;
-	use App\Utilities\handler\Component;
+	use App\Utilities\Handler\Component;
 	use Exception;
 	use ReflectionException;
 	use ReflectionMethod;

@@ -6,11 +6,13 @@
 	use App\Database\DB;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
+	use App\Utilities\Stream;
 
 	trait Configuration
 	{
 		private string $configPath = '';
 		private array $config = [];
+		private array $streamAuthentication = [];
 
 		protected function getConfig(): array {
 			return $this->config;
@@ -26,6 +28,17 @@
 
 		protected function setConfiguration(string $config): void {
 			$this->configPath = $config;
+		}
+
+		protected function setStreamAuthentication(array $actions = [], bool $run = false): void {
+			if ($run) {
+				if ($this->streamAuthentication) {
+					Stream::authentication($this->streamAuthentication);
+				}
+				return;
+			}
+
+			$this->streamAuthentication = $actions;
 		}
 
 		protected function setGlobalDefines(): void {

@@ -39,7 +39,7 @@
 					 * Component Lifecycle and Configuration
 					 *
 					 * ## Available Methods:
-					 * - `getIdentifier()` — Requires if we allow the component to be executed on the frontend.
+					 * - `identifier()` — Requires if we allow the component to be executed on the frontend.
 					 * - `redirect()` — Performs an Ajax-based redirection.
 					 * - `init()` — Serves as the component's initializer; use this to set up internal state or dependencies.
 					 * - `verify()` — (Optional) Runs pre-render validation or checks before displaying the component.

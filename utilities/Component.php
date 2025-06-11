@@ -369,8 +369,8 @@
 				$dataAttributes .= " data-" . htmlspecialchars($key) . "='" . htmlspecialchars($value, ENT_QUOTES) . "'";
 			}
 
-			if (method_exists(static::class, 'getIdentifier')) {
-				$componentDNA = static::getIdentifier();
+			if (method_exists(static::class, 'identifier')) {
+				$componentDNA = static::identifier();
 				$dataAttributes .= " data-id='{$componentDNA}'";
 			}
 
@@ -546,8 +546,8 @@
 							throw new Exception("Class `{$method}` is not allowed from extender.");
 
 						$componentDNA = '';
-						if (method_exists($class, 'getIdentifier')) {
-							$componentDNA = $class::getIdentifier();
+						if (method_exists($class, 'identifier')) {
+							$componentDNA = $class::identifier();
 						}
 
 						if ($componentDNA) {

@@ -273,6 +273,9 @@
 					'extender' => $this->prepareExtender()
 				];
 			} else {
+				if (!method_exists($this, 'render'))
+					throw new Exception("Render function is required.");
+
 				$render = $this->render();
 			}
 
@@ -294,19 +297,19 @@
 											$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
 						
 											echo <<<HTML
-																							console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
-																							
-																							// Simple log for Class without collapsing
-																							console.log(`Class: %c{$escapedClass}`, 'color: red;');
-																							
-																							// Collapsed group for Component with short preview
-																							console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
-																							console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
-																							console.groupEnd();
-																							
-																							console.log(`Duration: %c{$duration} ms`, 'color: orange;');
-																							console.log(' ');
-																							HTML;
+											console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
+											
+											// Simple log for Class without collapsing
+											console.log(`Class: %c{$escapedClass}`, 'color: red;');
+											
+											// Collapsed group for Component with short preview
+											console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
+											console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
+											console.groupEnd();
+											
+											console.log(`Duration: %c{$duration} ms`, 'color: orange;');
+											console.log(' ');
+											HTML;
 										}
 									})}
 								});	
@@ -352,15 +355,13 @@
 		 */
 		private function getAttributes(string $component, mixed $startedTime): string
 		{
+			$extra = [];
+			$dataAttributes = '';
+
 			$dev = Config::get('DEVELOPMENT');
 			$properties = $this->fetchProperties();
 
-			$extra = [];
-			if ($dev) {
-				$extra['class'] = get_called_class();
-			}
-
-			$dataAttributes = '';
+			if ($dev) $extra['class'] = get_called_class();
 			foreach (array_merge([
 				'component' => $component,
 				'duration' => $this->calculateDuration($startedTime),
@@ -387,12 +388,7 @@
 		 */
 		protected function extender(array $action, ...$args): void
 		{
-			$class = $action[0] ?? '';
-			$method = $action[1] ?? '';
-
-			if (!isset($action[2])) {
-				$action[2] = $args;
-			}
+			[$class, $method] = $action + [null, null];
 
 			if (!$class || !$method)
 				throw new StreamException("Both class and method must be provided.");
@@ -403,6 +399,7 @@
 			if (!method_exists($class, $method))
 				throw new StreamException("Method {$method} does not exist.");
 
+			$action[2] = $action[2] ?? $args;
 			$this->extender[] = $action;
 		}
 
@@ -413,15 +410,16 @@
 		 */
 		protected function invokeAndExit(array $actions, ...$args): void
 		{
-			if ($actions) {
-				if (is_array($actions[0])) {
-					foreach ($actions as $action) {
-						$this->extender($action, ...($args ?: ($action[2] ?? [])));
-					}
-				} else {
-					$this->extender($actions, ...$args);
-				}
+			if (empty($actions)) {
+				$this->exit();
 			}
+
+			$isMultiple = is_array($actions[0]);
+			foreach ($isMultiple ? $actions : [$actions] as $action) {
+				$passedArgs = $args ?: ($action[2] ?? []);
+				$this->extender($action, ...$passedArgs);
+			}
+
 			$this->exit();
 		}
 

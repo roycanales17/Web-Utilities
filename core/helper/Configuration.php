@@ -19,11 +19,13 @@
 		}
 
 		protected function setupConfig(): void {
-			if (!is_array($configPath = require($this->configPath))) {
-				throw new AppException('Config file path is not valid');
-			}
+			if ($this->configPath) {
+				if (!is_array($configPath = require($this->configPath))) {
+					throw new AppException('Config file path is not valid');
+				}
 
-			$this->config = $configPath;
+				$this->config = $configPath;
+			}
 		}
 
 		protected function setConfiguration(string $config): void {

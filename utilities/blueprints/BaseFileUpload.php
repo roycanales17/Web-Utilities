@@ -2,6 +2,7 @@
 
 	namespace App\utilities\Blueprints;
 
+	use App\Utilities\Config;
 	use Aws\S3\S3Client;
 
 	class BaseFileUpload
@@ -18,10 +19,10 @@
 			$this->basePath = $this->resolveBasePath($disk);
 
 			if ($this->isS3Disk()) {
-				$_ENV['AWS_DEFAULT_REGION'] = $_ENV['AWS_DEFAULT_REGION'] ?? 'us-east-1';
-				$_ENV['AWS_ACCESS_KEY_ID'] = $_ENV['AWS_ACCESS_KEY_ID'] ?? 'your-default-key';
-				$_ENV['AWS_SECRET_ACCESS_KEY'] = $_ENV['AWS_SECRET_ACCESS_KEY'] ?? 'your-default-secret';
-				$_ENV['AWS_BUCKET'] = $_ENV['AWS_BUCKET'] ?? 'your-default-bucket';
+				$_ENV['AWS_DEFAULT_REGION'] = Config::get('AWS_DEFAULT_REGION', 'us-east-1');
+				$_ENV['AWS_ACCESS_KEY_ID'] = Config::get('AWS_ACCESS_KEY_ID', 'your-default-key');
+				$_ENV['AWS_SECRET_ACCESS_KEY'] = Config::get('AWS_SECRET_ACCESS_KEY', 'your-default-secret');
+				$_ENV['AWS_BUCKET'] = Config::get('AWS_BUCKET', 'your-default-bucket');
 
 				// Initialize S3Client
 				$this->s3Client = new S3Client([

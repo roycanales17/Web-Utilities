@@ -7,7 +7,7 @@
 			'App\\Bootstrap\\Exceptions\\' => __DIR__ . '/exceptions/',
 			'App\\Bootstrap\\Handler\\'    => __DIR__ . '/core/handler/',
 			'App\\Bootstrap\\Helper\\'     => __DIR__ . '/core/helper/',
-			'App\\utilities\\Handler\\'    => __DIR__ . '/utilities/handler/',
+			'App\\Utilities\\Handler\\'    => __DIR__ . '/utilities/handler/',
 			'App\\Utilities\\Blueprints\\' => __DIR__ . '/utilities/blueprints/',
 			'App\\Utilities\\'             => __DIR__ . '/utilities/',
 			'App\\Bootstrap\\'             => __DIR__ . '/core/',

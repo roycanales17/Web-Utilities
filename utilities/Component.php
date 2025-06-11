@@ -262,7 +262,7 @@
 			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
-			$dev = defined('DEVELOPMENT') && DEVELOPMENT;
+			$dev = Config::get('DEVELOPMENT');
 
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
@@ -352,7 +352,7 @@
 		 */
 		private function getAttributes(string $component, mixed $startedTime): string
 		{
-			$dev = defined('DEVELOPMENT') && DEVELOPMENT;
+			$dev = Config::get('DEVELOPMENT');
 			$properties = $this->fetchProperties();
 
 			$extra = [];

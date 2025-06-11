@@ -87,7 +87,7 @@
 				}
 
 				// This display the content page
-				if ($callback) $callback();
+				if ($callback) $callback($conf);
 
 				// Configure Routes
 				foreach ($conf['routes'] ?? [] as $route) {

@@ -95,7 +95,7 @@
 
 				// Configure Routes
 				foreach ($conf['routes'] ?? [] as $route) {
-					$route = Route::configure(
+					$routeObject = Route::configure(
 						root: $route['root'] ?? $cli ? "/routes" : "../routes",
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
@@ -103,11 +103,11 @@
 					);
 
 					if ($cli) {
-						$route->routes(function($routes) {
+						$routeObject->routes(function($routes) {
 							// Store into the artisan
 						});
 					} else {
-						$route->captured($route['captured']);
+						$routeObject->captured($route['captured']);
 					}
 				}
 

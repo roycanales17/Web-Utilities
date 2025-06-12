@@ -102,7 +102,7 @@
 						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
 					);
 
-					if (php_sapi_name() !== 'cli') {
+					if ($cli) {
 						$route->routes(function($routes) {
 							// Store into the artisan
 						});

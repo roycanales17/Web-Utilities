@@ -91,12 +91,12 @@
 				$cli = php_sapi_name() === 'cli';
 
 				// This display the content page
-				if (!$cli && $callback) $callback($conf);
+				if ($callback) $callback($conf);
 
 				// Configure Routes
 				foreach ($conf['routes'] ?? [] as $route) {
 					$routeObject = Route::configure(
-						root: $route['root'] ?? $cli ? "/routes" : "../routes",
+						root: $route['root'] ?? $cli ? "./routes" : "../routes",
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
 						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')

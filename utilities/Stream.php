@@ -77,7 +77,7 @@
 
 				$component->initialize($class, $constructParams);
 				if ($method) {
-					$component->$method($args);
+					$component->$method(...$args);
 				}
 
 				if ($asynchronous) {

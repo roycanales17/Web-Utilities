@@ -87,20 +87,31 @@
 					Mail::configure($mail['host'], $mail['port'], $credentials);
 				}
 
+				// CLI Checker
+				$cli = php_sapi_name() === 'cli';
+
 				// This display the content page
-				if ($callback) $callback($conf);
+				if (!$cli && $callback) $callback($conf);
 
 				// Configure Routes
 				foreach ($conf['routes'] ?? [] as $route) {
-					Route::configure(
-						root: $route['root'] ?? "../routes",
+					$route = Route::configure(
+						root: $route['root'] ?? $cli ? "/routes" : "../routes",
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
 						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
-					)->captured($route['captured']);
+					);
+
+					if (php_sapi_name() !== 'cli') {
+						$route->routes(function($routes) {
+							// Store into the artisan
+						});
+					} else {
+						$route->captured($route['captured']);
+					}
 				}
 
-				if (php_sapi_name() !== 'cli') {
+				if (!$cli) {
 					ob_end_flush();
 				}
 

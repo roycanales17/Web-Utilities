@@ -11,7 +11,7 @@
 	{
 		private array $action = [];
 		private array $extract;
-		private ?Component $class;
+		private string|null $class;
 		private bool $asynchronous;
 
 		/**
@@ -165,12 +165,12 @@
 				$class = $this->action[0] ?? null;
 
 			if ($class) {
-				if (!stream::verifyComponent($class))
+				$component = new $class();
+
+				if (!stream::verifyComponent($component))
 					return ob_get_clean();
 
-				$component = new $class();
 				$component->initialize($class, $this->extract);
-
 				if ($this->action) {
 					$actionMethod = $this->action[1];
 					$actionArgs = $this->action[2] ?? [];

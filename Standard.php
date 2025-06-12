@@ -208,13 +208,13 @@
 	/**
 	 * Used to render both normal views and "stream" components.
 	 *
-	 * @param Component|null $class Class to invoke
+	 * @param string|null $class Class to invoke
 	 * @param array $constructParams Parameters to pass to the class constructor (if needed).
 	 * @param bool $asynchronous Whether the stream should run asynchronously.
 	 * @return StreamHandler            Rendered HTML output or Stream actions methods for blade content.
 	 * @throws StreamException
 	 */
-	function stream(null|Component $class = null, array $constructParams = [], bool $asynchronous = false): StreamHandler
+	function stream(null|string $class = null, array $constructParams = [], bool $asynchronous = false): StreamHandler
 	{
 		return new StreamHandler($class, $constructParams, $asynchronous);
 	}

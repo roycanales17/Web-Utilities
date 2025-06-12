@@ -19,12 +19,16 @@
 		 *
 		 * Initializes the stream with a given action and optional constructor parameters.
 		 *
-		 * @param Component|null $class Class to invoke
+		 * @param string|null $class Class to invoke
 		 * @param array $constructParams Parameters to pass to the class constructor (if needed).
 		 * @param bool $asynchronous Whether the stream should run asynchronously.
-		 *
+		 * @throws StreamException
 		 */
-		function __construct(null|Component $class = null, array $constructParams = [], bool $asynchronous = false) {
+		function __construct(null|string $class = null, array $constructParams = [], bool $asynchronous = false) {
+			if ($class !== null && !is_subclass_of($class, Component::class)) {
+				throw new StreamException("Class {$class} must extend " . Component::class);
+			}
+
 			$this->class = $class;
 			$this->asynchronous = $asynchronous;
 			$this->extract = $constructParams;

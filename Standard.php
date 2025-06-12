@@ -8,6 +8,7 @@
 	use App\Utilities\Handler\StreamHandler;
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\scheme\CompilerException;
+	use App\Utilities\Handler\Component;
 
 	/**
 	 * Retrieves a session value by key.
@@ -207,15 +208,15 @@
 	/**
 	 * Used to render both normal views and "stream" components.
 	 *
-	 * @param string|array $action  	The class and method to invoke, either as a string or [class, method, optional args].
-	 * @param array $constructParams  	Parameters to pass to the class constructor (if needed).
-	 * @param bool $asynchronous  		Whether the stream should run asynchronously.
-	 * @return StreamHandler 			Rendered HTML output or Stream actions methods for blade content.
+	 * @param Component|null $class Class to invoke
+	 * @param array $constructParams Parameters to pass to the class constructor (if needed).
+	 * @param bool $asynchronous Whether the stream should run asynchronously.
+	 * @return StreamHandler            Rendered HTML output or Stream actions methods for blade content.
 	 * @throws StreamException
 	 */
-	function stream(string|array $action = '', array $constructParams = [], bool $asynchronous = false): StreamHandler
+	function stream(null|Component $class = null, array $constructParams = [], bool $asynchronous = false): StreamHandler
 	{
-		return new StreamHandler($action, $constructParams, $asynchronous);
+		return new StreamHandler($class, $constructParams, $asynchronous);
 	}
 
 	/**

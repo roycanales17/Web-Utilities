@@ -10,59 +10,66 @@
 	final class StreamHandler
 	{
 		private array $action = [];
-		private bool $renderOnly = false;
-		private string $class = '';
-		private array $extract = [];
-		private bool $asynchronous = false;
+		private array $extract;
+		private ?Component $class;
+		private bool $asynchronous;
 
 		/**
 		 * Class constructor.
 		 *
 		 * Initializes the stream with a given action and optional constructor parameters.
 		 *
-		 * @param string|array $action          The class and method to invoke, either as a string or [class, method, optional args].
-		 * @param array        $constructParams Parameters to pass to the class constructor (if needed).
-		 * @param bool         $asynchronous    Whether the stream should run asynchronously.
+		 * @param Component|null $class Class to invoke
+		 * @param array $constructParams Parameters to pass to the class constructor (if needed).
+		 * @param bool $asynchronous Whether the stream should run asynchronously.
 		 *
-		 * @throws StreamException If the action is invalid or the target class/method does not exist.
 		 */
-		function __construct(string|array $action = '', array $constructParams = [], bool $asynchronous = false) {
+		function __construct(null|Component $class = null, array $constructParams = [], bool $asynchronous = false) {
+			$this->class = $class;
+			$this->asynchronous = $asynchronous;
+			$this->extract = $constructParams;
+		}
 
-			if (is_array($action)) {
-				[$class, $method] = $action + [null, null];
+		/**
+		 * On stream echo we also allow to execute more function
+		 *
+		 * @throws StreamException
+		 */
+		public function with(array|string $action, ...$args): void {
+			if ($this->class && $action) {
+				if (is_string($action)) {
+					$class = $this->class;
+					$method = $action;
 
-				if (!$class || !$method) {
-					throw new StreamException("Both class and method must be provided.");
-				}
-
-				if (!class_exists($class)) {
-					throw new StreamException("Class {$class} does not exist.");
-				}
-
-				if (!method_exists($class, $method)) {
-					throw new StreamException("Method {$method} does not exist.");
-				}
-
-				$this->renderOnly = true;
-				$this->action = $action;
-
-			} else {
-				if (!empty($action)) {
-					if (!class_exists($action)) {
-						throw new StreamException("Class '$action' does not exist");
+					if (!method_exists($class, $method)) {
+						throw new StreamException("Method {$method} does not exist.");
 					}
 
-					if (!is_subclass_of($action, Component::class)) {
-						throw new StreamException("Class '$action' does not extend Component");
+					$this->action = [$class, $method, $args];
+				} else {
+					$class = $action[0] ?? null;
+					$method = $action[1] ?? null;
+
+					if (!$class || !$method) {
+						throw new StreamException("Both class and method must be provided.");
 					}
 
-					$this->renderOnly = true;
-					$this->class = $action;
+					if (!class_exists($class)) {
+						throw new StreamException("Class {$class} does not exist.");
+					}
+
+					if (!is_subclass_of($class, Component::class)) {
+						throw new StreamException("Component '".get_class($class)."' does not implement " . Component::class);
+					}
+
+					if (!method_exists($class, $method)) {
+						throw new StreamException("Method {$method} does not exist.");
+					}
+
+					$action[2] = $args;
+					$this->action = $action;
 				}
 			}
-
-			$this->extract = $constructParams;
-			$this->asynchronous = $asynchronous;
 		}
 
 		/**
@@ -145,10 +152,35 @@
 		 * @throws StreamException
 		 */
 		public function __toString(): string {
-			if ($this->renderOnly) {
-				return Blade::compile(Stream::render($this->class ?: $this->action, $this->extract, $this->asynchronous));
+			ob_start();
+
+			$class = $this->class;
+			if (empty($class) && $this->action)
+				$class = $this->action[0] ?? null;
+
+			if ($class) {
+				if (!stream::verifyComponent($class))
+					return ob_get_clean();
+
+				$component = new $class();
+				$component->initialize($class, $this->extract);
+
+				if ($this->action) {
+					$actionMethod = $this->action[1];
+					$actionArgs = $this->action[2] ?? [];
+
+					$component->$actionMethod(...$actionArgs);
+				}
+
+				if ($this->asynchronous) {
+					echo($component->parse(preloader: true));
+				} else {
+					echo($component->parse());
+				}
+
+				return Blade::compile(ob_get_clean());
 			}
 
-			throw new StreamException("Cannot convert StreamHandler to string: no path specified during initialization.");
+			throw new StreamException("Unable to generate stream, class is not provided.");
 		}
 	}

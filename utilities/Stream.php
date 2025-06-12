@@ -37,68 +37,12 @@
 		}
 
 		/**
-		 * This render the class component.
-		 *
-		 * @throws StreamException
-		 */
-		public static function render(array|string $action, array $constructParams = [], $asynchronous = false): string
-		{
-			if (!$constructParams && is_string($action) && $html = self::isCompiled($action))
-				return $html;
-
-			ob_start();
-			$class = $action;
-			$method = null;
-			$args = [];
-
-			if ($action && is_array($action)) {
-				[$class, $method] = $action + [null, null];
-
-				if (!$class || !$method) {
-					throw new StreamException("Both class and method must be provided.");
-				}
-
-				if (!class_exists($class)) {
-					throw new StreamException("Class {$class} does not exist.");
-				}
-
-				if (!method_exists($class, $method)) {
-					throw new StreamException("Method {$method} does not exist.");
-				}
-
-				$args = $action[2] ?? [];
-			}
-
-			if (class_exists($class)) {
-				$component = new $class();
-
-				if (!self::verifyComponent($component))
-					return ob_get_clean();
-
-				$component->initialize($class, $constructParams);
-				if ($method) {
-					$component->$method(...$args);
-				}
-
-				if ($asynchronous) {
-					echo($component->parse(preloader: true));
-				} else {
-					echo($component->parse());
-				}
-			} else {
-				throw new StreamException("Unable to locate class component '{$class}'.");
-			}
-
-			# Capture the content
-			return ob_get_clean();
-		}
-
-		/**
 		 * @throws StreamException
 		 */
 		/**
 		 * This capture the stream wire request.
 		 *
+		 * @param Request $req
 		 * @return string
 		 * @throws StreamException
 		 */
@@ -281,7 +225,7 @@
 		/**
 		 * @throws StreamException
 		 */
-		private static function verifyComponent(Component $component): bool
+		public static function verifyComponent(Component $component): bool
 		{
 			if (!is_subclass_of($component, Component::class)) {
 				throw new StreamException("Component '".get_class($component)."' does not implement " . Component::class);

@@ -39,7 +39,7 @@
 		 *
 		 * @throws StreamException
 		 */
-		public function with(array|string $action, ...$args): void {
+		public function with(array|string $action, ...$args): self {
 			if ($this->class && $action) {
 				if (is_string($action)) {
 					$class = $this->class;
@@ -74,6 +74,8 @@
 					$this->action = $action;
 				}
 			}
+
+			return $this;
 		}
 
 		/**

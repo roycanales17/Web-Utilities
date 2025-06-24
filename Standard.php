@@ -8,7 +8,20 @@
 	use App\Utilities\Handler\StreamHandler;
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\scheme\CompilerException;
-	use App\Utilities\Handler\Component;
+
+	/**
+	 * Generates a URI for a named route with optional parameter replacements.
+	 *
+	 * Replaces placeholders (e.g., `{id}`) in the route URI with values from $params.
+	 * If the named route is not found, returns `'/'` as fallback.
+	 *
+	 * @param string $name           The name of the route.
+	 * @param array<string, mixed> $params Associative array of parameters to substitute in the URI.
+	 * @return string                The generated URI or `'/'` if the route was not found.
+	 */
+	function name(string $name, array $params = []): string {
+		return App\Routes\Route::link($name, $params);
+	}
 
 	/**
 	 * Retrieves a session value by key.

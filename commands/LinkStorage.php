@@ -7,7 +7,7 @@
 	class LinkStorage extends Command
 	{
 		protected string $signature = 'storage:link';
-		protected string $description = 'Create symbolic link from storage/public to public/build/storage and prepare storage folders';
+		protected string $description = 'Create symbolic link from storage to public/build/storage and prepare storage folders';
 
 		public function handle(): void
 		{
@@ -43,7 +43,7 @@ HTACCESS,
 			foreach ($folders as $folder => $htaccessContent) {
 				$folderPath = "$storageBasePath/$folder";
 
-				// Create directory if not exist
+				// Create directory if it doesn't exist
 				if (!is_dir($folderPath)) {
 					mkdir($folderPath, 0777, true);
 					$this->info("Created directory: $folderPath");
@@ -65,15 +65,13 @@ HTACCESS,
 				$this->info("Created directory: $publicBuildPath");
 			}
 
-			// 3. Create symbolic link from storage/public → public/build/storage
+			// 3. Create symbolic link: public/build/storage → storage
 			if (!is_link($storageLink)) {
-				$storagePublicPath = $storageBasePath . '/public';
-
-				if (!is_dir($storagePublicPath)) {
-					$this->error("Source directory does not exist: $storagePublicPath");
+				if (!is_dir($storageBasePath)) {
+					$this->error("Source directory does not exist: $storageBasePath");
 				} else {
-					if (symlink($storagePublicPath, $storageLink)) {
-						$this->success("Symbolic link created: $storageLink → $storagePublicPath");
+					if (symlink($storageBasePath, $storageLink)) {
+						$this->success("Symbolic link created: $storageLink → $storageBasePath");
 					} else {
 						$this->error("Failed to create symbolic link.");
 					}

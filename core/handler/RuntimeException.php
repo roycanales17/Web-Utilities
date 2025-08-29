@@ -3,6 +3,7 @@
 	namespace App\Bootstrap\Handler;
 
 	use App\Utilities\Config;
+	use App\Utilities\Logger;
 	use Closure;
 	use ReflectionException;
 	use ReflectionFunction;
@@ -88,6 +89,13 @@
 			}
 
 			if (Config::get('DEVELOPMENT')) {
+				$logger = new Logger('../logs', logFile: 'error.log');
+				$logger->error(strip_tags($e->getMessage()), [
+					'file' => $e->getFile(),
+					'line' => $e->getLine(),
+					'trace' => $e->getTraceAsString()
+				]);
+
 				$file = urlencode($e->getFile());
 				$line = $e->getLine();
 

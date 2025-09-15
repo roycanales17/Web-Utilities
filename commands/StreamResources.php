@@ -65,7 +65,18 @@
 				}
 			}
 
-			$this->success("✅ All resources streamed successfully.");
+			$this->success("✅ All resources streamed successfully.
+
+Add the following to your HTML:
+
+    <script src=\"/$path/streamdom/stream.js\"></script>
+    <link rel=\"stylesheet\" href=\"/$path/streamdom/stream.css\">
+
+Or in your CSS:
+
+    @import \"/$path/streamdom/stream.css\";
+
+");
 		}
 
 		protected function public_path(string $path = ''): string

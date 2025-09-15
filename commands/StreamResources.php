@@ -33,7 +33,7 @@
 		public function handle(string $path = 'libraries'): void
 		{
 			$basePath   = $this->public_path(trim($path, '/'));
-			$vendorPath = $this->base_path('vendor');
+			$vendorPath = $this->base_path('resources');
 
 			foreach ($this->resources as $type => $files) {
 				foreach ($files as $vendorFile => $publicFile) {
@@ -70,13 +70,13 @@
 
 		protected function public_path(string $path = ''): string
 		{
-			$base = realpath(__DIR__ . '/../../public');
+			$base = "./public/";
 			return rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
 		}
 
 		protected function base_path(string $path = ''): string
 		{
-			$base = realpath(__DIR__ . '/../../'); // adjust as needed
+			$base = realpath(dirname(__DIR__));
 			return rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
 		}
 

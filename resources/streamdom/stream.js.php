@@ -3,7 +3,7 @@ function stream(identifier) {
 		let modulePromise;
 		return () => {
 			if (!modulePromise) {
-				modulePromise = import(<?= json_encode( "../$public_path/streamdom/stream-wire.js" ) ?>);
+				modulePromise = import(<?= json_encode( "stream-wire.js" ) ?>);
 			}
 			return modulePromise;
 		};
@@ -17,7 +17,7 @@ function StreamListener(identifier = '') {
 		let modulePromise;
 		return () => {
 			if (!modulePromise) {
-				modulePromise = import(<?= json_encode( "../$public_path/streamdom/stream-listener.js" ) ?>);
+				modulePromise = import(<?= json_encode( "stream-listener.js" ) ?>);
 			}
 			return modulePromise;
 		};

@@ -152,19 +152,34 @@
 				return null;
 
 			$functionName = $matches[1];
-			$argsString = trim($matches[2]);
+			$argsString   = trim($matches[2]);
 
-			$jsonArgsString = preg_replace_callback(
-				"/'(.*?)'/s",
-				fn($m) => '"' . str_replace('"', '\\"', $m[1]) . '"',
+			// Split by commas, respecting quotes
+			$parts = preg_split(
+				"/,(?=(?:[^'\"\\\\]*(?:\\\\.|['\"][^'\"\\\\]*['\"]))*[^'\"\\\\]*$)/",
 				$argsString
 			);
 
-			$json = "[$jsonArgsString]";
-			$args = json_decode($json, true);
+			$args = [];
+			foreach ($parts as $p) {
+				$p = trim($p);
 
-			if (!is_array($args))
-				return null;
+				// If quoted → strip quotes
+				if (preg_match("/^'(.*)'$/s", $p, $m) || preg_match('/^"(.*)"$/s', $p, $m)) {
+					$args[] = $m[1];
+				}
+				// If numeric → cast to number
+				elseif (is_numeric($p)) {
+					$args[] = $p + 0;
+				}
+				// If empty → skip
+				elseif ($p === '') {
+					continue;
+				}
+				else {
+					$args[] = $p;
+				}
+			}
 
 			return [
 				'name' => $functionName,

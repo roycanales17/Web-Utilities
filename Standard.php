@@ -19,7 +19,8 @@
 	 * @param array<string, mixed> $params Associative array of parameters to substitute in the URI.
 	 * @return string                The generated URI or `'/'` if the route was not found.
 	 */
-	function name(string $name, array $params = []): string {
+	function name(string $name, array $params = []): string 
+	{
 		return App\Routes\Route::link($name, $params);
 	}
 

@@ -65,18 +65,23 @@
 				}
 			}
 
-			$this->success("✅ All resources streamed successfully.
+			echo PHP_EOL;
+			echo "\033[32m✅ Resources streamed successfully! Next steps:\033[0m" . PHP_EOL;
 
-Add the following to your HTML:
+			echo "  1. Add the following to your HTML:" . PHP_EOL;
+			echo "     <script src=\"/$path/streamdom/stream.js\"></script>" . PHP_EOL;
+			echo "     <link rel=\"stylesheet\" href=\"/$path/streamdom/stream.css\">" . PHP_EOL;
+			echo PHP_EOL;
 
-    <script src=\"/$path/streamdom/stream.js\"></script>
-    <link rel=\"stylesheet\" href=\"/$path/streamdom/stream.css\">
+			echo "  2. Or in your CSS:" . PHP_EOL;
+			echo "     @import \"/$path/streamdom/stream.css\";" . PHP_EOL;
+			echo PHP_EOL;
 
-Or in your CSS:
+			echo "  3. Register the route in your Laravel app:" . PHP_EOL;
+			echo "     Route::post('/api/stream-wire/{identifier}', [App\\Utilities\\Stream::class, 'capture']);" . PHP_EOL;
+			echo PHP_EOL;
 
-    @import \"/$path/streamdom/stream.css\";
-
-");
+			echo "\033[32m✔️  All set! You're ready to stream DOM resources! 🚀\033[0m" . PHP_EOL;
 		}
 
 		protected function public_path(string $path = ''): string

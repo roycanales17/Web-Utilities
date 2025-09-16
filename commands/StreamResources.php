@@ -66,7 +66,7 @@
 			}
 
 			echo PHP_EOL;
-			echo "\033[32m✅ Resources streamed successfully! Next steps:\033[0m" . PHP_EOL;
+			echo "\033[32m ✅ Resources streamed successfully! Next steps:\033[0m" . PHP_EOL;
 
 			echo "  1. Add the following to your HTML:" . PHP_EOL;
 			echo "     <script src=\"/$path/streamdom/stream.js\"></script>" . PHP_EOL;
@@ -77,7 +77,7 @@
 			echo "     @import \"/$path/streamdom/stream.css\";" . PHP_EOL;
 			echo PHP_EOL;
 
-			echo "  3. Register the route in your Laravel app:" . PHP_EOL;
+			echo "  3. Register the route in your app:" . PHP_EOL;
 			echo "     Route::post('/api/stream-wire/{identifier}', [App\\Utilities\\Stream::class, 'capture']);" . PHP_EOL;
 			echo PHP_EOL;
 

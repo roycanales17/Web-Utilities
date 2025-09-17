@@ -107,11 +107,14 @@
 							// Store into the artisan
 						});
 					} else {
-						$routeObject->captured($route['captured']);
+						$routeObject->captured($route['captured'], true);
 					}
 				}
 
 				if (!$cli) {
+					if (file_exists('../views/404.blade.php') || file_exists('../views/404.php')) {
+						echo view('404');
+					}
 					ob_end_flush();
 				}
 

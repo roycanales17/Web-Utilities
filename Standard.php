@@ -73,7 +73,8 @@
 	 * @param string $string The plain text to encrypt.
 	 * @return string The encrypted string format.
 	 */
-	function encrypt(string $string): string {
+	function encrypt(string $string): string 
+	{
 		$numbers = [];
 
 		foreach (mb_str_split($string) as $char) {
@@ -99,7 +100,8 @@
 	 * @param string $encoded The encoded string to decode.
 	 * @return string The original plain text.
 	 */
-	function decrypt(string $encoded): string {
+	function decrypt(string $encoded): string 
+	{
 		$parts = explode('-', $encoded);
 		$decoded = '';
 
@@ -211,7 +213,8 @@
 	 * @param string $end String to append if truncated (default '...')
 	 * @return string The limited string
 	 */
-	function str_limit(string $value, int $limit = 100, string $end = '...'): string {
+	function str_limit(string $value, int $limit = 100, string $end = '...'): string 
+	{
 		if (mb_strlen($value) <= $limit) {
 			return $value;
 		}

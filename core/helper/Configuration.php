@@ -3,7 +3,7 @@
 	namespace App\Bootstrap\Helper;
 
 	use App\Bootstrap\Exceptions\AppException;
-	use App\Database\DB;
+	use App\Databases\Database;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\Utilities\Stream;
@@ -61,11 +61,11 @@
 		protected function setDatabaseConfig(): void {
 			$databases = $this->config['database'] ?? [];
 			if ($databases) {
-				$default = $databases['default'] ?? '';
 				$connections = $databases['connections'] ?? [];
 
-				if ($connections[$default] ?? false)
-					DB::configure($connections[$default]);
+				foreach ($connections as $server => $config) {
+					Database::configure($server, $config);
+				}
 			}
 		}
 

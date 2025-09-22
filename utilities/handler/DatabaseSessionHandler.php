@@ -35,7 +35,7 @@
 			$ip = Server::IPAddress();
 			$now = date('Y-m-d H:i:s');
 
-			$isExist = Database::table($this->table)->where('id', $id)->count();
+			$isExist = Database::table($this->table)->where('id', $id)->exists();
 
 			if ($isExist) {
 				Database::table($this->table)

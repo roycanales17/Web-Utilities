@@ -180,6 +180,11 @@
 
 			$icon = $icons[$level] ?? '📌';
 			$log = "{$icon} [{$levelUpper}] [{$timestamp}]\n\n";
+
+			if (isset($context['exception'])) {
+				$log .= "Type     : {$context['exception']}\n";
+			}
+
 			$log .= "Message  : {$message}\n";
 
 			if (isset($context['file'])) {

@@ -92,6 +92,7 @@
 			if (Config::get('DEVELOPMENT')) {
 				$logger = new Logger($cli ? '/logs' : '../logs', logFile: 'error.log');
 				$logger->error(strip_tags($e->getMessage()), [
+					'exception' => strtoupper(get_class($e)),
 					'file' => $e->getFile(),
 					'line' => $e->getLine(),
 					'trace' => $e->getTraceAsString()
@@ -107,12 +108,6 @@
 					'sublime'  => "subl://open?file=$file&line=$line"
 				];
 				$selectedUrl = $editorUrls[$e->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
-
-				$sanitizedMessage = preg_replace(
-					'/ in .*? on line \d+/',
-					'',
-					$e->getMessage()
-				);
 
 				$table = [
 					'Exception Type:'      => strtoupper(get_class($e)),

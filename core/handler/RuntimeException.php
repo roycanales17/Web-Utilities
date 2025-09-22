@@ -128,8 +128,7 @@
 					echo "\n\033[31m--- Stack Trace ---\033[0m\n";
 					echo $e->getTraceAsString() . "\n";
 
-					$link = "\033]8;;{$selectedUrl}\033\\Click here\033]8;;\033\\";
-					echo "\n\033[36mNavigate in editor:\033[0m $link\n\n";
+					echo "\n\033[36mNavigate in editor:\033[0m $selectedUrl\n\n";
 				} else {
 					echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
 					echo '<h2 style="color: #721c24;">Exception Details</h2>';

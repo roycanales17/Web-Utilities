@@ -52,16 +52,16 @@
 					'httponly' => $config['http_only'] ?? true,
 					'samesite' => $config['same_site'] ?? 'lax',
 				]);
-			}
 
-			switch ($config['driver']) {
-				case 'redis':
-					// session_set_save_handler(new RedisSessionHandler($object), true);
-					break;
+				switch ($config['driver']) {
+					case 'redis':
+						// session_set_save_handler(new RedisSessionHandler($object), true);
+						break;
 
-				case 'database':
-					session_set_save_handler(new DatabaseSessionHandler, true);
-					break;
+					case 'database':
+						session_set_save_handler(new DatabaseSessionHandler, true);
+						break;
+				}
 			}
 		}
 

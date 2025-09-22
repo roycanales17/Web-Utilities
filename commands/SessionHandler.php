@@ -16,10 +16,11 @@
 		{
 			if (!Schema::hasTable('sessions')) {
 				Schema::create('sessions', function (Table $table) {
-					$table->id();
+					$table->text('id');
 					$table->text('data');
 					$table->string('ip_address', 128)->default(Server::IPAddress());
 					$table->timestamp('last_activity')->defaultNow()->updateNow();
+					$table->unique('id');
 				});
 
 				$this->success("Sessions table was created.");

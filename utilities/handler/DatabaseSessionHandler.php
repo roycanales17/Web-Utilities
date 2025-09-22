@@ -35,12 +35,25 @@
 			$ip = Server::IPAddress();
 			$now = date('Y-m-d H:i:s');
 
-			return (bool) Database::replace($this->table, [
-				'id' => $id,
-				'data' => $data,
-				'ip_address' => $ip,
-				'last_activity' => $now
-			]);
+			$isExist = Database::table($this->table)->where('id', $id)->count();
+
+			if ($isExist) {
+				Database::table($this->table)
+					->where('id', $id)
+					->set('data', $data)
+					->set('ip_address', $ip)
+					->set('last_activity', $now)
+					->update();
+			} else {
+				Database::create($this->table, [
+					'id' => $id,
+					'data' => $data,
+					'ip_address' => $ip,
+					'last_activity' => $now
+				]);
+			}
+
+			return true;
 		}
 
 		public function destroy($id): bool

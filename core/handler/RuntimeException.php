@@ -57,6 +57,7 @@
 		 */
 		public function handle(Throwable $e): void {
 			$class = get_class($e);
+			$cli = PHP_SAPI === 'cli';
 
 			// Skip if in exclusion list
 			foreach ($this->dontReport as $excluded) {
@@ -89,7 +90,7 @@
 			}
 
 			if (Config::get('DEVELOPMENT')) {
-				$logger = new Logger('../logs', logFile: 'error.log');
+				$logger = new Logger($cli ? '/logs' : '../logs', logFile: 'error.log');
 				$logger->error(strip_tags($e->getMessage()), [
 					'file' => $e->getFile(),
 					'line' => $e->getLine(),
@@ -122,7 +123,7 @@
 					'Previous Exception:'  => ($e->getPrevious() ? $e->getPrevious()->getMessage() : 'None'),
 				];
 
-				if (PHP_SAPI === 'cli') {
+				if ($cli) {
 					echo "\n\033[41;37m " . get_class($e) . " \033[0m\n\n";
 
 					foreach ($table as $label => $value) {
@@ -132,9 +133,9 @@
 					echo "\n\033[31m--- Stack Trace ---\033[0m\n";
 					echo $e->getTraceAsString() . "\n";
 
-					echo "\n\033[36mNavigate in editor:\033[0m $selectedUrl\n\n";
+					$link = "\033]8;;{$selectedUrl}\033\\Click here\033]8;;\033\\";
+					echo "\n\033[36mNavigate in editor:\033[0m $link\n\n";
 				} else {
-					// Browser-friendly output (your HTML version)
 					echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
 					echo '<h2 style="color: #721c24;">Exception Details</h2>';
 					echo '<hr style="border-color: #f5c6cb;">';

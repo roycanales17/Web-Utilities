@@ -37,7 +37,7 @@
 				ini_set('session.gc_maxlifetime', ($config['lifetime'] ?? 120) * 60);
 
 				if ($config['driver'] === 'file') {
-					$storagePath = $config['storage_path'] ?? '../storage/sessions';
+					$storagePath = $config['session']['storage_path'] ?? '../storage/sessions';
 					if (!is_dir($storagePath)) {
 						mkdir($storagePath, 0755, true);
 					}
@@ -45,12 +45,12 @@
 				}
 
 				session_set_cookie_params([
-					'lifetime' => $config['expire_on_close'] ? 0 : ($config['lifetime'] ?? 120) * 60,
-					'path'     => $config['path'] ?? '/',
-					'domain'   => $config['domain'] ?? '',
-					'secure'   => $config['secure'] ?? false,
-					'httponly' => $config['http_only'] ?? true,
-					'samesite' => $config['same_site'] ?? 'lax',
+					'lifetime' => $config['session']['expire_on_close'] ? 0 : ($config['session']['lifetime'] ?? 120) * 60,
+					'path'     => $config['session']['path'] ?? '/',
+					'domain'   => $config['session']['domain'] ?? '',
+					'secure'   => $config['session']['secure'] ?? false,
+					'httponly' => $config['session']['http_only'] ?? true,
+					'samesite' => $config['session']['same_site'] ?? 'lax',
 				]);
 
 				switch ($config['driver']) {

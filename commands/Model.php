@@ -32,7 +32,7 @@
 			
 				{$namespaceDeclaration}
 			
-				use App\Database\Model;
+				use App\Databases\Facade\Model;
 				
 				class {$className} extends Model
 				{

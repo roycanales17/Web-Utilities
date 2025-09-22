@@ -3,9 +3,9 @@
 	namespace Commands;
 	
 	use App\Console\Command;
+	use App\Databases\Schema;
 	use App\Utilities\Server;
-	use Illuminate\Database\Facades\Blueprint;
-	use Illuminate\Database\Facades\Schema;
+	use App\Databases\Handler\Blueprints\Table;
 
 	class SessionHandler extends Command {
 		
@@ -15,11 +15,11 @@
 		public function handle(): void
 		{
 			if (!Schema::hasTable('sessions')) {
-				Schema::create('sessions', function (Blueprint $table) {
-					$table->int('id', 128)->autoIncrement();
+				Schema::create('sessions', function (Table $table) {
+					$table->id();
 					$table->text('data');
 					$table->string('ip_address', 128)->default(Server::IPAddress());
-					$table->dateTime('last_activity' )->current_date()->on_update();
+					$table->timestamp('last_activity')->defaultNow()->updateNow();
 				});
 
 				$this->success("Sessions table was created.");

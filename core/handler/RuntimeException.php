@@ -98,33 +98,43 @@
 			$context = [];
 			if (!$cli) {
 				$context = [
-					// Request
+					// 🚨 Core request info (always check first)
 					'url'           => Server::RequestURI(),
 					'method'        => Server::RequestMethod(),
-					'query'         => Server::QueryString(),
-					'referer'       => Server::Referer(),
 					'ip'            => Server::IPAddress(),
-					'user_agent'    => Server::UserAgent(),
 					'host'          => Server::HostName(),
-					'server_ip'     => Server::ServerIPAddress(),
-					'secure'        => Server::IsSecureConnection(),
-					'client_port'   => Server::ClientPort(),
-					'request_time'  => Server::RequestTime(),
-					'is_ajax'       => Server::isAjaxRequest(),
-
-					// API-specific
-					'content_type'  => Server::ContentType(),
-					'accept'        => Server::Accept(),
 					'protocol'      => Server::Protocol(),
-					'raw_body'      => file_get_contents('php://input'),
-					'response_code' => http_response_code(),
+					'secure'        => Server::IsSecureConnection(),
+					'is_ajax'       => Server::isAjaxRequest(),
 					'request_id'    => Server::RequestId(),
+					'response_code' => http_response_code(),
 
-					// User/session
-					'get'           => $_GET ?? [],
-					'post'          => $_POST ?? [],
+					// ⏱ Timing + connection
+					'request_time' => sprintf(
+						"%s [%s]",
+						Server::RequestTime(),
+						date('Y-m-d H:i:s', Server::RequestTime())
+					),
+					'client_port'   => Server::ClientPort(),
+					'server_ip'     => Server::ServerIPAddress(),
+
+					// 🌐 Request metadata
+					'referer'       => Server::Referer(),
+					'content_type'  => Server::ContentType(),
+
+					// 👤 User/session
 					'session_id'    => session_id() ?: null,
 					'user_id'       => $_SESSION['user_id'] ?? null,
+
+					// 🔎 Request params (can be verbose but useful)
+					'query'         => Server::QueryString(),
+					'get'           => $_GET ?? [],
+					'post'          => $_POST ?? [],
+
+					// 📝 Potentially long fields (put at the bottom)
+					'accept'        => Server::Accept(),
+					'user_agent'    => Server::UserAgent(),
+					'raw_body'      => file_get_contents('php://input'),
 				];
 			}
 

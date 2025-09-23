@@ -92,7 +92,7 @@
 			}
 
 			// Always put on the logger by default
-			$basePath = dirname(__DIR__);
+			$basePath = Config::get('APP_ROOT', '');
 			$logger = new Logger($basePath . '/logs', logFile: 'error.log');
 			$logger->error(strip_tags($e->getMessage()), [
 				'exception' => strtoupper($class),

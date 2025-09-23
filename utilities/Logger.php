@@ -194,6 +194,22 @@
 				$log .= "Line     : {$context['line']}\n";
 			}
 
+			if (isset($context['context']) && is_array($context['context'])) {
+				$log .= "\n🌐 Context:\n";
+				foreach ($context['context'] as $key => $value) {
+					if (is_array($value) || is_object($value)) {
+						$pretty = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+						$log .= sprintf("  %-12s: %s\n", $key, $pretty);
+					} elseif (is_bool($value)) {
+						$log .= sprintf("  %-12s: %s\n", $key, $value ? 'true' : 'false');
+					} elseif ($value === null) {
+						$log .= sprintf("  %-12s: null\n", $key);
+					} else {
+						$log .= sprintf("  %-12s: %s\n", $key, $value);
+					}
+				}
+			}
+
 			if (isset($context['trace'])) {
 				$log .= "\n🔍 Trace:\n" . trim($context['trace']) . "\n";
 			}

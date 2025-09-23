@@ -194,7 +194,7 @@
 				$log .= "Line     : {$context['line']}\n";
 			}
 
-			if (isset($context['context']) && is_array($context['context'])) {
+			if (!empty($context['context']) && is_array($context['context'])) {
 				$log .= "\n🌐 Context:\n";
 				foreach ($context['context'] as $key => $value) {
 					if (is_array($value) || is_object($value)) {

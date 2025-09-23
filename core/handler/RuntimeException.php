@@ -94,12 +94,10 @@
 			// Always put on the logger by default
 			$basePath = Config::get('APP_ROOT', '');
 			$logger = new Logger($basePath . '/logs', logFile: 'error.log');
-			$logger->error(strip_tags($e->getMessage()), [
-				'exception' => strtoupper($class),
-				'file'      => $e->getFile(),
-				'line'      => $e->getLine(),
-				'trace'     => $e->getTraceAsString(),
-				'context'   => [
+
+			$context = [];
+			if (!$cli) {
+				$context = [
 					// Request
 					'url'           => Server::RequestURI(),
 					'method'        => Server::RequestMethod(),
@@ -127,7 +125,15 @@
 					'post'          => $_POST ?? [],
 					'session_id'    => session_id() ?: null,
 					'user_id'       => $_SESSION['user_id'] ?? null,
-				]
+				];
+			}
+
+			$logger->error(strip_tags($e->getMessage()), [
+				'exception' => strtoupper($class),
+				'file'      => $e->getFile(),
+				'line'      => $e->getLine(),
+				'trace'     => $e->getTraceAsString(),
+				'context'   => $context
 			]);
 
 			// Display the error only in the development mode

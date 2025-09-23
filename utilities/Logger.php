@@ -196,17 +196,23 @@
 
 			if (!empty($context['context']) && is_array($context['context'])) {
 				$log .= "\n🌐 Context:\n";
-				foreach ($context['context'] as $key => $value) {
+				$ctx = $context['context'];
+
+				// Find longest key length
+				$maxKeyLength = max(array_map('strlen', array_keys($ctx)));
+
+				foreach ($ctx as $key => $value) {
+					// Normalize value: arrays/objects -> JSON, null -> "null", booleans -> true/false
 					if (is_array($value) || is_object($value)) {
-						$pretty = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-						$log .= sprintf("  %-12s: %s\n", $key, $pretty);
+						$value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 					} elseif (is_bool($value)) {
-						$log .= sprintf("  %-12s: %s\n", $key, $value ? 'true' : 'false');
+						$value = $value ? 'true' : 'false';
 					} elseif ($value === null) {
-						$log .= sprintf("  %-12s: null\n", $key);
-					} else {
-						$log .= sprintf("  %-12s: %s\n", $key, $value);
+						$value = 'null';
 					}
+
+					// Pad key names for alignment
+					$log .= str_pad($key, $maxKeyLength) . " : {$value}\n";
 				}
 			}
 

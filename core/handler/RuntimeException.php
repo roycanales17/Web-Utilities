@@ -127,14 +127,14 @@
 					'user_id'       => $_SESSION['user_id'] ?? null,
 
 					// 🔎 Request params (can be verbose but useful)
-					'query'         => Server::QueryString(),
 					'get'           => $_GET ?? [],
 					'post'          => $_POST ?? [],
+					'query'         => Server::QueryString(),
 
 					// 📝 Potentially long fields (put at the bottom)
+					'raw_body'      => file_get_contents('php://input'),
 					'accept'        => Server::Accept(),
 					'user_agent'    => Server::UserAgent(),
-					'raw_body'      => file_get_contents('php://input'),
 				];
 			}
 

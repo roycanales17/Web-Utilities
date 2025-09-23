@@ -97,7 +97,7 @@
 		public static function IsSecureConnection(): bool
 		{
 			return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-				($_SERVER['SERVER_PORT'] ?? null) == 443;
+				(($_SERVER['SERVER_PORT'] ?? null) == 443);
 		}
 
 		/**
@@ -128,5 +128,67 @@
 		public static function RequestTime(): int
 		{
 			return $_SERVER['REQUEST_TIME'] ?? time();
+		}
+
+		/**
+		 * Checks if the current request is an AJAX request.
+		 *
+		 * Detection logic:
+		 *  1. Checks the "X-Requested-With" HTTP header (commonly set by jQuery).
+		 *  2. Falls back to checking if an "ajax" key is present in $_POST or $_GET.
+		 *
+		 * @return bool True if the request is AJAX, false otherwise.
+		 */
+		public static function isAjaxRequest(): bool
+		{
+			if (
+				!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+				strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+			) {
+				return true;
+			}
+
+			return isset($_POST['ajax']) || isset($_GET['ajax']);
+		}
+
+		/**
+		 * Gets the Content-Type of the request (e.g., application/json).
+		 *
+		 * @return string The content type or "Unknown Content-Type" if not available.
+		 */
+		public static function ContentType(): string
+		{
+			return $_SERVER['CONTENT_TYPE'] ?? 'Unknown Content-Type';
+		}
+
+		/**
+		 * Gets the Accept header (e.g., application/json, text/html).
+		 *
+		 * @return string The Accept header or "Unknown Accept" if not available.
+		 */
+		public static function Accept(): string
+		{
+			return $_SERVER['HTTP_ACCEPT'] ?? 'Unknown Accept';
+		}
+
+		/**
+		 * Gets the HTTP protocol version (e.g., HTTP/1.1, HTTP/2).
+		 *
+		 * @return string The protocol or "Unknown Protocol" if not available.
+		 */
+		public static function Protocol(): string
+		{
+			return $_SERVER['SERVER_PROTOCOL'] ?? 'Unknown Protocol';
+		}
+
+		/**
+		 * Gets the request correlation ID (X-Request-ID header).
+		 * Generates a random ID if not provided by the client.
+		 *
+		 * @return string The request ID.
+		 */
+		public static function RequestId(): string
+		{
+			return $_SERVER['HTTP_X_REQUEST_ID'] ?? bin2hex(random_bytes(8));
 		}
 	}

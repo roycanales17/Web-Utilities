@@ -4,10 +4,12 @@
 
 	use App\Utilities\Config;
 	use App\Utilities\Logger;
-	use Closure;
+	use App\Utilities\Server;
+	use App\Headers\Request;
 	use ReflectionException;
 	use ReflectionFunction;
 	use Throwable;
+	use Closure;
 
 	final class RuntimeException
 	{
@@ -89,15 +91,47 @@
 				exit();
 			}
 
-			if (Config::get('DEVELOPMENT')) {
-				$logger = new Logger($cli ? '/logs' : '../logs', logFile: 'error.log');
-				$logger->error(strip_tags($e->getMessage()), [
-					'exception' => strtoupper(get_class($e)),
-					'file' => $e->getFile(),
-					'line' => $e->getLine(),
-					'trace' => $e->getTraceAsString()
-				]);
+			// Always put on the logger by default
+			$basePath = dirname(__DIR__);
+			$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+			$logger->error(strip_tags($e->getMessage()), [
+				'exception' => strtoupper($class),
+				'file'      => $e->getFile(),
+				'line'      => $e->getLine(),
+				'trace'     => $e->getTraceAsString(),
+				'context'   => [
+					// Request
+					'url'           => Server::RequestURI(),
+					'method'        => Server::RequestMethod(),
+					'query'         => Server::QueryString(),
+					'referer'       => Server::Referer(),
+					'ip'            => Server::IPAddress(),
+					'user_agent'    => Server::UserAgent(),
+					'host'          => Server::HostName(),
+					'server_ip'     => Server::ServerIPAddress(),
+					'secure'        => Server::IsSecureConnection(),
+					'client_port'   => Server::ClientPort(),
+					'request_time'  => Server::RequestTime(),
+					'is_ajax'       => Server::isAjaxRequest(),
 
+					// API-specific
+					'content_type'  => Server::ContentType(),
+					'accept'        => Server::Accept(),
+					'protocol'      => Server::Protocol(),
+					'raw_body'      => file_get_contents('php://input'),
+					'response_code' => http_response_code(),
+					'request_id'    => Server::RequestId(),
+
+					// User/session
+					'get'           => $_GET ?? [],
+					'post'          => $_POST ?? [],
+					'session_id'    => session_id() ?: null,
+					'user_id'       => $_SESSION['user_id'] ?? null,
+				]
+			]);
+
+			// Display the error only in the development mode
+			if (Config::get('DEVELOPMENT')) {
 				$file = urlencode($e->getFile());
 				$line = $e->getLine();
 
@@ -110,7 +144,7 @@
 				$selectedUrl = $editorUrls[$e->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
 
 				$table = [
-					'Exception Type:'      => strtoupper(get_class($e)),
+					'Exception Type:'      => strtoupper($class),
 					'Message:'             => $e->getMessage(),
 					'File:'                => $e->getFile(),
 					'Line:'                => $e->getLine(),
@@ -119,7 +153,7 @@
 				];
 
 				if ($cli) {
-					echo "\n\033[41;37m " . get_class($e) . " \033[0m\n\n";
+					echo "\n\033[41;37m " . $class . " \033[0m\n\n";
 
 					foreach ($table as $label => $value) {
 						echo "\033[33m$label\033[0m $value\n";
@@ -130,23 +164,48 @@
 
 					echo "\n\033[36mNavigate in editor:\033[0m $selectedUrl\n\n";
 				} else {
-					echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
-					echo '<h2 style="color: #721c24;">Exception Details</h2>';
-					echo '<hr style="border-color: #f5c6cb;">';
-					echo '<table style="width: 100%; border-collapse: collapse;">';
+					if (Server::isAjaxRequest()) {
 
-					foreach ($table as $label => $value) {
-						echo '<tr>';
-						echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;"><strong>' . $label . '</strong></td>';
-						echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . htmlspecialchars($value) . '</td>';
-						echo '</tr>';
+						$req = new Request();
+						$response = [
+							'status' => 'error',
+							'error'  => [
+								'type'    => strtoupper($class),
+								'message' => $e->getMessage(),
+								'code'    => $e->getCode(),
+								'file'    => $e->getFile(),
+								'line'    => $e->getLine(),
+								'trace'   => $e->getTrace(),
+							],
+						];
+
+						$headers = [
+							'Cache-Control' => 'no-cache, no-store, must-revalidate',
+							'Pragma'        => 'no-cache',
+							'Expires'       => '0',
+							'X-Request-ID'  => Server::RequestId() ?: uniqid('req_', true),
+						];
+
+						echo $req->response($response, 500, $headers)->json();
+					} else {
+						echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
+						echo '<h2 style="color: #721c24;">Exception Details</h2>';
+						echo '<hr style="border-color: #f5c6cb;">';
+						echo '<table style="width: 100%; border-collapse: collapse;">';
+
+						foreach ($table as $label => $value) {
+							echo '<tr>';
+							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;"><strong>' . $label . '</strong></td>';
+							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . htmlspecialchars($value) . '</td>';
+							echo '</tr>';
+						}
+
+						echo '</table>';
+						echo '<h3 style="color: #721c24;">Stack Trace</h3>';
+						echo '<pre style="background-color: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 5px; color: #333;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+						echo '<a href="' . $selectedUrl . '" style="display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #721c24; color: #fff; text-decoration: none; border-radius: 5px;">Navigate Error</a>';
+						echo '</div>';
 					}
-
-					echo '</table>';
-					echo '<h3 style="color: #721c24;">Stack Trace</h3>';
-					echo '<pre style="background-color: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 5px; color: #333;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
-					echo '<a href="' . $selectedUrl . '" style="display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #721c24; color: #fff; text-decoration: none; border-radius: 5px;">Navigate Error</a>';
-					echo '</div>';
 				}
 			}
 		}

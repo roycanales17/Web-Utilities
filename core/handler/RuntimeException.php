@@ -212,7 +212,7 @@
 						foreach ($table as $label => $value) {
 							echo '<tr>';
 							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;"><strong>' . $label . '</strong></td>';
-							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . htmlspecialchars($value) . '</td>';
+							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . $value . '</td>';
 							echo '</tr>';
 						}
 

@@ -131,7 +131,7 @@
 					$this->runtimeHandler->handle($e);
 				} else {
 					$class = get_class($e);
-					$basePath = Config::get('APP_ROOT', '');
+					$basePath = Config::get('APP_ROOT', '..');
 					$logger = new Logger($basePath . '/logs', logFile: 'error.log');
 
 					$logger->error(strip_tags($e->getMessage()), [

@@ -10,10 +10,10 @@
 	use App\Utilities\Cache;
 	use App\Utilities\Logger;
 	use App\Utilities\Mail;
-	use App\Routes\Route;
 	use App\Utilities\Config;
-	use App\Headers\Request;
 	use App\Utilities\Server;
+	use App\Headers\Request;
+	use App\Routes\Route;
 	use Closure;
 	use Exception;
 	use Throwable;

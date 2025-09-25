@@ -3,10 +3,11 @@
 	namespace App\Bootstrap\Helper;
 
 	use App\Bootstrap\Exceptions\AppException;
-	use App\Databases\Database;
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\Utilities\Stream;
+	use App\Databases\Database;
+	use App\Console\Schedule;
 
 	trait Configuration
 	{
@@ -94,7 +95,7 @@
 				$basePath = config('APP_ROOT');
 				$path = $basePath . $this->config['scheduler'] ?? '';
 				if (file_exists($path)) {
-					App\Console\Schedule::setPath($path);
+					Schedule::setPath($path);
 				}
 			}
 		}

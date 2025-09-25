@@ -154,16 +154,16 @@
         },
         {
             "name": "roy404/artisan",
-            "version": "v1.1.9",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-CLI-Artisan.git",
-                "reference": "d26c57257aa8a5496d67c504c65983dbe2fcfa16"
+                "reference": "afe75d470cb098d045ebbcd8ca50ddd723526e87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-CLI-Artisan/zipball/d26c57257aa8a5496d67c504c65983dbe2fcfa16",
-                "reference": "d26c57257aa8a5496d67c504c65983dbe2fcfa16",
+                "url": "https://api.github.com/repos/roycanales17/PHP-CLI-Artisan/zipball/afe75d470cb098d045ebbcd8ca50ddd723526e87",
+                "reference": "afe75d470cb098d045ebbcd8ca50ddd723526e87",
                 "shasum": ""
             },
             "require": {
@@ -194,9 +194,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-CLI-Artisan/issues",
-                "source": "https://github.com/roycanales17/PHP-CLI-Artisan/tree/v1.1.9"
+                "source": "https://github.com/roycanales17/PHP-CLI-Artisan/tree/v1.2.0"
             },
-            "time": "2025-09-25T00:41:47+00:00"
+            "time": "2025-09-25T00:54:03+00:00"
         },
         {
             "name": "roy404/blades",

@@ -88,4 +88,14 @@
 				}
 			}
 		}
+
+		protected function setScheduler(): void {
+			if (php_sapi_name() == 'cli') {
+				$basePath = config('APP_ROOT');
+				$path = $basePath . $this->config['scheduler'] ?? '';
+				if (file_exists($path)) {
+					App\Console\Schedule::setPath($path);
+				}
+			}
+		}
 	}

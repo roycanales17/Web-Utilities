@@ -59,6 +59,7 @@
 				$this->setDatabaseConfig();
 				$this->setSessionConfig();
 				$this->setPreloadFiles();
+				$this->setScheduler();
 				$this->setStreamAuthentication(run: true);
 
 				// Validate/Configure CSRF token

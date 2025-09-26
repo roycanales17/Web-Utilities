@@ -93,7 +93,7 @@
 		protected function setScheduler(): void {
 			if (php_sapi_name() == 'cli' && defined('APP_SCHEDULER')) {
 				$basePath = rtrim(config('APP_ROOT'), '/'). "/";
-				$path = $basePath . ltrim($this->config['scheduler'] ?? '', '/');
+				$path = $basePath . ltrim($this->config['execute'] ?? '', '/');
 				$artisan = $basePath . ltrim($this->config['cron'] ?? '', '/');
 
 				if (file_exists($path) && file_exists($artisan)) {

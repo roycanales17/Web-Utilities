@@ -91,11 +91,13 @@
 		}
 
 		protected function setScheduler(): void {
-			if (php_sapi_name() == 'cli') {
-				$basePath = config('APP_ROOT');
-				$path = $basePath . $this->config['scheduler'] ?? '';
-				if (file_exists($path)) {
-					Schedule::setPath($path);
+			if (php_sapi_name() == 'cli' && defined('APP_SCHEDULER')) {
+				$basePath = rtrim(config('APP_ROOT'), '/'). "/";
+				$path = $basePath . ltrim($this->config['scheduler'] ?? '', '/');
+				$artisan = $basePath . ltrim($this->config['cron'] ?? '', '/');
+
+				if (file_exists($path) && file_exists($artisan)) {
+					Schedule::setPath($artisan, $path);
 				}
 			}
 		}

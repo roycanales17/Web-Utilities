@@ -132,12 +132,8 @@
 					$this->runtimeHandler->handle($e);
 				} else {
 					$class = get_class($e);
-					if (defined('APP_SCHEDULER')) {
-						$logger = new Logger('/logs', logFile: 'cron.log');
-					} else {
-						$basePath = Config::get('APP_ROOT', '..');
-						$logger = new Logger($basePath . '/logs', logFile: 'error.log');
-					}
+					$basePath = Config::get('APP_ROOT', '..');
+					$logger = new Logger($basePath . '/logs', logFile: 'error.log');
 
 					$logger->error(strip_tags($e->getMessage()), [
 						'exception' => strtoupper($class),

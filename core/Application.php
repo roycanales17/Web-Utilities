@@ -36,6 +36,9 @@
 		}
 
 		public function run(Closure|null $callback = null): void {
+			// CLI Checker
+			$cli = php_sapi_name() === 'cli';
+
 			try {
 				if (php_sapi_name() !== 'cli') {
 					while (ob_get_level() > 0) {
@@ -90,9 +93,6 @@
 					Mail::configure($mail['host'], $mail['port'], $credentials);
 				}
 
-				// CLI Checker
-				$cli = php_sapi_name() === 'cli';
-
 				// This display the content page
 				if ($callback) $callback($conf);
 
@@ -122,7 +122,7 @@
 				}
 
 			} catch (Exception|Throwable $e) {
-				if (php_sapi_name() !== 'cli' && Config::get('DEVELOPMENT')) {
+				if (!$cli && Config::get('DEVELOPMENT')) {
 					while (ob_get_level() > 0) {
 						ob_end_clean();
 					}
@@ -132,8 +132,12 @@
 					$this->runtimeHandler->handle($e);
 				} else {
 					$class = get_class($e);
-					$basePath = Config::get('APP_ROOT', '..');
-					$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+					if (defined('APP_SCHEDULER')) {
+						$logger = new Logger('/logs', logFile: 'cron.log');
+					} else {
+						$basePath = Config::get('APP_ROOT', '..');
+						$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+					}
 
 					$logger->error(strip_tags($e->getMessage()), [
 						'exception' => strtoupper($class),
@@ -180,9 +184,12 @@
 							'user_agent'    => Server::UserAgent(),
 						]
 					]);
-					echo(view('error', [
-						'email' => Config::get('APP_EMAIL', '')
-					]));
+
+					if (!$cli) {
+						echo(view('error', [
+							'email' => Config::get('APP_EMAIL', '')
+						]));
+					}
 				}
 			} finally {
 				$this->performance->end();

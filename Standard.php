@@ -342,6 +342,7 @@
 	 */
 	function base_path(string $path = ''): string
 	{
-		$base = realpath(__DIR__ . '/..');
+		$base = realpath(__DIR__ . '/../../');
+
 		return $path ? $base . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : $base;
 	}

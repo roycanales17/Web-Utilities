@@ -92,8 +92,7 @@
 
 		protected function setScheduler(): void {
 			if (php_sapi_name() == 'cli') {
-				$basePath = rtrim(config('APP_ROOT'), '/'). "/";
-				$cron = $basePath . ltrim($this->config['cron'] ?? '', '/');
+				$cron = base_path($this->config['cron'] ?? '');
 
 				if (file_exists($cron)) {
 					Schedule::setPath($cron);

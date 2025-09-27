@@ -99,7 +99,7 @@
 				// Configure Routes
 				foreach ($conf['routes'] ?? [] as $route) {
 					$routeObject = Route::configure(
-						root: $route['root'] ?? $cli ? "./routes" : "../routes",
+						root: base_path('/routes'),
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
 						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
@@ -115,10 +115,11 @@
 				}
 
 				if (!$cli) {
-					if (file_exists('../views/404.blade.php') || file_exists('../views/404.php')) {
+					if (file_exists(base_path('/views/404.blade.php')) || file_exists(base_path('/views/404.php'))) {
 						echo view('404');
 					}
 					ob_end_flush();
+
 				}
 
 			} catch (Exception|Throwable $e) {
@@ -132,8 +133,7 @@
 					$this->runtimeHandler->handle($e);
 				} else {
 					$class = get_class($e);
-					$basePath = Config::get('APP_ROOT', '..');
-					$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+					$logger = new Logger(base_path('/logs'), logFile: 'error.log');
 
 					$logger->error(strip_tags($e->getMessage()), [
 						'exception' => strtoupper($class),

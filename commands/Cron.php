@@ -1,21 +1,20 @@
 <?php
 
 	namespace Commands;
-	
+
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Console\Command;
 	use App\Console\Schedule;
 
 	class Cron extends Command {
-		
+
 		protected string $signature = 'cron:scheduler';
 		protected string $description = 'Runs the application scheduler every minute via cron.';
-		
+
 		public function handle(): void
 		{
-			$basePath = rtrim(config('APP_ROOT', '/'), '/');
-			$artisan = trim(config('ARTISAN_FILENAME', 'artisan'), '/');
-			$artisanPath = "{$basePath}/{$artisan}";
+			$artisan = config('ARTISAN_FILENAME', 'artisan');
+			$artisanPath = base_path("/{$artisan}");
 			$routePath = Schedule::getRoute();
 
 			if (!file_exists($routePath)) {

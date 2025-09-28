@@ -223,6 +223,8 @@
 						echo '</div>';
 					}
 				}
+			} else {
+				echo(view('error', ['email' => Config::get('APP_EMAIL', '')]));
 			}
 		}
 	}

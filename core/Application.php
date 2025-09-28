@@ -129,65 +129,11 @@
 					}
 				}
 
-				if ($this->runtimeHandler) {
-					$this->runtimeHandler->handle($e);
-				} else {
-					$class = get_class($e);
-					$basePath = Config::get('APP_ROOT', '..');
-					$logger = new Logger($basePath . '/logs/app', logFile: 'error.log');
-
-					$logger->error(strip_tags($e->getMessage()), [
-						'exception' => strtoupper($class),
-						'file'      => $e->getFile(),
-						'line'      => $e->getLine(),
-						'trace'     => $e->getTraceAsString(),
-						'context'   => [
-							// 🚨 Core request info (always check first)
-							'url'           => Server::RequestURI(),
-							'method'        => Server::RequestMethod(),
-							'ip'            => Server::IPAddress(),
-							'host'          => Server::HostName(),
-							'protocol'      => Server::Protocol(),
-							'secure'        => Server::IsSecureConnection(),
-							'is_ajax'       => Server::isAjaxRequest(),
-							'request_id'    => Server::RequestId(),
-							'response_code' => http_response_code(),
-
-							// ⏱ Timing + connection
-							'request_time' => sprintf(
-								"%s [%s]",
-								Server::RequestTime(),
-								date('Y-m-d H:i:s', Server::RequestTime())
-							),
-							'client_port'   => Server::ClientPort(),
-							'server_ip'     => Server::ServerIPAddress(),
-
-							// 🌐 Request metadata
-							'referer'       => Server::Referer(),
-							'content_type'  => Server::ContentType(),
-
-							// 👤 User/session
-							'session_id'    => session_id() ?: null,
-							'user_id'       => $_SESSION['user_id'] ?? null,
-
-							// 🔎 Request params (can be verbose but useful)
-							'get'           => $_GET ?? [],
-							'post'          => $_POST ?? [],
-							'query'         => Server::QueryString(),
-
-							// 📝 Potentially long fields (put at the bottom)
-							'raw_body'      => file_get_contents('php://input'),
-							'accept'        => Server::Accept(),
-							'user_agent'    => Server::UserAgent(),
-						]
-					]);
-
-					if (!$cli) {
-						echo(view('error', [
-							'email' => Config::get('APP_EMAIL', '')
-						]));
-					}
+				if (!$this->runtimeHandler) {
+					$this->runtimeHandler = new RuntimeException();
 				}
+
+				$this->runtimeHandler->handle($e);
 			} finally {
 				$this->performance->end();
 				if (request()->query('SHOW_PERFORMANCE') === true) {

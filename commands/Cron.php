@@ -26,6 +26,6 @@
 			}
 
 			require_once $routePath;
-			Schedule::execute($artisanPath);
+			Schedule::execute($artisanPath, true);
 		}
 	}

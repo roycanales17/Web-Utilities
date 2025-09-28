@@ -134,7 +134,7 @@
 				} else {
 					$class = get_class($e);
 					$basePath = Config::get('APP_ROOT', '..');
-					$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+					$logger = new Logger($basePath . '/logs/app', logFile: 'error.log');
 
 					$logger->error(strip_tags($e->getMessage()), [
 						'exception' => strtoupper($class),

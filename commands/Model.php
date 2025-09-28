@@ -23,7 +23,7 @@
 			$className = ucfirst($directories[count($directories) - 1]);
 
 			array_pop($directories);
-			$basePath = dirname('./') . "/" . implode('/', $directories);
+			$basePath = base_path("/" . implode('/', $directories));
 			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
 
 			$table = strtolower($className);

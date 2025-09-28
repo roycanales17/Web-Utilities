@@ -18,12 +18,12 @@
 
 			$this->info('⏳ Initializing controller class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "http/Controller/$className");
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "Http/Controller/$className");
 			$directories = explode('/', $className);
 			$className = ucfirst($directories[count($directories) - 1]);
 
 			array_pop($directories);
-			$basePath = dirname('./') . "/" . implode('/', $directories);
+			$basePath = base_path("/" . implode('/', $directories));
 			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
 
 			$content = <<<PHP

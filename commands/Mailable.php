@@ -45,7 +45,7 @@
 				}
 			HTML;
 
-			if ($this->create($filename, $content, dirname('./'). '/mails')) {
+			if ($this->create($filename, $content, base_path('/mails'))) {
 				$this->success("✅ Mail class '{$filename}' has been successfully created and is ready for use.");
 				return;
 			}

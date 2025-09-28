@@ -3,6 +3,7 @@
 	namespace Commands;
 	
 	use App\Console\Command;
+	use FilesystemIterator;
 
 	class ClearDirectory extends Command {
 		
@@ -16,15 +17,14 @@
 				return;
 			}
 
-			$root = dirname('./');
-			$targetPath = rtrim("$root/$path", '/');
+			$targetPath = base_path("/$path");
 
 			if (!is_dir($targetPath)) {
 				$this->warn("Directory `$targetPath` does not exist or is not a directory.");
 				return;
 			}
 
-			$items = new \FilesystemIterator($targetPath, \FilesystemIterator::SKIP_DOTS);
+			$items = new FilesystemIterator($targetPath, FilesystemIterator::SKIP_DOTS);
 
 			foreach ($items as $item) {
 				if ($item->isDir()) {
@@ -41,7 +41,7 @@
 		{
 			if (!is_dir($dir)) return;
 
-			$items = new \FilesystemIterator($dir, \FilesystemIterator::SKIP_DOTS);
+			$items = new FilesystemIterator($dir, FilesystemIterator::SKIP_DOTS);
 
 			foreach ($items as $item) {
 				if ($item->isDir()) {

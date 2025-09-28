@@ -23,7 +23,7 @@
 			$className = ucfirst($directories[count($directories) - 1]);
 
 			array_pop($directories);
-			$basePath = dirname('./') . "/" . implode('/', $directories) . "/" . $className;
+			$basePath = base_path("/" . implode('/', $directories) . "/" . $className);
 			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', array_merge($directories, [ $className ]))) . ";";
 
 			$content = <<<PHP

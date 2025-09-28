@@ -30,7 +30,7 @@
 		 */
 		public function __construct(string $logDirectory = 'logs', string $logFile = 'app.log', string $logLevel = 'debug')
 		{
-			$this->logDirectory = trim($logDirectory, '/') . '/';
+			$this->logDirectory = trim($logDirectory, '/');
 			$this->logFile = $logFile;
 			$this->logLevel = in_array(strtolower($logLevel), $this->logLevels) ? strtolower($logLevel) : 'debug';
 

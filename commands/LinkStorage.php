@@ -11,9 +11,10 @@
 
 		public function handle(): void
 		{
-			$publicBuildPath = base_path('/public/build');
-			$storageBasePath = base_path('/storage');
-			$storageLink = base_path('/storage');
+			$projectRoot = $this->findProjectRoot();
+			$publicBuildPath = $projectRoot . '/public/build';
+			$storageBasePath = $projectRoot . '/storage';
+			$storageLink = $publicBuildPath . '/storage';
 
 			// 1. Create storage/{public,protect,private} and add .htaccess
 			$folders = [

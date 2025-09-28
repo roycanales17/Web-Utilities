@@ -19,22 +19,35 @@
 			$this->basePath = $this->resolveBasePath($disk);
 
 			if ($this->isS3Disk()) {
-				$_ENV['AWS_DEFAULT_REGION'] = Config::get('AWS_DEFAULT_REGION', 'us-east-1');
-				$_ENV['AWS_ACCESS_KEY_ID'] = Config::get('AWS_ACCESS_KEY_ID', 'your-default-key');
-				$_ENV['AWS_SECRET_ACCESS_KEY'] = Config::get('AWS_SECRET_ACCESS_KEY', 'your-default-secret');
-				$_ENV['AWS_BUCKET'] = Config::get('AWS_BUCKET', 'your-default-bucket');
+				// Load AWS configuration (LocalStack or AWS)
+				$_ENV['AWS_DEFAULT_REGION']     = Config::get('AWS_DEFAULT_REGION', 'us-east-1');
+				$_ENV['AWS_ACCESS_KEY_ID']      = Config::get('AWS_ACCESS_KEY_ID', 'test');
+				$_ENV['AWS_SECRET_ACCESS_KEY']  = Config::get('AWS_SECRET_ACCESS_KEY', 'test');
+				$_ENV['AWS_BUCKET']             = Config::get('AWS_BUCKET', 'my-bucket');
+				$_ENV['AWS_ENDPOINT']           = Config::get('AWS_ENDPOINT', null);
 
-				// Initialize S3Client
-				$this->s3Client = new S3Client([
-					'region' => getenv('AWS_DEFAULT_REGION'),
-					'version' => 'latest',
+				$config = [
+					'region'      => getenv('AWS_DEFAULT_REGION'),
+					'version'     => 'latest',
 					'credentials' => [
-						'key' => getenv('AWS_ACCESS_KEY_ID'),
+						'key'    => getenv('AWS_ACCESS_KEY_ID'),
 						'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
 					],
-				]);
+				];
 
-				$this->bucket = getenv('AWS_BUCKET');
+				// Use LocalStack endpoint if provided
+				if (getenv('AWS_ENDPOINT')) {
+					$config['endpoint'] = getenv('AWS_ENDPOINT');
+					$config['use_path_style_endpoint'] = true; // required for LocalStack/MinIO
+				}
+
+				$this->s3Client = new S3Client($config);
+				$this->bucket   = getenv('AWS_BUCKET');
+
+				// Validate bucket exists (helpful for LocalStack)
+				if (!$this->s3Client->doesBucketExist($this->bucket)) {
+					throw new \RuntimeException("S3 bucket '{$this->bucket}' does not exist.");
+				}
 			}
 		}
 
@@ -42,12 +55,13 @@
 		{
 			$paths = [
 				'local' => rtrim(self::$root, '/') . '/',
-				's3' => 's3://',
+				's3'    => 's3://',
 			];
 
-			if ($disk == 'local') {
-				if (!file_exists($paths['local']))
-					mkdir($paths['local'],  0777, true);
+			if ($disk === 'local') {
+				if (!file_exists($paths['local'])) {
+					mkdir($paths['local'], 0777, true);
+				}
 			}
 
 			return $paths[$disk] ?? $paths['local'];
@@ -67,7 +81,7 @@
 			if ($this->isS3Disk()) {
 				$cmd = $this->s3Client->getCommand('GetObject', [
 					'Bucket' => $this->bucket,
-					'Key' => $path,
+					'Key'    => $path,
 				]);
 
 				return (string)$this->s3Client->createPresignedRequest($cmd, $expiration)->getUri();
@@ -84,8 +98,8 @@
 			if ($this->isS3Disk()) {
 				$this->s3Client->putObject([
 					'Bucket' => $this->bucket,
-					'Key' => $path,
-					'Body' => $contents,
+					'Key'    => $path,
+					'Body'   => $contents,
 				]);
 				return true;
 			}
@@ -99,7 +113,7 @@
 			if ($this->isS3Disk()) {
 				$result = $this->s3Client->getObject([
 					'Bucket' => $this->bucket,
-					'Key' => $path,
+					'Key'    => $path,
 				]);
 				return (string)$result['Body'];
 			}
@@ -122,7 +136,7 @@
 			if ($this->isS3Disk()) {
 				$this->s3Client->deleteObject([
 					'Bucket' => $this->bucket,
-					'Key' => $path,
+					'Key'    => $path,
 				]);
 				return true;
 			}
@@ -135,15 +149,15 @@
 		{
 			if ($this->isS3Disk()) {
 				$this->s3Client->copyObject([
-					'Bucket' => $this->bucket,
-					'Key' => $to,
+					'Bucket'     => $this->bucket,
+					'Key'        => $to,
 					'CopySource' => "{$this->bucket}/{$from}",
 				]);
 				return true;
 			}
 
 			$fullFromPath = $this->basePath . ltrim($from, '/');
-			$fullToPath = $this->basePath . ltrim($to, '/');
+			$fullToPath   = $this->basePath . ltrim($to, '/');
 			return copy($fullFromPath, $fullToPath);
 		}
 
@@ -151,8 +165,8 @@
 		{
 			if ($this->isS3Disk()) {
 				$this->s3Client->copyObject([
-					'Bucket' => $this->bucket,
-					'Key' => $to,
+					'Bucket'     => $this->bucket,
+					'Key'        => $to,
 					'CopySource' => "{$this->bucket}/{$from}",
 				]);
 				$this->delete($from);
@@ -160,7 +174,7 @@
 			}
 
 			$fullFromPath = $this->basePath . ltrim($from, '/');
-			$fullToPath = $this->basePath . ltrim($to, '/');
+			$fullToPath   = $this->basePath . ltrim($to, '/');
 			return rename($fullFromPath, $fullToPath);
 		}
 
@@ -169,7 +183,7 @@
 			if ($this->isS3Disk()) {
 				$result = $this->s3Client->headObject([
 					'Bucket' => $this->bucket,
-					'Key' => $path,
+					'Key'    => $path,
 				]);
 				return $result['ContentLength'];
 			}
@@ -183,7 +197,7 @@
 			if ($this->isS3Disk()) {
 				$result = $this->s3Client->headObject([
 					'Bucket' => $this->bucket,
-					'Key' => $path,
+					'Key'    => $path,
 				]);
 				return strtotime($result['LastModified']);
 			}
@@ -196,9 +210,9 @@
 		{
 			if ($this->isS3Disk()) {
 				$files = $this->s3Client->listObjectsV2([
-					'Bucket' => $this->bucket,
-					'Prefix' => $directory,
-					'Delimeter' => '/',
+					'Bucket'    => $this->bucket,
+					'Prefix'    => $directory,
+					'Delimiter' => '/',
 				]);
 
 				return array_map(fn($object) => $object['Key'], $files['Contents'] ?? []);
@@ -212,8 +226,8 @@
 		{
 			if ($this->isS3Disk()) {
 				$objects = $this->s3Client->listObjectsV2([
-					'Bucket' => $this->bucket,
-					'Prefix' => $directory,
+					'Bucket'    => $this->bucket,
+					'Prefix'    => $directory,
 					'Delimiter' => '/',
 				]);
 				return array_map(fn($prefix) => $prefix['Prefix'], $objects['CommonPrefixes'] ?? []);
@@ -226,7 +240,6 @@
 		public function makeDirectory(string $directory): bool
 		{
 			if ($this->isS3Disk()) {
-				// S3 doesn't have directories per se, it uses prefixes. You can simulate directory creation by uploading a blank file with a slash in the name.
 				$this->put($directory . '/.empty', '');
 				return true;
 			}
@@ -243,7 +256,7 @@
 					'Prefix' => $directory,
 				]);
 
-				foreach ($objects['Contents'] as $object) {
+				foreach ($objects['Contents'] ?? [] as $object) {
 					$this->delete($object['Key']);
 				}
 				return true;
@@ -262,7 +275,8 @@
 		{
 			self::$root = $path;
 
-			if (!file_exists($path))
-				mkdir($path,  0777, true);
+			if (!file_exists($path)) {
+				mkdir($path, 0777, true);
+			}
 		}
 	}

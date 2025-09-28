@@ -14,6 +14,8 @@
 	 */
 	final class Storage
 	{
+		private static ?array $disk = null;
+
 		/**
 		 * Configure the default storage path.
 		 *
@@ -33,7 +35,11 @@
 		 */
 		public static function disk(string $disk = 'local'): BaseFileUpload
 		{
-			return new BaseFileUpload($disk);
+			if (!isset(self::$disk[$disk])) {
+				self::$disk[$disk] = new BaseFileUpload($disk);
+			}
+
+			return self::$disk[$disk];
 		}
 
 		/**

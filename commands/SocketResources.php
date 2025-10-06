@@ -11,9 +11,15 @@
 
 		public function handle(): void
 		{
-			$source = __DIR__ . '/../../resources/node';
+			$source = realpath(__DIR__ . '/../resources/node');
 			$destination = base_path('node');
 			$publicSocket = base_path('public/socket.js');
+
+			// Safety check
+			if (!$source || !is_dir($source)) {
+				$this->error("❌ Source directory not found: {$source}");
+				return;
+			}
 
 			// --- Validate source
 			if (!is_dir($source)) {
@@ -24,21 +30,25 @@
 			// --- Ensure destination exists
 			if (!is_dir($destination)) {
 				mkdir($destination, 0755, true);
-				$this->info("📁 Created directory: {$destination}");
+				$this->success("Created directory: {$destination}", false);
 			}
 
 			// --- Copy files recursively
 			$this->copyRecursive($source, $destination);
-			$this->info("✅ Node socket resources copied successfully.");
+			$this->success("Node socket resources copied successfully.", false);
 
 			// --- Create socket.js in /public for browser connection
 			$this->createFrontendSocketScript($publicSocket);
 
 			// --- Output Docker instructions
-			$this->info("🚀 Add the following service block to your docker-compose.yml:");
+			$this->info('');
+			$this->info("Add the following service block to your docker-compose.yml:");
+			$this->info('');
 			$this->info($this->getDockerInstruction());
-			$this->info("✅ Setup complete! You can now build and run your Node socket service with:");
+			$this->info('');
+			$this->info("Setup complete! You can now build and run your Node socket service with:");
 			$this->info('    docker compose up -d node');
+			$this->info('');
 		}
 
 		/**
@@ -102,7 +112,7 @@ JS;
 			}
 
 			file_put_contents($path, $content);
-			$this->info("🧩 Frontend socket file created: {$path}");
+			$this->success("Frontend socket file created: {$path}", false);
 		}
 
 		/**

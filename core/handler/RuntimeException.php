@@ -5,6 +5,7 @@
 	use App\Utilities\Config;
 	use App\Utilities\Logger;
 	use App\Utilities\Server;
+	use App\Utilities\Mail;
 	use App\Headers\Request;
 	use ReflectionException;
 	use ReflectionFunction;
@@ -97,6 +98,12 @@
 
 			$context = [];
 			if (!$cli) {
+
+				// Send via email
+				if (class_exists('\Mails\ErrorReportMail')) {
+					Mail::mail(new \Mails\ErrorReportMail($e));
+				}
+
 				$context = [
 					// 🚨 Core request info (always check first)
 					'url'           => Server::RequestURI(),

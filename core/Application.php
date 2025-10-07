@@ -7,11 +7,9 @@
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Helper\Configuration;
 	use App\Bootstrap\Helper\Performance;
-	use App\Utilities\Cache;
-	use App\Utilities\Logger;
-	use App\Utilities\Mail;
 	use App\Utilities\Config;
-	use App\Utilities\Server;
+	use App\Utilities\Cache;
+	use App\Utilities\Mail;
 	use App\Headers\Request;
 	use App\Routes\Route;
 	use Closure;

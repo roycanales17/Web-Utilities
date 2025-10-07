@@ -159,14 +159,17 @@
 		 */
 		public static function configure(string $host, int $port = 1025, array $credentials = []): bool
 		{
-			if (!$host || !$port || !$credentials)
+			if (!$host || !$port)
 				return false;
 
 			self::$configure = [
 				'host' => $host,
-				'port' => $port,
-				'credentials' => $credentials
+				'port' => $port
 			];
+
+			if ($credentials) {
+				self::$configure['credentials'] = $credentials;
+			}
 
 			return true;
 		}
@@ -384,14 +387,24 @@
 					$mail->Port = $conf['port'];
 					$mail->SMTPAuth = false;
 
-					if ($conf['credentials']) {
+					// Enable auth if credentials provided
+					if (!empty($conf['credentials'])) {
 						$mail->SMTPAuth = true;
-						$mail->Username = $credentials['username'] ?? '';
-						$mail->Password = $credentials['password'] ?? '';
+						$mail->Username = $conf['credentials']['username'] ?? '';
+						$mail->Password = $conf['credentials']['password'] ?? '';
 					}
 
+					// Auto TLS off by default
 					$mail->SMTPAutoTLS = false;
-					$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+
+					// Determine encryption based on port or user config
+					if (in_array($conf['port'], [465])) {
+						$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+					} elseif (in_array($conf['port'], [587, 2525])) {
+						$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+					} else {
+						$mail->SMTPSecure = false; // No encryption
+					}
 
 					self::$mailer = $mail;
 				} catch (Exception $e) {

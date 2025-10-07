@@ -6,8 +6,8 @@
 	
 	class ErrorReportMail extends Command {
 		
-		protected string $signature = '';
-		protected string $description = '';
+		protected string $signature = 'make:email_report';
+		protected string $description = 'Creates an exception email reporting template.';
 		
 		public function handle(): void
 		{

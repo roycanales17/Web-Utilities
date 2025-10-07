@@ -38,7 +38,7 @@
 			$cli = php_sapi_name() === 'cli';
 
 			try {
-				if (php_sapi_name() !== 'cli') {
+				if (!$cli) {
 					while (ob_get_level() > 0) {
 						ob_end_clean();
 					}

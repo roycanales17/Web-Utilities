@@ -18,10 +18,22 @@
 		private array $attachments = [];
 		private array $embedded = [];
 		private string $body = '';
+		private string $plainBody = '';
+		private string $altBody = '';
 
 		protected function view(string $view, array $data = []): self
 		{
 			$this->body = view($view, $data);
+			$this->plainBody = strip_tags(
+				preg_replace(['/<br\s*\/?>/i', '/<\/p>/i'], ["\n", "\n\n"], $this->body)
+			);
+
+			return $this;
+		}
+
+		protected function text(string $view, array $data = []): self
+		{
+			$this->altBody = view($view, $data);
 			return $this;
 		}
 
@@ -94,11 +106,16 @@
 		protected function build(): bool
 		{
 			$mail = Mail::to($this->to);
+
 			$mail->charset($this->charset);
 			$mail->contentType($this->contentType);
 			$mail->subject($this->subject);
 			$mail->body($this->body);
 			$mail->from($this->from);
+
+			if (!empty($this->altBody) && method_exists($mail, 'altBody')) {
+				$mail->altBody($this->altBody);
+			}
 
 			if ($this->replyTo)
 				$mail->header('Reply-To', $this->replyTo);
@@ -130,6 +147,7 @@
 				}
 			}
 
+			$mail->body($this->body ?: $this->plainBody);
 			return $mail->send();
 		}
 

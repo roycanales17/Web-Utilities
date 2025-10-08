@@ -7,7 +7,7 @@
 	class LinkStorage extends Command
 	{
 		protected string $signature = 'storage:link';
-		protected string $description = 'Create symbolic link from storage to public/build/storage and prepare storage folders';
+		protected string $description = 'Create symbolic link from storage to public/build/storage and prepare storage folders.';
 
 		public function handle(): void
 		{

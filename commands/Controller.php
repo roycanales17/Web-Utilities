@@ -7,7 +7,7 @@
 	class Controller extends Command
 	{
 		protected string $signature = 'make:controller';
-		protected string $description = 'Generates controller class';
+		protected string $description = 'Generates controller class.';
 
 		public function handle(string $className = ''): void
 		{

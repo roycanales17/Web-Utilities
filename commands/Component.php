@@ -7,7 +7,7 @@
 	class Component extends Command
 	{
 		protected string $signature = 'make:component';
-		protected string $description = 'Creates stream wire component';
+		protected string $description = 'Creates stream wire component.';
 
 		public function handle(string $className = ''): void
 		{

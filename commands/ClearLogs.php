@@ -7,7 +7,7 @@
 	class ClearLogs extends Command
 	{
 		protected string $signature = 'clear:logs';
-		protected string $description = 'Flush the application logs';
+		protected string $description = 'Flush the application logs.';
 
 		public function handle(bool $force = false): void
 		{

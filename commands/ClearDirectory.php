@@ -8,7 +8,7 @@
 	class ClearDirectory extends Command {
 		
 		protected string $signature = 'clear:directory';
-		protected string $description = 'Clear the directory files and subdirectories';
+		protected string $description = 'Clear the directory files and subdirectories.';
 		
 		public function handle(string $path = ''): void
 		{

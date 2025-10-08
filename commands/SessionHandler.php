@@ -10,7 +10,7 @@
 	class SessionHandler extends Command {
 		
 		protected string $signature = 'make:session';
-		protected string $description = 'Migrate database session';
+		protected string $description = 'Migrate database session.';
 		
 		public function handle(): void
 		{

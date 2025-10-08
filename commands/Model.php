@@ -7,7 +7,7 @@
 	class Model extends Command
 	{
 		protected string $signature = 'make:model';
-		protected string $description = 'Generates model class';
+		protected string $description = 'Generates model class.';
 
 		public function handle(string $className = ''): void
 		{

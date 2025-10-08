@@ -7,7 +7,7 @@
 	class Mailable extends Command {
 		
 		protected string $signature = 'make:mail';
-		protected string $description = 'Generate a new mailable class';
+		protected string $description = 'Generate a new mailable class.';
 		
 		public function handle(string $className = ''): void
 		{

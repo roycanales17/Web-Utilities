@@ -8,7 +8,7 @@
 	class Clear extends Command
 	{
 		protected string $signature = 'clear';
-		protected string $description = 'Clear the terminal screen';
+		protected string $description = 'Clear the terminal screen.';
 
 		public function handle(): void
 		{

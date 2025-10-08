@@ -33,21 +33,21 @@
 	 *
 	 * Static Methods:
 	 * @method static bool configure(string $host, int $port = 1025, array $credentials = []) Set up SMTP configuration.
-	 * @method static self to(string|array $emails) Set recipient(s).
+	 * @method static Mail to(string|array $emails) Set recipient(s).
 	 * @method static bool mail(object $className) Call `send()` method of an object.
 	 *
 	 * Instance Methods:
-	 * @method self from(string $email) Set the "from" email address.
-	 * @method self subject(string $subject) Set the subject of the email.
-	 * @method self body(string $body) Set the body content of the email.
-	 * @method self header(string $key, string $value) Add a custom email header.
-	 * @method self charset(string $charset) Set the character set (default: UTF-8).
-	 * @method self contentType(string $contentType) Set the content type (default: text/html).
-	 * @method self cc(string $email) Add a CC recipient.
-	 * @method self bcc(string $email) Add a BCC recipient.
-	 * @method self replyTo(string $email, string $name = '') Set a reply-to address.
-	 * @method self attach(string $content, string $filename, array $opt = []) Attach a file with optional MIME type and encoding.
-	 * @method self embedImage(string $path, string $cid) Embed an image in the message body.
+	 * @method Mail from(string $email) Set the "from" email address.
+	 * @method Mail subject(string $subject) Set the subject of the email.
+	 * @method Mail body(string $body) Set the body content of the email.
+	 * @method Mail header(string $key, string $value) Add a custom email header.
+	 * @method Mail charset(string $charset) Set the character set (default: UTF-8).
+	 * @method Mail contentType(string $contentType) Set the content type (default: text/html).
+	 * @method Mail cc(string $email) Add a CC recipient.
+	 * @method Mail bcc(string $email) Add a BCC recipient.
+	 * @method Mail replyTo(string $email, string $name = '') Set a reply-to address.
+	 * @method Mail attach(string $content, string $filename, array $opt = []) Attach a file with optional MIME type and encoding.
+	 * @method Mail embedImage(string $path, string $cid) Embed an image in the message body.
 	 * @method bool send() Send the email using the configured settings.
 	 *
 	 * @package App\Utilities
@@ -70,6 +70,7 @@
 		 * @var array
 		 */
 		private static array $configure = [];
+		private array $temp_config;
 
 		/**
 		 * Instance of PHPMailer for sending emails.
@@ -152,19 +153,32 @@
 		/**
 		 * Configure SMTP settings.
 		 *
+		 * @param array $config
+		 */
+		private function __construct(array $config = []) {
+			$this->temp_config = $config;
+		}
+
+		/**
+		 * Configure SMTP settings.
+		 *
 		 * @param string $host
 		 * @param int $port
+		 * @param string $encryption
+		 * @param string $smtp
 		 * @param array $credentials ['username' => '', 'password' => '']
 		 * @return bool
 		 */
-		public static function configure(string $host, int $port = 1025, array $credentials = []): bool
+		public static function configure(string $host, int $port = 1025, string $encryption = 'tls', string $smtp = 'smtp', array $credentials = []): bool
 		{
 			if (!$host || !$port)
 				return false;
 
 			self::$configure = [
 				'host' => $host,
-				'port' => $port
+				'port' => $port,
+				'encryption' => $encryption,
+				'mailer' => $smtp
 			];
 
 			if ($credentials) {
@@ -172,6 +186,16 @@
 			}
 
 			return true;
+		}
+
+		/**
+		 * Manual configuration for mailing.
+		 *
+		 * @param array $config
+		 * @return self
+		 */
+		public static function driver(array $config): self {
+			return new self($config);
 		}
 
 		/**
@@ -379,31 +403,44 @@
 		 */
 		public function send(): bool
 		{
-			if ($conf = self::$configure) {
+			$conf = self::$configure;
+			if (!empty($this->temp_config)) {
+				$conf = $this->temp_config;
+			}
+
+			if ($conf) {
 				try {
+					$mailerType = $conf['mailer'] ?? 'smtp';
 					$mail = new PHPMailer(true);
-					$mail->isSMTP();
-					$mail->Host = $conf['host'];
-					$mail->Port = $conf['port'];
-					$mail->SMTPAuth = false;
 
-					// Enable auth if credentials provided
-					if (!empty($conf['credentials'])) {
-						$mail->SMTPAuth = true;
-						$mail->Username = $conf['credentials']['username'] ?? '';
-						$mail->Password = $conf['credentials']['password'] ?? '';
-					}
+					switch ($mailerType) {
+						case 'smtp':
+							$mail->isSMTP();
+							$mail->Host = $conf['host'] ?? 'localhost';
+							$mail->Port = $conf['port'] ?? 587;
+							$mail->SMTPSecure = $conf['encryption'] ?? PHPMailer::ENCRYPTION_STARTTLS;
+							$mail->SMTPAuth = !empty($conf['credentials']);
 
-					// Auto TLS off by default
-					$mail->SMTPAutoTLS = false;
+							if (!empty($conf['credentials'])) {
+								$mail->Username = $conf['credentials']['username'] ?? '';
+								$mail->Password = $conf['credentials']['password'] ?? '';
+							}
 
-					// Determine encryption based on port or user config
-					if (in_array($conf['port'], [465])) {
-						$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-					} elseif (in_array($conf['port'], [587, 2525])) {
-						$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-					} else {
-						$mail->SMTPSecure = false; // No encryption
+							// Optional: Disable auto TLS if you explicitly control encryption
+							$mail->SMTPAutoTLS = false;
+							break;
+
+						case 'sendmail':
+							$mail->isSendmail();
+							break;
+
+						case 'mail':
+							$mail->isMail();
+							break;
+
+						case 'none':
+						default:
+							break;
 					}
 
 					self::$mailer = $mail;
@@ -431,8 +468,10 @@
 				$mail->Body = $this->body;
 
 				foreach ($this->headers as $header) {
-					[$key, $value] = explode(':', $header, 2);
-					$mail->addCustomHeader(trim($key), trim($value));
+					if (strpos($header, ':') !== false) {
+						[$key, $value] = explode(':', $header, 2);
+						$mail->addCustomHeader(trim($key), trim($value));
+					}
 				}
 
 				foreach ($this->attachments as $file) {

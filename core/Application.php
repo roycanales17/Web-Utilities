@@ -88,7 +88,7 @@
 						];
 					}
 
-					Mail::configure($mail['host'], $mail['port'], $credentials);
+					Mail::configure($mail['host'], $mail['port'], $mail['encryption'], $mail['smtp'], $credentials);
 				}
 
 				// This display the content page

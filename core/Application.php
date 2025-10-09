@@ -64,8 +64,10 @@
 				$this->setStreamAuthentication(run: true);
 
 				// Validate/Configure CSRF token
-				define('CSRF_TOKEN', csrf_token());
-				validate_token();
+				if (!$cli) {
+					define('CSRF_TOKEN', csrf_token());
+					validate_token();
+				}
 
 				// Configurations
 				$conf = $this->getConfig();

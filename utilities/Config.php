@@ -28,23 +28,46 @@
 		/**
 		 * Loads configuration from a .env-style file.
 		 * Lines starting with '#' are treated as comments and ignored.
+		 * Supports ${VAR_NAME} substitution using already loaded values.
 		 *
 		 * @param string $path The full path to the config file.
 		 * @return void
 		 */
 		public static function load(string $path): void
 		{
-			if (file_exists($path)) {
-				$lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-				foreach ($lines as $line) {
-					if (str_starts_with(trim($line), '#')) {
-						continue;
-					}
-					list($key, $value) = explode('=', $line, 2) + [null, null];
-					if ($key !== null && $value !== null) {
-						self::$config[trim($key)] = trim($value);
-					}
+			if (!file_exists($path)) {
+				return;
+			}
+
+			$lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+			foreach ($lines as $line) {
+				$line = trim($line);
+				if ($line === '' || str_starts_with($line, '#')) {
+					continue;
 				}
+
+				[$key, $value] = array_pad(explode('=', $line, 2), 2, null);
+				if ($key === null || $value === null) {
+					continue;
+				}
+
+				$key = trim($key);
+				$value = trim($value);
+
+				// Handle quoted values
+				if ((str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+					(str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+					$value = substr($value, 1, -1);
+				}
+
+				// Perform variable substitution like ${VAR}
+				$value = preg_replace_callback('/\$\{([A-Z0-9_]+)\}/i', function ($matches) use (&$config) {
+					$var = $matches[1];
+					return self::$config[$var] ?? getenv($var) ?? '';
+				}, $value);
+
+				self::$config[$key] = $value;
 			}
 		}
 

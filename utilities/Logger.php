@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use Exception;
 	use InvalidArgumentException;
 
 	/**
@@ -54,7 +55,7 @@
 		 */
 		public function debug(string $message, array $context = []): void
 		{
-			$this->log('🐞', 'debug', $message, $context);
+			$this->log('🐞', 'debug', $message, ['context' => $context]);
 		}
 
 		/**
@@ -66,7 +67,7 @@
 		 */
 		public function info(string $message, array $context = []): void
 		{
-			$this->log('ℹ️', 'info', $message, $context);
+			$this->log('ℹ️', 'info', $message, ['context' => $context]);
 		}
 
 		/**
@@ -78,7 +79,7 @@
 		 */
 		public function warning(string $message, array $context = []): void
 		{
-			$this->log('⚠️', 'warning', $message, $context);
+			$this->log('⚠️', 'warning', $message, ['context' => $context]);
 		}
 
 		/**
@@ -137,6 +138,9 @@
 
 			switch ($level) {
 				case 'error':
+					if (empty($context['trace'])) {
+						$context['trace'] = (new Exception())->getTraceAsString();
+					}
 					$this->errorTemplate($message, $log, $context);
 					break;
 
@@ -148,7 +152,7 @@
 					$log .= "Message  : {$message}\n";
 					$log .= "Memory   : " . round(memory_get_usage(true) / 1024 / 1024, 2) . " MB\n";
 					if (empty($context['trace'])) {
-						$context['trace'] = (new \Exception())->getTraceAsString();
+						$context['trace'] = (new Exception())->getTraceAsString();
 					}
 					$this->appendContext($log, $context);
 					break;
@@ -200,7 +204,7 @@
 
 		private function appendContext(string &$log, array $context): void
 		{
-			if (empty($context['context']) || !is_array($context['context'])) {
+			if (empty($context['context']) && !is_array($context['context'])) {
 				return;
 			}
 

@@ -137,7 +137,7 @@
 
 			switch ($level) {
 				case 'error':
-					$this->error_template($message, $log, $context);
+					$this->errorTemplate($message, $log, $context);
 					break;
 
 				case 'warning':
@@ -176,7 +176,7 @@
 			$this->appendContext($log, $context);
 		}
 
-		private function error_template(string $message, string &$log, array $context): void
+		private function errorTemplate(string $message, string &$log, array $context): void
 		{
 			if (isset($context['exception'])) {
 				$log .= "Type     : {$context['exception']}\n";

@@ -105,6 +105,13 @@
 		 */
 		protected function log(string $title, string $level, string $message, array $context = []): void
 		{
+			// Automatically include caller info (file + line)
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+			$caller = $trace[1] ?? $trace[0] ?? [];
+			$context['file'] = $context['file'] ?? ($caller['file'] ?? 'unknown');
+			$context['line'] = $context['line'] ?? ($caller['line'] ?? 0);
+			$context['trace'] = $context['trace'] ?? sprintf('%s:%d', $context['file'], $context['line']);
+
 			$logEntry = $this->formatLogEntry($level, $title, $message, $context);
 			file_put_contents("{$this->logDirectory}/{$this->logFile}", $logEntry, FILE_APPEND | LOCK_EX);
 		}
@@ -140,10 +147,9 @@
 
 				case 'debug':
 					$log .= "Message  : {$message}\n";
+					$log .= "File     : {$context['file']}\n";
+					$log .= "Line     : {$context['line']}\n";
 					$log .= "Memory   : " . round(memory_get_usage(true) / 1024 / 1024, 2) . " MB\n";
-					if (empty($context['trace'])) {
-						$context['trace'] = (new Exception())->getTraceAsString();
-					}
 					$this->appendContext($log, $context);
 					break;
 
@@ -160,13 +166,8 @@
 		private function warningTemplate(string $message, string &$log, array $context): void
 		{
 			$log .= "Message  : {$message}\n";
-			if (isset($context['file'])) {
-				$log .= "File     : {$context['file']}\n";
-			}
-			if (isset($context['line'])) {
-				$log .= "Line     : {$context['line']}\n";
-			}
-
+			$log .= "File     : {$context['file']}\n";
+			$log .= "Line     : {$context['line']}\n";
 			$this->appendContext($log, $context);
 		}
 
@@ -177,38 +178,25 @@
 			}
 
 			$log .= "Message  : {$message}\n";
-
-			if (isset($context['file'])) {
-				$log .= "File     : {$context['file']}\n";
-			}
-			if (isset($context['line'])) {
-				$log .= "Line     : {$context['line']}\n";
-			}
+			$log .= "File     : {$context['file']}\n";
+			$log .= "Line     : {$context['line']}\n";
 
 			$this->appendContext($log, $context);
 
 			if (isset($context['trace'])) {
-				$log .= "\n🔍 Trace:\n" . trim($context['trace']) . "\n";
+				$log .= "\n🔍 Trace Path:\n" . trim($context['trace']) . "\n";
 			}
 		}
 
 		private function appendContext(string &$log, array $context): void
 		{
-			if (empty($context['context']) && !is_array($context['context'])) {
+			$ctx = $context['context'] ?? [];
+			if (!is_array($ctx) || empty($ctx)) {
 				return;
 			}
 
-			$ctx = $context['context'];
-
-			if (!empty($ctx)) {
-				$maxKeyLength = max(array_map('strlen', array_keys($ctx)));
-			} else {
-				$maxKeyLength = 0;
-			}
-
-			if ($ctx) {
-				$log .= "\n🌐 Context:\n";
-			}
+			$maxKeyLength = max(array_map('strlen', array_keys($ctx)));
+			$log .= "\n🌐 Context:\n";
 
 			foreach ($ctx as $key => $value) {
 				if (is_array($value) || is_object($value)) {
@@ -218,7 +206,6 @@
 				} elseif ($value === null) {
 					$value = 'null';
 				}
-
 				$log .= str_pad($key, $maxKeyLength) . " : {$value}\n";
 			}
 		}

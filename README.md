@@ -365,10 +365,10 @@ Mail::to(['user@example.com', 'support@example.com'])
     ->body('<h1>Hello!</h1><p>Thanks for joining us.</p>')
     ->contentType('text/html')
     ->cc('manager@example.com')
-    ->bcc(['audit@example.com', 'log@example.com'])
+    ->bcc('audit@example.com')
     ->replyTo('support@example.com')
-    ->attach('/path/to/attachment.pdf') // Optional
-    ->embedImage('/path/to/image.png', 'inlineImage') // Optional
+    ->attach('This is the content', 'attachment.pdf') // Optional
+    ->embedImage(base_path('/public/favicon.ico'), 'inlineImage') // Optional
     ->charset('UTF-8')
     ->header('X-Mailer', 'PHP Utilities Mailer')
     ->send();
@@ -460,18 +460,18 @@ You can also define multiple disks like `local` or `s3`, each referring to diffe
 use App\Utilities\Storage;
 
 // Store a file
-Storage::disk('local')->put('documents/file.txt', 'File contents');
+Storage::disk('local')->put('public/file.txt', 'File contents');
 
 // Retrieve file content
-$content = Storage::disk('local')->get('documents/file.txt');
+$content = Storage::disk('local')->get('public/file.txt');
 
 // Check existence
-if (Storage::disk('local')->exists('documents/file.txt')) {
+if (Storage::disk('local')->exists('public/file.txt')) {
     echo 'File exists!';
 }
 
 // Delete a file
-Storage::disk('local')->delete('documents/file.txt');
+Storage::disk('local')->delete('public/file.txt');
 ```
 
 ### **Common Operations:**

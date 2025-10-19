@@ -26,7 +26,7 @@
 		 */
 		public function __construct(string $logDirectory = 'logs', string $logFile = 'app.log')
 		{
-			$this->logDirectory = trim($logDirectory, '/');
+			$this->logDirectory = base_path(trim($logDirectory, '/'));
 			$this->logFile = $logFile;
 
 			$this->ensureLogDirectoryExists();
@@ -40,7 +40,7 @@
 		protected function ensureLogDirectoryExists(): void
 		{
 			if (!is_dir($this->logDirectory)) {
-				if (!mkdir($this->logDirectory, 0777, true) && !is_dir($this->logDirectory)) {
+				if (!mkdir($this->logDirectory, 0777, true)) {
 					throw new InvalidArgumentException("Failed to create log directory: {$this->logDirectory}");
 				}
 			}
@@ -95,16 +95,6 @@
 		}
 
 		/**
-		 * Gets the full path to the log file.
-		 *
-		 * @return string
-		 */
-		protected function getLogFilePath(): string
-		{
-			return "{$this->logDirectory}/{$this->logFile}";
-		}
-
-		/**
 		 * Logs a message at the given level with optional context.
 		 *
 		 * @param string $title
@@ -116,7 +106,7 @@
 		protected function log(string $title, string $level, string $message, array $context = []): void
 		{
 			$logEntry = $this->formatLogEntry($level, $title, $message, $context);
-			file_put_contents($this->getLogFilePath(), $logEntry, FILE_APPEND | LOCK_EX);
+			file_put_contents("{$this->logDirectory}/{$this->logFile}", $logEntry, FILE_APPEND | LOCK_EX);
 		}
 
 		/**
@@ -208,9 +198,17 @@
 				return;
 			}
 
-			$log .= "\n🌐 Context:\n";
 			$ctx = $context['context'];
-			$maxKeyLength = max(array_map('strlen', array_keys($ctx)));
+
+			if (!empty($ctx)) {
+				$maxKeyLength = max(array_map('strlen', array_keys($ctx)));
+			} else {
+				$maxKeyLength = 0;
+			}
+
+			if ($ctx) {
+				$log .= "\n🌐 Context:\n";
+			}
 
 			foreach ($ctx as $key => $value) {
 				if (is_array($value) || is_object($value)) {

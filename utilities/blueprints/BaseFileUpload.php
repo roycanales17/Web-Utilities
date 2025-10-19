@@ -12,7 +12,7 @@
 		protected ?S3Client $s3Client = null;
 		protected string $bucket;
 		protected string $basePath;
-		protected static string $root = 'storage';
+		public static string $root = 'storage';
 
 		public function __construct(string $disk)
 		{
@@ -45,9 +45,11 @@
 				$this->s3Client = new S3Client($config);
 				$this->bucket   = getenv('AWS_BUCKET');
 
-				// Validate bucket exists (helpful for LocalStack)
-				if (!$this->s3Client->doesBucketExist($this->bucket)) {
-					throw new \RuntimeException("S3 bucket '{$this->bucket}' does not exist.");
+				// Validate bucket exists (safer for LocalStack or S3)
+				try {
+					$this->s3Client->headBucket(['Bucket' => $this->bucket]);
+				} catch (\Aws\S3\Exception\S3Exception $e) {
+					throw new \RuntimeException("S3 bucket '{$this->bucket}' does not exist or is not accessible.");
 				}
 			}
 		}
@@ -80,19 +82,37 @@
 
 		public function temporaryUrl(string $path, \DateTimeInterface $expiration): string
 		{
+			if (empty($path)) {
+				throw new \InvalidArgumentException('Path cannot be empty when generating a temporary URL.');
+			}
+
+			if ($expiration->getTimestamp() <= time()) {
+				throw new \InvalidArgumentException('Expiration time must be in the future.');
+			}
+
 			if ($this->isS3Disk()) {
 				$cmd = $this->s3Client->getCommand('GetObject', [
 					'Bucket' => $this->bucket,
 					'Key'    => $path,
 				]);
 
-				return (string)$this->s3Client->createPresignedRequest($cmd, $expiration)->getUri();
+				return (string) $this->s3Client
+					->createPresignedRequest($cmd, $expiration)
+					->getUri();
 			}
 
+			// Local temporary URL
 			$timestamp = $expiration->getTimestamp();
-			$signature = hash_hmac('sha256', $path . $timestamp, 'your-secret-key');
+			$secretKey = config('APP_KEY', 'fallback-secret');
+			$data = "{$path}|{$timestamp}";
+			$signature = hash_hmac('sha256', $data, $secretKey);
 
-			return $this->url($path) . "?expires={$timestamp}&signature={$signature}";
+			return sprintf(
+				'%s?expires=%d&signature=%s',
+				$this->url($path),
+				$timestamp,
+				$signature
+			);
 		}
 
 		public function put(string $path, string $contents): bool
@@ -107,6 +127,11 @@
 			}
 
 			$fullPath = $this->basePath . ltrim($path, '/');
+			$dir = dirname($fullPath);
+			if (!is_dir($dir)) {
+				mkdir($dir, 0777, true);
+			}
+
 			return file_put_contents($fullPath, $contents) !== false;
 		}
 
@@ -221,7 +246,8 @@
 			}
 
 			$fullDirectory = $this->basePath . ltrim($directory, '/');
-			return glob($fullDirectory . '/*');
+			$files = glob($fullDirectory . '/*');
+			return array_map(fn($f) => str_replace($this->basePath, '', $f), $files ?: []);
 		}
 
 		public function allDirectories(string $directory = ''): array
@@ -236,7 +262,8 @@
 			}
 
 			$fullDirectory = $this->basePath . ltrim($directory, '/');
-			return glob($fullDirectory . '/*', GLOB_ONLYDIR);
+			$dirs = glob($fullDirectory . '/*', GLOB_ONLYDIR);
+			return array_map(fn($d) => str_replace($this->basePath, '', $d), $dirs ?: []);
 		}
 
 		public function makeDirectory(string $directory): bool
@@ -265,6 +292,19 @@
 			}
 
 			$fullPath = $this->basePath . ltrim($directory, '/');
+			if (!is_dir($fullPath)) {
+				return false;
+			}
+
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator($fullPath, \FilesystemIterator::SKIP_DOTS),
+				\RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ($iterator as $file) {
+				$file->isDir() ? rmdir($file) : unlink($file);
+			}
+
 			return rmdir($fullPath);
 		}
 
@@ -280,5 +320,19 @@
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
 			}
+		}
+
+		public function validateTemporaryUrl(string $path, int $expires, string $signature): bool
+		{
+			if ($expires < time()) {
+				return false;
+			}
+
+			$secretKey = config('APP_KEY', 'fallback-secret');
+			$data = "{$path}|{$expires}";
+			$expectedSignature = hash_hmac('sha256', $data, $secretKey);
+
+			// Use hash_equals to prevent timing attacks
+			return hash_equals($expectedSignature, $signature);
 		}
 	}

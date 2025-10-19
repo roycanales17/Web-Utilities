@@ -44,11 +44,6 @@
 
 		/**
 		 * Store a file at the specified path.
-		 *
-		 * @param string $path
-		 * @param string $contents
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function put(string $path, string $contents, string $disk = 'local'): bool
 		{
@@ -57,10 +52,6 @@
 
 		/**
 		 * Retrieve the contents of a file.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return string|null
 		 */
 		public static function get(string $path, string $disk = 'local'): ?string
 		{
@@ -69,10 +60,6 @@
 
 		/**
 		 * Check if a file exists.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function exists(string $path, string $disk = 'local'): bool
 		{
@@ -81,10 +68,6 @@
 
 		/**
 		 * Delete a file.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function delete(string $path, string $disk = 'local'): bool
 		{
@@ -93,11 +76,6 @@
 
 		/**
 		 * Copy a file to a new location.
-		 *
-		 * @param string $from
-		 * @param string $to
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function copy(string $from, string $to, string $disk = 'local'): bool
 		{
@@ -106,11 +84,6 @@
 
 		/**
 		 * Move a file to a new location.
-		 *
-		 * @param string $from
-		 * @param string $to
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function move(string $from, string $to, string $disk = 'local'): bool
 		{
@@ -119,10 +92,6 @@
 
 		/**
 		 * Get the file size in bytes.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return int
 		 */
 		public static function size(string $path, string $disk = 'local'): int
 		{
@@ -131,10 +100,6 @@
 
 		/**
 		 * Get the last modified time of a file.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return int
 		 */
 		public static function lastModified(string $path, string $disk = 'local'): int
 		{
@@ -143,10 +108,6 @@
 
 		/**
 		 * Get the public URL for a file.
-		 *
-		 * @param string $path
-		 * @param string $disk
-		 * @return string
 		 */
 		public static function url(string $path, string $disk = 'local'): string
 		{
@@ -155,11 +116,6 @@
 
 		/**
 		 * Get a temporary URL for a file with an expiration date.
-		 *
-		 * @param string $path
-		 * @param DateTimeInterface $expiration
-		 * @param string $disk
-		 * @return string
 		 */
 		public static function temporaryUrl(string $path, DateTimeInterface $expiration, string $disk = 'local'): string
 		{
@@ -167,11 +123,65 @@
 		}
 
 		/**
-		 * Get all files in a directory.
+		 * Validate a temporary URL.
 		 *
-		 * @param string $directory
+		 * @param string $path
+		 * @param int $expires
+		 * @param string $signature
+		 * @return bool
+		 */
+		public static function validateTemporaryUrl(string $path, int $expires, string $signature): bool
+		{
+			if ($expires < time()) {
+				return false; // expired
+			}
+
+			$secretKey = config('APP_KEY', 'fallback-secret');
+			$data = "{$path}|{$expires}";
+			$expectedSignature = hash_hmac('sha256', $data, $secretKey);
+
+			return hash_equals($expectedSignature, $signature);
+		}
+
+		/**
+		 * Serve a temporary file if the signature and expiration are valid.
+		 *
+		 * @param string $path
+		 * @param array $query
 		 * @param string $disk
-		 * @return array<int, string>
+		 * @return mixed
+		 */
+		public static function serveTemporaryFile(string $path, array $query = [], string $disk = 'local')
+		{
+			$expires = isset($query['expires']) ? (int)$query['expires'] : 0;
+			$signature = $query['signature'] ?? '';
+
+			if (!self::validateTemporaryUrl($path, $expires, $signature)) {
+				http_response_code(403);
+				exit('This temporary link is invalid or has expired.');
+			}
+
+			$fileHandler = self::disk($disk);
+			if (!$fileHandler->exists($path)) {
+				http_response_code(404);
+				exit('File not found.');
+			}
+
+			$contents = $fileHandler->get($path);
+
+			// Guess MIME type (basic)
+			$mime = function_exists('mime_content_type')
+				? mime_content_type($fileHandler::$root . '/' . ltrim($path, '/'))
+				: 'application/octet-stream';
+
+			header("Content-Type: {$mime}");
+			header('Content-Disposition: inline; filename="' . basename($path) . '"');
+			echo $contents;
+			exit;
+		}
+
+		/**
+		 * Get all files in a directory.
 		 */
 		public static function allFiles(string $directory, string $disk = 'local'): array
 		{
@@ -180,10 +190,6 @@
 
 		/**
 		 * Get all directories within a directory.
-		 *
-		 * @param string $directory
-		 * @param string $disk
-		 * @return array<int, string>
 		 */
 		public static function allDirectories(string $directory, string $disk = 'local'): array
 		{
@@ -192,10 +198,6 @@
 
 		/**
 		 * Create a new directory.
-		 *
-		 * @param string $directory
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function makeDirectory(string $directory, string $disk = 'local'): bool
 		{
@@ -204,10 +206,6 @@
 
 		/**
 		 * Delete a directory.
-		 *
-		 * @param string $directory
-		 * @param string $disk
-		 * @return bool
 		 */
 		public static function deleteDirectory(string $directory, string $disk = 'local'): bool
 		{

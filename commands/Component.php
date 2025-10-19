@@ -23,16 +23,17 @@
 			$className = ucfirst($directories[count($directories) - 1]);
 
 			array_pop($directories);
-			$basePath = base_path("/" . implode('/', $directories) . "/" . $className);
+			$fakePath = "/" . implode('/', $directories) . "/" . $className;
+			$basePath = base_path($fakePath);
 			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', array_merge($directories, [ $className ]))) . ";";
 
 			$content = <<<PHP
 			<?php
-			
+
 				{$namespaceDeclaration}
-				
+
 				use App\Utilities\Handler\Component;
-				
+
 				class {$className} extends Component
 				{
 					/**
@@ -46,7 +47,7 @@
 					 * - `loader()` — Returns a loading skeleton or placeholder shown while the component is processing.
 					 *
 					 * See the component interface located at:
-					 * @see $basePath/index.blade.php
+					 * @see .$fakePath/index.blade.php
 					 */
 					public function render(): array
 					{

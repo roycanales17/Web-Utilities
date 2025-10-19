@@ -114,7 +114,13 @@
 							// Store into the artisan
 						});
 					} else {
-						$routeObject->captured($route['captured'], true);
+						if (Request::header('X-STREAM-WIRE')) {
+							$routeObject->captured(function($content) {
+								echo($content);
+							}, true);
+						} else {
+							$routeObject->captured($route['captured'], true);
+						}
 					}
 				}
 

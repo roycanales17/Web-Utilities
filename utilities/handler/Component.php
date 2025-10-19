@@ -60,73 +60,102 @@
 			$html = $this->replaceHTML($this->loader(), $component);
 			$dataAttributes = $this->getAttributes($component, $startedTime);
 
-			return <<<HTML
-			<fragment class='component-container' {$dataAttributes}>
-				{$html}
-				<script>
-					(function() {
-						const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-						const component = document.querySelector("[data-component='{$component}']");
-						if (!component) return;
-			
-						const form = new FormData();
-						form.append('_component', '$component');
-						form.append('_method', 'render');
-			
-						fetch("/api/stream-wire/{$component}", {
-							method: "POST",
-							headers: {
-								"X-STREAM-WIRE": "true",
-								"X-CSRF-TOKEN": token
-							},
-							body: form
-						})
-						.then(response => {
-							if (!response.ok) {
-								console.error(
-									`%c❌ HTTP ERROR! %cStatus: \${response.status} 🚫`,
-									'color: red; font-weight: bold;',
-									'color: orange;'
-								);
-								if (response.status === 500) {
-									response.text().then(errorHtml => {
-										component.innerHTML += errorHtml;
-									});
-								}
-								return null;
-							}
-				
-							return response.text();
-						})
-						.then(html => {
-							const wrapper = document.createElement('div');
-							wrapper.innerHTML = html;
-							const newFragment = wrapper.querySelector("[data-component='{$component}']");
-							if (newFragment) {
-								component.replaceWith(newFragment);
-								newFragment.querySelectorAll('script').forEach(oldScript => {
-									const newScript = document.createElement('script');
-								
-									if (oldScript.src)
-										newScript.src = oldScript.src;
-								
-									if (oldScript.type)
-										newScript.type = oldScript.type;
-								
-									if (oldScript.textContent && !oldScript.src)
-										newScript.textContent = oldScript.textContent;
-										
-									document.head.appendChild(newScript).remove();
-								});
-							}
-						})
-						.catch(error => {
-							console.error("Fetch error:", error);
-						});
-					})();
-				</script>
-			</fragment>
-			HTML;
+			return
+				<<<HTML
+<fragment class='component-container' {$dataAttributes}>
+    {$html}
+    <script>
+        (function() {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+            const component = document.querySelector("[data-component='{$component}']");
+            if (!component) return;
+
+            let isJson = false;
+            const form = new FormData();
+            form.append('_component', '$component');
+            form.append('_method', 'render');
+            form.append('_models', '');
+            form.append('_properties', '');
+
+            fetch("/api/stream-wire/{$component}", {
+                method: "POST",
+                headers: {
+                    "X-STREAM-WIRE": "true",
+                    "X-CSRF-TOKEN": token
+                },
+                body: form
+            })
+            .then(response => {
+                const contentType = response.headers.get("Content-Type") || "";
+
+                if (!response.ok) {
+                    console.error(
+                        `%c❌ HTTP ERROR! %cStatus: \${response.status} 🚫`,
+                        "color: red; font-weight: bold;",
+                        "color: orange;"
+                    );
+
+                    if (response.status === 500) {
+                        response.text().then(errorHtml => {
+                            component.innerHTML += errorHtml;
+                        });
+                    }
+
+                    return null;
+                }
+
+                if (contentType.includes("application/json")) {
+                    isJson = true;
+                    return response.json().catch(err => {
+                        console.error("⚠️ Failed to parse JSON:", err);
+                        return null;
+                    });
+                } else if (contentType.includes("text/html")) {
+                    return response.text().catch(err => {
+                        console.error("⚠️ Failed to read HTML:", err);
+                        return null;
+                    });
+                } else {
+                    console.warn("⚠️ Unknown content type:", contentType);
+                    return null;
+                }
+            })
+            .then(res => {
+                var newContent = '';
+                if (isJson) {
+                    if (res.redirect !== undefined) {
+                        window.location.href = data.redirect;
+                        return;
+                    } else {
+                        newContent = res.content;
+                    }
+                } else {
+                    newContent = res;
+                }
+
+                const wrapper = document.createElement('div');
+                if (newContent) {
+                    component.innerHTML = newContent;
+                    component.querySelectorAll('script').forEach(oldScript => {
+                        const newScript = document.createElement('script');
+
+                        if (oldScript.src)
+                            newScript.src = oldScript.src;
+
+                        if (oldScript.type)
+                            newScript.type = oldScript.type;
+
+                        if (oldScript.textContent && !oldScript.src)
+                            newScript.textContent = oldScript.textContent;
+
+                        document.head.appendChild(newScript).remove();
+                    });
+                }
+            });
+        })();
+    </script>
+</fragment>
+HTML;
 		}
 
 		/**
@@ -299,21 +328,21 @@
 						
 											echo <<<HTML
 											console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
-											
+
 											// Simple log for Class without collapsing
 											console.log(`Class: %c{$escapedClass}`, 'color: red;');
-											
+
 											// Collapsed group for Component with short preview
 											console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
 											console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
 											console.groupEnd();
-											
+
 											console.log(`Duration: %c{$duration} ms`, 'color: orange;');
 											console.log(' ');
 											HTML;
 										}
 									})}
-								});	
+								});
 							} else {
 								console.error("Stream wire is not available");
 							}

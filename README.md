@@ -12,7 +12,7 @@ composer require roy404/utilities
 
 Then include the autoloader in your project entry file (e.g., index.php):
 ```php
-require 'autoload.php';
+require_once 'autoload.php';
 ```
 
 ---
@@ -237,10 +237,10 @@ use App\Utilities\Logger;
 // STEP 1: Initialize the Logger
 // ------------------------------------------------------
 // Parameters:
-// 1️⃣ Directory path where logs are stored
-// 2️⃣ Log filename (optional, default: 'app.log')
+// 1️⃣ Log filename (optional, default: 'app.log')
+// 2️⃣ Directory path where logs are stored
 
-$logger = new Logger('logs', 'app.log');
+$logger = new Logger('app.log', 'logs');
 
 // ------------------------------------------------------
 // STEP 2: Logging Different Message Types

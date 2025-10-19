@@ -21,10 +21,10 @@
 		/**
 		 * Logger constructor.
 		 *
-		 * @param string $logDirectory Directory to store logs (default: 'logs').
 		 * @param string $logFile Log file name (default: 'app.log').
+		 * @param string $logDirectory Directory to store logs (default: 'logs').
 		 */
-		public function __construct(string $logDirectory = 'logs', string $logFile = 'app.log')
+		public function __construct(string $logFile = 'app.log', string $logDirectory = 'logs')
 		{
 			$this->logDirectory = base_path(trim($logDirectory, '/'));
 			$this->logFile = $logFile;

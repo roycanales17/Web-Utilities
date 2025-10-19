@@ -93,7 +93,7 @@
 			}
 
 			// Always put on the logger by default
-			$logger = new Logger('logs', 'error.log');
+			$logger = new Logger('error.log');
 
 			$context = [];
 			if (!$cli) {

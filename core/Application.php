@@ -7,6 +7,7 @@
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Helper\Configuration;
 	use App\Bootstrap\Helper\Performance;
+	use App\Utilities\Storage;
 	use App\Utilities\Config;
 	use App\Utilities\Cache;
 	use App\Utilities\Mail;
@@ -62,6 +63,9 @@
 				$this->setPreloadFiles();
 				$this->setScheduler();
 				$this->setStreamAuthentication(run: true);
+
+				// Set storage path default
+				Storage::configure(base_path('/storage'));
 
 				// Validate/Configure CSRF token
 				if (!$cli) {

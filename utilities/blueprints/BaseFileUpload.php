@@ -3,6 +3,7 @@
 	namespace App\Utilities\Blueprints;
 
 	use App\Utilities\Config;
+	use App\Utilities\Server;
 	use Aws\S3\S3Client;
 
 	class BaseFileUpload
@@ -73,7 +74,8 @@
 				return $this->s3Client->getObjectUrl($this->bucket, $path);
 			}
 
-			return ltrim($path, '/');
+			$baseUrl = config('APP_URL', Server::HostName());
+			return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
 		}
 
 		public function temporaryUrl(string $path, \DateTimeInterface $expiration): string

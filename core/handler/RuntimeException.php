@@ -93,8 +93,7 @@
 			}
 
 			// Always put on the logger by default
-			$basePath = Config::get('APP_ROOT', '');
-			$logger = new Logger($basePath . '/logs', logFile: 'error.log');
+			$logger = new Logger('logs', 'error.log');
 
 			$context = [];
 			if (!$cli) {

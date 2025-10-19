@@ -360,7 +360,7 @@ use App\Utilities\Mail;
 // ------------------------------------------------------
 
 Mail::to(['user@example.com', 'support@example.com'])
-    ->from('noreply@example.com', 'App Support')
+    ->from('noreply@example.com')
     ->subject('Welcome to our platform!')
     ->body('<h1>Hello!</h1><p>Thanks for joining us.</p>')
     ->contentType('text/html')

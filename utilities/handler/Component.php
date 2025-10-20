@@ -3,12 +3,13 @@
 	namespace App\Utilities\Handler;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\Utilities\Config;
-	use App\View\Compilers\Blade;
 	use App\View\Compilers\scheme\CompilerException;
-	use Exception;
-	use ReflectionClass;
+	use App\View\Compilers\Blade;
+	use App\Utilities\Config;
+	use App\Utilities\Server;
 	use ReflectionProperty;
+	use ReflectionClass;
+	use Exception;
 
 	abstract class Component
 	{
@@ -68,14 +69,16 @@
         (function() {
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
             const component = document.querySelector("[data-component='{$component}']");
+            const properties = component.getAttribute('data-properties');
+
             if (!component) return;
 
             let isJson = false;
             const form = new FormData();
             form.append('_component', '$component');
             form.append('_method', 'render');
+            form.append('_properties', properties);
             form.append('_models', '');
-            form.append('_properties', '');
 
             fetch("/api/stream-wire/{$component}", {
                 method: "POST",
@@ -133,23 +136,26 @@
                     newContent = res;
                 }
 
-                const wrapper = document.createElement('div');
                 if (newContent) {
-                    component.innerHTML = newContent;
-                    component.querySelectorAll('script').forEach(oldScript => {
-                        const newScript = document.createElement('script');
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newContent.trim();
 
-                        if (oldScript.src)
-                            newScript.src = oldScript.src;
+                    const newComponent = tempDiv.firstElementChild;
+                    if (newComponent) {
+                        component.replaceWith(newComponent);
 
-                        if (oldScript.type)
-                            newScript.type = oldScript.type;
+                        newComponent.querySelectorAll('script').forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            if (oldScript.src) newScript.src = oldScript.src;
+                            if (oldScript.type) newScript.type = oldScript.type;
+                            if (oldScript.textContent && !oldScript.src)
+                                newScript.textContent = oldScript.textContent;
 
-                        if (oldScript.textContent && !oldScript.src)
-                            newScript.textContent = oldScript.textContent;
-
-                        document.head.appendChild(newScript).remove();
-                    });
+                            document.head.appendChild(newScript).remove();
+                        });
+                    } else {
+                        console.warn("⚠️ No valid component HTML returned for replacement.");
+                    }
                 }
             });
         })();
@@ -320,7 +326,7 @@ HTML;
 							if (typeof stream === 'function') {
 								stream("{$component}").finally(() => {
 									{$this->print(function() use ($dev, $component, $duration) {
-										if ($dev && count($_POST ?? [])) {
+										if ($dev && Server::isAjaxRequest()) {
 											$class = get_called_class();
 											$escapedClass = addslashes($class);
 											$escapedComponent = addslashes($component);

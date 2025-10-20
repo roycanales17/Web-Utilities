@@ -777,6 +777,26 @@ This will generate:
 | `/components/Counter/index.php`   | Defines the frontend markup and bindings.         |
 
 
+### Component Lifecycle Overview
+
+Each Stream-Wire component extends the base class:
+
+```php
+use App\Utilities\Handler\Component;
+```
+
+Your component may define any of the following methods:
+
+| Method                     | Purpose                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| **init()**                 | Initializes internal state or dependencies. Called when the component is first loaded. |
+| **verify(): bool**         | *(Optional)* Perform validation or pre-render checks.                                  |
+| **identifier(): string**   | Must be `static`. Used by the frontend to reference this component.                    |
+| **loader(): string**       | Returns temporary content shown while the component is processing.                     |
+| **redirect(string $path)** | Performs an AJAX-based redirect.                                                       |
+| **render(): array**        | Renders the final component view. Must return `$this->compile([...])`.                 |
+
+
 ### Example Component
 
 `/components/Counter/Counter.php`
@@ -788,30 +808,58 @@ use App\Utilities\Handler\Component;
 
 class Counter extends Component
 {
-    public $count = 0;
+    public int $count = 0;
+    public string $name = '';
 
-    public function increment()
+    // Initializes state when the component is mounted.
+    public function init($name): void
+    {
+        $this->name = $name;
+    }
+
+    // Optional: run checks before rendering.
+    public function verify(): bool
+    {
+        return true;
+    }
+
+    // Defines how this component is identified on the frontend.
+    public static function identifier(): string
+    {
+        return 'counter';
+    }
+
+    // Shown temporarily during long operations.
+    public function loader(): string
+    {
+        return 'Loading...';
+    }
+
+    // A simple interactive method callable from the frontend.
+    public function increment(): void
     {
         $this->count++;
     }
+    
+    public function incrementTwice(int $increment): void
+    {
+        $this->count += $increment;
+    }
 
     /**
-     * Component Lifecycle and Configuration
-     *
-     * ## Available Methods:
-     * - `identifier()` — Enables frontend access to this component.
-     * - `redirect()` — Performs an AJAX-based redirect.
-     * - `init()` — Initializes state or dependencies when the component is loaded.
-     * - `verify()` — (Optional) Runs validation before rendering.
-     * - `loader()` — Displays a temporary view while the component is processing.
-     *
-     * The component interface is defined in:
-     * @see ./components/Counter/index.php
+     * @see ./components/Counter/index.blade.php
      */
-    public function render()
+    public function render(): array
     {
+        // Example: simulate a long operation
+        sleep(2);
+
+        // Example: redirect if certain conditions are met
+        // $this->redirect('/profile');
+
         return $this->compile([
-            'count' => $this->count
+            'count' => $this->count,
+            'name' => $this->name
         ]);
     }
 }
@@ -820,21 +868,40 @@ class Counter extends Component
 `/components/Counter/index.php`
 
 ```bladehtml
-<div class="container">
+<div class="counter">
+    <h2>Hello, {{ $name }}!</h2>
     <h1>{{ $count }}</h1>
-    <button wire:click="increment()">+</button>
+    <button wire:click="increment">+1</button>
+    <button wire:click="incrementTwice(2)">+2</button>
 </div>
 ```
 
-### Available Directives
+To display the component, simply call example below anywhere on the blades:
+```php
+$component = Components\Counter\Counter::class;
+$init_params = ['name' => 'Robroy'];
+$asynchronous = true;
+echo stream($component, $init_params, $asynchronous);
+```
+
+**Function Parameters**
+
+| Parameter       | Type     | Description                                                                                                              |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `$component`    | `string` | The fully-qualified class name of the component (e.g., `Components\Counter\Counter::class`).                             |
+| `$init_params`  | `array`  | Optional parameters passed to the component’s public properties before initialization.                                   |
+| `$asynchronous` | `bool`   | Whether the component should be rendered as a live (AJAX-driven) Stream-Wire component. Set `true` to enable reactivity. |
+
+
+### Frontend Available Directives
 | Directive                | Description                                                  |
 |--------------------------| ------------------------------------------------------------ |
 | `wire:click="method()"`  | Calls a backend method when clicked.                         |
 | `wire:model="property"`  | Binds a frontend input field to a backend property.          |
 | `wire:submit="method()"` | Handles form submissions via AJAX.                           |
 | `wire:loading`           | Displays content while a backend request is being processed. |
-| `wire:if`, `wire:show`   | Conditionally show or hide elements.                         |
 
+More directives will be posted here soon...
 
 ### Behavior
 

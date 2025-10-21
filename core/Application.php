@@ -13,9 +13,9 @@
 	use App\Utilities\Mail;
 	use App\Headers\Request;
 	use App\Routes\Route;
-	use Closure;
 	use Exception;
 	use Throwable;
+	use Closure;
 
 	final class Application
 	{

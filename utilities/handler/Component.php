@@ -344,7 +344,6 @@ HTML;
 								$class = get_called_class();
 								$escapedClass = addslashes($class);
 								$escapedComponent = addslashes($component);
-								$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
 				
 								echo <<<JS
 									console.log("%c[Stream Completed]", "color: green; font-weight: bold;");
@@ -353,7 +352,7 @@ HTML;
 									console.log("Class: %c{$escapedClass}", "color: red;");
 									
 									// Collapsed group for Component details
-									console.groupCollapsed("Component: %c{$componentShort}", "color: yellow; font-weight: bold;");
+									console.groupCollapsed("Details");
 									console.log("Identifer: {$escapedComponent}");
 									try {
 									    const traceSingle = JSON.parse({$trace});

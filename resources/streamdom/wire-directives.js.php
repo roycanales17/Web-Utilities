@@ -65,8 +65,8 @@ export function load(stream)
 			let action = expression;
 			let overwrite = 0;
 
-			if (action.includes("event.target.value"))
-				action = action.replace("event.target.value", `'${value}'`);
+			if (action.includes("this.value"))
+				action = action.replace("this.value", `'${value}'`);
 
 			if (directive.includes('.refresh'))
 				overwrite = 1;
@@ -137,8 +137,8 @@ export function load(stream)
 				if (directive.includes('.rebind'))
 					overwrite = 2;
 
-				if (action.includes("event.target.value"))
-					action = action.replace("event.target.value", `'${element.value}'`);
+				if (action.includes("this.value"))
+					action = action.replace("this.value", `'${element.value}'`);
 
 				stream.findTheID(element, 'wire:target', function(target) {
 					if (target)
@@ -181,8 +181,8 @@ export function load(stream)
 				if (directive.includes('.rebind'))
 					overwrite = 2;
 
-				if (action.includes("event.target.value"))
-					action = action.replace("event.target.value", `'${element.value}'`);
+				if (action.includes("this.value"))
+					action = action.replace("this.value", `'${element.value}'`);
 
 				stream.submit({'_method': action}, false, overwrite);
 				stream.ajax(({ status }) => {
@@ -209,8 +209,8 @@ export function load(stream)
 				if (directive.includes('.rebind'))
 					overwrite = 2;
 
-				if (action.includes("event.target.value"))
-					action = action.replace("event.target.value", `'${element.value}'`);
+				if (action.includes("this.value"))
+					action = action.replace("this.value", `'${element.value}'`);
 
 				stream.submit({'_method': action}, false, overwrite);
 			}
@@ -233,8 +233,8 @@ export function load(stream)
 				if (directive.includes('.rebind'))
 					overwrite = 2;
 
-				if (action.includes("event.target.value"))
-					action = action.replace("event.target.value", `'${element.value}'`);
+				if (action.includes("this.value"))
+					action = action.replace("this.value", `'${element.value}'`);
 
 				stream.submit({'_method': action}, false, overwrite);
 				stream.ajax(({ status }) => {
@@ -261,8 +261,8 @@ export function load(stream)
 				if (directive.includes('.rebind'))
 					overwrite = 2;
 
-				if (action.includes("event.target.value"))
-					action = action.replace("event.target.value", `'${element.value}'`);
+				if (action.includes("this.value"))
+					action = action.replace("this.value", `'${element.value}'`);
 
 				stream.submit({'_method': action}, false, overwrite);
 			}

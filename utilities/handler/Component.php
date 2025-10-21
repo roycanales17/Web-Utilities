@@ -288,7 +288,7 @@ HTML;
 		 * @return array|string The rendered component wrapped in a <fragment> element with data attributes.
 		 * @throws Exception
 		 */
-		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false, bool $directSkeleton = true): string|array
+		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false, bool $directSkeleton = true, array $trace = []): string|array
 		{
 			if (!$preloader && !method_exists($this, 'render'))
 				throw new Exception("Render function is required.");
@@ -298,7 +298,7 @@ HTML;
 			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
-			$dev = Config::get('DEVELOPMENT', true);
+			$dev = Config::get('DEVELOPMENT');
 
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
@@ -318,20 +318,23 @@ HTML;
 			$html = $this->replaceHTML($render['content'] ?? '', $component);
 			$duration = $this->calculateDuration($startedTime);
 
+			$traceJson = json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), JSON_PRETTY_PRINT);
+			$traceEscaped = json_encode($traceJson);
+
 			$compiled = <<<HTML
 			<fragment class="component-container" {$this->getAttributes($component, $startedTime)}>
 				{$html}
-			
+
 				<script id="__fragment__">
 					(function () {
 						if (typeof stream !== 'function') {
 							console.error("Stream wire is not available");
 							return;
 						}
-			
+
 						stream("{$component}").finally(() => {
-							{$this->print(function () use ($dev, $component, $duration) {
-								if (!$dev) {
+							{$this->print(function () use ($dev, $component, $duration, $traceEscaped, $trace) {
+								if (!$dev && config('STREAM_DEBUG', true)) {
 									return;
 								}
 				
@@ -350,6 +353,12 @@ HTML;
 									console.groupCollapsed("Component: %c{$componentShort}", "color: yellow; font-weight: bold;");
 									console.log("Full Component: %c{$escapedComponent}", "color: yellow;");
 									console.groupEnd();
+									
+									console.groupCollapsed("%cPHP Backtrace", "color: cyan; font-weight: bold;");
+									console.table(JSON.parse({$traceEscaped}));
+									console.groupEnd();
+									
+									console.log({$trace});
 									
 									console.log("Duration: %c{$duration} ms", "color: orange;");
 									console.log(" ");

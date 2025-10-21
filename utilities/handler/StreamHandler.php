@@ -10,6 +10,7 @@
 	final class StreamHandler
 	{
 		private array $action = [];
+		private array $trace = [];
 		private array $extract;
 		private string|null $class;
 		private bool $asynchronous;
@@ -32,6 +33,11 @@
 			$this->class = $class;
 			$this->asynchronous = $asynchronous;
 			$this->extract = $constructParams;
+
+			if (config('STREAM_DEBUG', true)) {
+				$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+				$this->trace = $trace[3] ?? $trace[2] ?? $trace[1];
+			}
 		}
 
 		/**
@@ -179,9 +185,9 @@
 				}
 
 				if ($this->asynchronous) {
-					echo($component->parse(preloader: true));
+					echo($component->parse(preloader: true, trace: $this->trace));
 				} else {
-					echo($component->parse());
+					echo($component->parse(trace: $this->trace));
 				}
 
 				return Blade::compile(ob_get_clean());

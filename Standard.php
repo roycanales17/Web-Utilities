@@ -240,10 +240,13 @@
 
 		if (config('STREAM_DEBUG', true)) {
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-			$stream->trace('', [
+			$context = $constructParams;
+			$context = array_merge($context, [
 				'file' => $trace[0]['file'],
 				'line' => $trace[0]['line'],
 			]);
+			$context['asynchronous'] = $asynchronous;
+			$stream->trace(context: $context);
 		}
 
 		return $stream;

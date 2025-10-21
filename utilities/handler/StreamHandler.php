@@ -39,14 +39,14 @@
 		 * Use the trace the component.
 		 *
 		 * @param string $message
-		 * @param array $trace
+		 * @param array $context
 		 * @return $this
 		 */
-		public function trace(string $message, array $trace = []): self {
+		public function trace(string $message = '', array $context = []): self {
 			if ($message) {
 				$this->trace['message'] = $message;
 			}
-			$this->trace = array_merge($this->trace, $trace);
+			$this->trace = array_merge($this->trace, $context);
 			return $this;
 		}
 

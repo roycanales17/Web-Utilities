@@ -354,7 +354,7 @@ HTML;
 									
 									// Collapsed group for Component details
 									console.groupCollapsed("Component: %c{$componentShort}", "color: yellow; font-weight: bold;");
-									console.log("Identifer: %c{$escapedComponent}");
+									console.log("Identifer: {$escapedComponent}");
 									try {
 									    const traceSingle = JSON.parse({$trace});
 									    if (traceSingle && typeof traceSingle === 'object') {

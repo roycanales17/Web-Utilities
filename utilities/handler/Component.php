@@ -480,7 +480,6 @@ HTML;
 		 * @param array $data Data to be passed to the view for rendering.
 		 * @param string $blade Use to render the interface within the component directory.
 		 * @return array The rendered HTML content from the matched view file.
-		 * @throws CompilerException
 		 */
 		protected function compile(array $data = [], string $blade = 'index'): array
 		{
@@ -488,7 +487,6 @@ HTML;
 				ob_start();
 
 				// Set the root directory and determine the path of the class file
-				$root = "../";
 				$path = str_replace(['.', '\\'], '/', get_called_class());
 
 				// Define the possible file extensions for the view
@@ -511,7 +509,7 @@ HTML;
 
 				// Check each extension to see if the file exists in the directory
 				foreach ($extensions as $ext) {
-					if (file_exists($root . $index . $ext)) {
+					if (file_exists(base_path($index . $ext))) {
 						// If a matching file is found, set it as the skeleton to render
 						$blade_path = $index . $ext;
 						break;
@@ -520,7 +518,7 @@ HTML;
 
 				// Render the matched skeleton (view) file, passing the extracted data
 				if (isset($blade_path)) {
-					Blade::load($root . $blade_path, $data);
+					Blade::load(base_path($blade_path), $data);
 				}
 
 				return ob_get_clean();

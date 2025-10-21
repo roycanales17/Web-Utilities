@@ -36,19 +36,7 @@
 
 				class {$className} extends Component
 				{
-					/**
-					 * Component Lifecycle and Configuration
-					 *
-					 * ## Available Methods:
-					 * - `identifier()` — Requires if we allow the component to be executed on the frontend.
-					 * - `redirect()` — Performs an Ajax-based redirection.
-					 * - `init()` — Serves as the component's initializer; use this to set up internal state or dependencies.
-					 * - `verify()` — (Optional) Runs pre-render validation or checks before displaying the component.
-					 * - `loader()` — Returns a loading skeleton or placeholder shown while the component is processing.
-					 *
-					 * See the component interface located at:
-					 * @see .$fakePath/index.blade.php
-					 */
+					 /** @see .$fakePath/index.blade.php */
 					public function render(): array
 					{
 						return \$this->compile();

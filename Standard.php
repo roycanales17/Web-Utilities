@@ -174,7 +174,7 @@
 	 */
 	function dump(mixed $data, bool $exit = false): void
 	{
-		if (config('DEVELOPMENT')) {
+		if (config('DEVELOPMENT', true)) {
 			$printed = print_r($data, true);
 			echo <<<HTML
 				<pre> 
@@ -202,7 +202,7 @@
 			$requestToken = request()->header('X-CSRF-TOKEN') ?? request()->input('csrf-token');
 
 			if ($requestToken !== $token) {
-				$message = Config::get('DEVELOPMENT') ? 'Invalid token' : 'Bad Request';
+				$message = Config::get('DEVELOPMENT', true) ? 'Invalid token' : 'Bad Request';
 				exit(response(['message' => $message], 400)->json());
 			}
 		}

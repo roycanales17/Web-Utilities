@@ -298,7 +298,7 @@ HTML;
 			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
-			$dev = Config::get('DEVELOPMENT');
+			$dev = Config::get('DEVELOPMENT', true);
 
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
@@ -397,7 +397,7 @@ HTML;
 			$extra = [];
 			$dataAttributes = '';
 
-			$dev = Config::get('DEVELOPMENT');
+			$dev = Config::get('DEVELOPMENT', true);
 			$properties = $this->fetchProperties();
 
 			if ($dev) $extra['class'] = get_called_class();

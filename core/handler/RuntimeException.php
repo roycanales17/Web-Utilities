@@ -153,7 +153,7 @@
 			]);
 
 			// Display the error only in the development mode
-			if (Config::get('DEVELOPMENT')) {
+			if (Config::get('DEVELOPMENT', true)) {
 				$file = urlencode($e->getFile());
 				$line = $e->getLine();
 

@@ -54,7 +54,7 @@
 		}
 
 		protected function setDevelopment(): void {
-			$status = config('DEVELOPMENT', 1);
+			$status = config('DEVELOPMENT', true);
 			error_reporting($status);
 			ini_set('display_errors', $status);
 		}

@@ -187,8 +187,16 @@
 					echo "\n\033[36mNavigate in editor:\033[0m $selectedUrl\n\n";
 				} else {
 					if (Server::isAjaxRequest()) {
-
 						$req = new Request();
+						$trace = array_map(function ($t) {
+							return [
+								'file'     => $t['file'] ?? '',
+								'line'     => $t['line'] ?? '',
+								'class'    => $t['class'] ?? '',
+								'function' => $t['function'] ?? '',
+							];
+						}, $e->getTrace());
+
 						$response = [
 							'status' => 'error',
 							'error'  => [
@@ -197,7 +205,7 @@
 								'code'    => $e->getCode(),
 								'file'    => $e->getFile(),
 								'line'    => $e->getLine(),
-								'trace'   => $e->getTrace(),
+								'trace'   => $trace,
 							],
 						];
 

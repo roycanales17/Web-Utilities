@@ -145,15 +145,16 @@
 	 *
 	 * @param string $path View path using dot notation (e.g., 'users.profile').
 	 * @param array $data Data to be extracted and passed into the view.
+	 * @param string $directory Directory for
 	 * @return string Rendered HTML content.
 	 * @throws CompilerException
 	 */
-	function view(string $path, array $data = []): string
+	function view(string $path, array $data = [], string $directory = 'views'): string
 	{
 		ob_start();
 		$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
-		$mainPath = "../views/{$normalizedPath}.php";
-		$bladePath = "../views/{$normalizedPath}.blade.php";
+		$mainPath = base_path("/$directory/{$normalizedPath}.php");
+		$bladePath = base_path("/$directory/{$normalizedPath}.blade.php");
 
 		if (file_exists($bladePath)) {
 			$mainPath = $bladePath;

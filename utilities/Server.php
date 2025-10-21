@@ -2,6 +2,8 @@
 
 	namespace App\Utilities;
 
+	use App\Headers\Request;
+
 	/**
 	 * Class Server
 	 *
@@ -145,6 +147,10 @@
 				!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
 				strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
 			) {
+				return true;
+			}
+
+			if (Request::header('X-STREAM-WIRE')) {
 				return true;
 			}
 

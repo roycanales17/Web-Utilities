@@ -319,44 +319,47 @@ HTML;
 			$duration = $this->calculateDuration($startedTime);
 
 			$compiled = <<<HTML
-				<fragment class='component-container'{$this->getAttributes($component, $startedTime)}>
-					{$html}
-					<script id="__fragment__">
-						(function() {
-							if (typeof stream === 'function') {
-								stream("{$component}").finally(() => {
-									{$this->print(function() use ($dev, $component, $duration) {
-										if ($dev && Server::isAjaxRequest()) {
-											$class = get_called_class();
-											$escapedClass = addslashes($class);
-											$escapedComponent = addslashes($component);
-											$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
-						
-											echo <<<HTML
-											console.log(`%c[Stream Completed]`, 'color: green; font-weight: bold;');
+			<fragment class="component-container" {$this->getAttributes($component, $startedTime)}>
+				{$html}
+			
+				<script id="__fragment__">
+					(function () {
+						if (typeof stream !== 'function') {
+							console.error("Stream wire is not available");
+							return;
+						}
+			
+						stream("{$component}").finally(() => {
+							{$this->print(function () use ($dev, $component, $duration) {
+								if (!$dev) {
+									return;
+								}
+				
+								$class = get_called_class();
+								$escapedClass = addslashes($class);
+								$escapedComponent = addslashes($component);
+								$componentShort = substr($component, 0, 20) . (strlen($component) > 20 ? '...' : '');
+				
+								echo <<<JS
+									console.log("%c[Stream Completed]", "color: green; font-weight: bold;");
 
-											// Simple log for Class without collapsing
-											console.log(`Class: %c{$escapedClass}`, 'color: red;');
-
-											// Collapsed group for Component with short preview
-											console.groupCollapsed(`Component: %c{$componentShort}`, 'color: yellow; font-weight: bold;');
-											console.log(`Full Component: %c{$escapedComponent}`, 'color: yellow;');
-											console.groupEnd();
-
-											console.log(`Duration: %c{$duration} ms`, 'color: orange;');
-											console.log(' ');
-											HTML;
-										}
-									})}
-								});
-							} else {
-								console.error("Stream wire is not available");
-							}
-						})();
-					</script>
-				</fragment>
-
-				HTML;
+									// Simple log for Class (no grouping)
+									console.log("Class: %c{$escapedClass}", "color: red;");
+									
+									// Collapsed group for Component details
+									console.groupCollapsed("Component: %c{$componentShort}", "color: yellow; font-weight: bold;");
+									console.log("Full Component: %c{$escapedComponent}", "color: yellow;");
+									console.groupEnd();
+									
+									console.log("Duration: %c{$duration} ms", "color: orange;");
+									console.log(" ");
+								JS;
+							})}
+						});
+					})();
+				</script>
+			</fragment>
+			HTML;
 
 			if (!$directSkeleton) {
 				$render['content'] = $compiled;

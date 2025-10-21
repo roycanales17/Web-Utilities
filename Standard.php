@@ -236,7 +236,17 @@
 	 */
 	function stream(null|string $class = null, array $constructParams = [], bool $asynchronous = false): StreamHandler
 	{
-		return new StreamHandler($class, $constructParams, $asynchronous);
+		$stream = new StreamHandler($class, $constructParams, $asynchronous);
+
+		if (config('STREAM_DEBUG', true)) {
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+			$stream->trace('', [
+				'file' => $trace[0]['file'],
+				'line' => $trace[0]['line'],
+			]);
+		}
+
+		return $stream;
 	}
 
 	/**

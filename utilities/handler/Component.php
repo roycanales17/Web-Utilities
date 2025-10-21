@@ -321,6 +321,9 @@ HTML;
 			$traceJson = json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), JSON_PRETTY_PRINT);
 			$traceEscaped = json_encode($traceJson);
 
+			$trace = json_encode($trace, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+			$trace = json_encode($trace);
+
 			$compiled = <<<HTML
 			<fragment class="component-container" {$this->getAttributes($component, $startedTime)}>
 				{$html}
@@ -351,14 +354,25 @@ HTML;
 									
 									// Collapsed group for Component details
 									console.groupCollapsed("Component: %c{$componentShort}", "color: yellow; font-weight: bold;");
-									console.log("Full Component: %c{$escapedComponent}", "color: yellow;");
+									console.log("Identifer: %c{$escapedComponent}");
+									try {
+									    const traceSingle = JSON.parse({$trace});
+									    if (traceSingle && typeof traceSingle === 'object') {
+									        Object.entries(traceSingle).forEach(([key, val]) => {
+									            console.log(key+':', val);
+									        });
+									    } else {
+									        console.log(traceSingle);
+									    }
+									} catch (err) {
+									    console.warn("Failed to parse exception trace:", err);
+									    console.log({$trace});
+									}
 									console.groupEnd();
 									
 									console.groupCollapsed("%cPHP Backtrace", "color: cyan; font-weight: bold;");
 									console.table(JSON.parse({$traceEscaped}));
 									console.groupEnd();
-									
-									console.log({$trace});
 									
 									console.log("Duration: %c{$duration} ms", "color: orange;");
 									console.log(" ");

@@ -33,11 +33,21 @@
 			$this->class = $class;
 			$this->asynchronous = $asynchronous;
 			$this->extract = $constructParams;
+		}
 
-			if (config('STREAM_DEBUG', true)) {
-				$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-				$this->trace = $trace[3] ?? $trace[2] ?? $trace[1];
+		/**
+		 * Use the trace the component.
+		 *
+		 * @param string $message
+		 * @param array $trace
+		 * @return $this
+		 */
+		public function trace(string $message, array $trace = []): self {
+			if ($message) {
+				$this->trace['message'] = $message;
 			}
+			$this->trace = array_merge($this->trace, $trace);
+			return $this;
 		}
 
 		/**

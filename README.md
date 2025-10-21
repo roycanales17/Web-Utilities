@@ -738,46 +738,49 @@ $message = Session::flash('success'); // "Profile updated successfully!"
 
 ## Stream-Wire
 
-Stream-Wire enables you to create dynamic and interactive components using pure PHP —
-no JavaScript required. It handles communication between the frontend and backend seamlessly,
-allowing components to update themselves on user interaction.
+Stream-Wire enables you to build dynamic, interactive PHP components without writing JavaScript.
+It bridges backend and frontend communication automatically, allowing components to update and react to user interactions seamlessly — using pure **PHP**.
 
 ### Installation & Setup
-1. **Generate required assets:** 
+1. **Publish Required Assets:** 
    ```php
    php artisan public:stream
    ```
-   This command publishes all necessary JavaScript and CSS files to `/libraries/streamdom/`.
-2. **Include these files in your main layout:**
-   ```html
-   <script src="/libraries/streamdom/stream.js"></script>
-   <link rel="stylesheet" href="/libraries/streamdom/stream.css">  
+   This publishes all necessary JavaScript and CSS files to:
+   ```bash
+   /public/libraries/streamdom/
    ```
-   Or in your CSS file:
-   ```css
-   @import "/libraries/streamdom/stream.css";
-   ```
-3. **Add the Stream-Wire route:**
+2. **Include Assets in Your Layout** <br>
+   In your main layout (e.g., `layout.blade.php`):
+    ```html
+    <script src="/libraries/streamdom/stream.js"></script>
+    <link rel="stylesheet" href="/libraries/streamdom/stream.css">
+    ```
+    Or in your stylesheet:
+    ```css
+    @import "/libraries/streamdom/stream.css";
+    ```
+3. **Add Stream-Wire Route** <br> In your routes file:
    ```php
    App\Routes\Route::post('/api/stream-wire/{identifier}', [App\Utilities\Stream::class, 'capture']);
    ```
 
 ### Creating a Component
 
-To create a new Stream-Wire component:
+Generate a new component using Artisan:
 ```shell
 php artisan make:component Counter
 ```
 
-This will generate:
+This will create:
 
 | File                              | Description                                       |
 | --------------------------------- | ------------------------------------------------- |
 | `/components/Counter/Counter.php` | Contains the backend logic and lifecycle methods. |
-| `/components/Counter/index.php`   | Defines the frontend markup and bindings.         |
+| `/components/Counter/index.php`   | Defines the frontend markup and data bindings.    |
 
 
-### Component Lifecycle Overview
+### Component Lifecycle
 
 Each Stream-Wire component extends the base class:
 
@@ -797,10 +800,8 @@ Your component may define any of the following methods:
 | **render(): array**        | Renders the final component view. Must return `$this->compile([...])`.                 |
 
 
-### Example Component
-
+### Example 1 — Simple Counter Component
 `/components/Counter/Counter.php`
-
 ```php
 namespace Components\Counter;
 
@@ -808,103 +809,173 @@ use App\Utilities\Handler\Component;
 
 class Counter extends Component
 {
-    public int $count = 0;
-    public string $name = '';
+    public string $name = "Robroy";
 
-    // Initializes state when the component is mounted.
-    public function init($name): void
-    {
-        $this->name = $name;
-    }
-
-    // Optional: run checks before rendering.
-    public function verify(): bool
-    {
-        return true;
-    }
-
-    // Defines how this component is identified on the frontend.
-    public static function identifier(): string
-    {
-        return 'counter';
-    }
-
-    // Shown temporarily during long operations.
-    public function loader(): string
-    {
-        return 'Loading...';
-    }
-
-    // A simple interactive method callable from the frontend.
-    public function increment(): void
-    {
-        $this->count++;
-    }
-    
-    public function incrementTwice(int $increment): void
-    {
-        $this->count += $increment;
-    }
-
-    /**
-     * @see ./components/Counter/index.blade.php
-     */
+    /** @see ./components/Counter/index.blade.php */
     public function render(): array
     {
-        // Example: simulate a long operation
-        sleep(2);
-
-        // Example: redirect if certain conditions are met
-        // $this->redirect('/profile');
-
         return $this->compile([
-            'count' => $this->count,
-            'name' => $this->name
+            'name' => $this->name,
         ]);
     }
 }
 ```
 
-`/components/Counter/index.php`
-
+`/components/Counter/index.blade.php`
 ```bladehtml
-<div class="counter">
-    <h2>Hello, {{ $name }}!</h2>
-    <h1>{{ $count }}</h1>
-    <button wire:click="increment">+1</button>
-    <button wire:click="incrementTwice(2)">+2</button>
+@php
+use Components\Counter\Counter;
+/**
+ * This file is rendered by:
+ * @see Components\Counter\Counter::render()
+ */
+@endphp
+
+<div class="max-w-sm mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md space-y-4">
+    <h2 class="text-xl font-semibold text-gray-800">
+        Your Name is <span class="text-blue-600">{{ $name }}</span>
+    </h2>
+
+    <!-- Simple two-way binding -->
+    <input
+        type="text"
+        wire:model="name"
+        wire:keydown.enter.clear="render"
+        placeholder="Enter your name"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+    />
+
+    <!-- Using `this.value` as parameter -->
+    <input
+        type="text"
+        wire:model="name"
+        wire:keydown.enter.clear="method(this.value)"
+        placeholder="Enter your name again"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+    />
+
+    <!-- Re-render the component -->
+    <button
+        type="button"
+        wire:click="render"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors duration-200">
+        Submit
+    </button>
+
+    <!-- Advanced: Execute directly using helper -->
+    <button
+        type="button"
+        wire:click="{!! stream()->execute([Counter::class, 'render']) !!}"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors duration-200">
+        Submit 2
+    </button>
+
+    <!-- Cross-component action -->
+    <button
+        type="button"
+        wire:click="{!! stream()->target([Counter2::class, 'render']) !!}"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors duration-200">
+        Trigger Another Component
+    </button>
 </div>
 ```
 
-To display the component, simply call example below anywhere on the blades:
+### Usage in Blade or PHP Views
+To render a component:
 ```php
 $component = Components\Counter\Counter::class;
 $init_params = ['name' => 'Robroy'];
 $asynchronous = true;
+
 echo stream($component, $init_params, $asynchronous);
 ```
 
-**Function Parameters**
+#### Parameters
+| Parameter       | Type     | Description                                                                                 |
+| --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `$component`    | `string` | Fully-qualified class name of the component.                                                |
+| `$init_params`  | `array`  | Optional initial data assigned to the component’s properties.                               |
+| `$asynchronous` | `bool`   | Whether the component should be reactive (AJAX-driven). Set to `true` to enable reactivity. |
 
-| Parameter       | Type     | Description                                                                                                              |
-| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `$component`    | `string` | The fully-qualified class name of the component (e.g., `Components\Counter\Counter::class`).                             |
-| `$init_params`  | `array`  | Optional parameters passed to the component’s public properties before initialization.                                   |
-| `$asynchronous` | `bool`   | Whether the component should be rendered as a live (AJAX-driven) Stream-Wire component. Set `true` to enable reactivity. |
+### Available Frontend Directives
+
+| Directive                | Description                                                   |
+| ------------------------ | ------------------------------------------------------------- |
+| `wire:click="method()"`  | Calls a backend method when clicked.                          |
+| `wire:model="property"`  | Binds an input field to a backend property (two-way binding). |
+| `wire:submit="method()"` | Handles form submissions via AJAX.                            |
+| `wire:loading`           | Displays content while waiting for backend response.          |
 
 
-### Frontend Available Directives
-| Directive                | Description                                                  |
-|--------------------------| ------------------------------------------------------------ |
-| `wire:click="method()"`  | Calls a backend method when clicked.                         |
-| `wire:model="property"`  | Binds a frontend input field to a backend property.          |
-| `wire:submit="method()"` | Handles form submissions via AJAX.                           |
-| `wire:loading`           | Displays content while a backend request is being processed. |
+#### Key-based Directives
 
-More directives will be posted here soon...
+| Directive                | Description                    |
+| ------------------------ | ------------------------------ |
+| `wire:keydown.enter`     | Triggers on Enter key press.   |
+| `wire:keydown.escape`    | Triggers on Escape key press.  |
+| `wire:keydown.backspace` | Triggers on Backspace.         |
+| `wire:keydown.tab`       | Triggers on Tab.               |
+| `wire:keydown.delete`    | Triggers on Delete.            |
+| `wire:keydown.keypress`  | Fires when any key is pressed. |
 
-### Behavior
 
-When rendered, the component updates automatically in response to user actions,
-sending data to the server and refreshing only the affected part of the page —
-with **no manual JavaScript or page reload required**.
+#### Each of the above supports chained modifiers:
+| Modifier                                     | Description                               |
+|----------------------------------------------| ----------------------------------------- |
+| `.clear`                                     | Clears the input value after execution.   |
+| `.refresh`                                   | Forces a full component refresh.          |
+| `.rebind`                                    | Re-runs scripts inside the rendered HTML. |
+| `.prevent`                                   | Equivalent to `e.preventDefault()`.       |
+| `.100ms`, `.300ms`, `.500ms`, +... `1000ms`. | Adds delay before executing the action.   |
+
+#### Loader Directive
+The `wire:loader` directive executes before a request is made.
+
+**Example:**
+```html
+<button
+    wire:click="save"
+    wire:loader.classList.add="opacity-50 cursor-not-allowed"
+    wire:loader.classList.remove="opacity-100"
+    wire:loader.style="background: gray;"
+>
+    Saving...
+</button>
+```
+
+**Modifiers**
+
+| Modifier                      | Description                          |
+| ----------------------------- | ------------------------------------ |
+| `.classList.add="..."`        | Adds a class while loading.          |
+| `.classList.add.retain="..."` | Retains class after completion.      |
+| `.classList.remove="..."`     | Removes a class while loading.       |
+| `.style="..."`                | Adds inline style during request.    |
+| `.style.retain="..."`         | Keeps style after request completes. |
+| `.attr="..."`                 | Adds an attribute during request.    |
+| `.attr.retain="..."`          | Retains the attribute after request. |
+
+
+### Advanced Features
+**Execute Methods Manually**
+
+You can call backend methods directly using the helper:
+```php
+stream()->execute([Counter::class, 'render']);
+```
+
+**Target Other Components**
+To execute a method on a different component:
+```bladehtml
+wire:click="{!! stream()->target([Counter2::class, 'render']) !!}"
+```
+
+### Behavior Summary
+Stream-Wire automatically synchronizes backend data and frontend state:
+
+* No page reloads.
+* No manual JavaScript.
+* Automatic partial updates.
+* Built-in loading feedback.
+
+Write expressive PHP, and let Stream-Wire handle the browser updates.

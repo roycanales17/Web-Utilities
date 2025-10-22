@@ -68,6 +68,9 @@ export function load(stream)
 			if (action.includes("this.value"))
 				action = action.replace("this.value", `'${value}'`);
 
+			if (directive.includes('.prevent'))
+				e.preventDefault();
+
 			if (directive.includes('.refresh'))
 				overwrite = 1;
 
@@ -117,7 +120,7 @@ export function load(stream)
 				perform()
 			}
 		});
-	}, ['100ms', '300ms', '500ms', '1000ms', '1300ms', '1500ms', '2000ms', 'clear', 'refresh', 'rebind']);
+	}, ['100ms', '300ms', '500ms', '1000ms', '1300ms', '1500ms', '2000ms', 'clear', 'refresh', 'rebind', 'prevent']);
 
 	stream.wire('wire:keydown.enter', function (element, expression, directive, identifier) {
 		element.addEventListener('keydown', (e) => {

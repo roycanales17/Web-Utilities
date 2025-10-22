@@ -263,6 +263,8 @@ class stream {
 								})();
 							}
 						}
+					} else {
+						document.body.insertAdjacentHTML("beforeend", data);
 					}
 				})
 				.catch(error => {

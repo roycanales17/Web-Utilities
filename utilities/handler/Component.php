@@ -498,54 +498,19 @@ HTML;
 
 		/**
 		 * Compiles and returns the content of the view associated with the component.
-		 * This function looks for the `index` file in the same directory as the class and renders
-		 * the first file it finds with the extensions `.blade.php`, `.php`, or `.html`.
-		 * It is useful for components where the view files are stored within the same directory.
 		 *
 		 * @param array $data Data to be passed to the view for rendering.
-		 * @param string $blade Use to render the interface within the component directory.
 		 * @return array The rendered HTML content from the matched view file.
 		 */
-		protected function compile(array $data = [], string $blade = 'index'): array
+		protected function compile(array $data = []): array
 		{
-			$loadBaseComponent = function() use ($data, $blade) {
+			$loadBaseComponent = function() use ($data) {
 				ob_start();
 
 				// Set the root directory and determine the path of the class file
-				$path = str_replace(['.', '\\'], '/', get_called_class());
+				$path = base_path("/views/". strtolower(str_replace(['.', '\\'], '/', get_called_class())) . ".blade.php");
 
-				// Define the possible file extensions for the view
-				$extensions = ['.blade.php', '.php', '.html'];
-
-				// Check if $blade already has a valid extension
-				$hasExtension = false;
-				foreach ($extensions as $ext) {
-					if (str_ends_with($blade, $ext)) {
-						$hasExtension = true;
-						break;
-					}
-				}
-
-				// Normalize path only if $blade has no extension
-				$bladePath = $hasExtension ? $blade : str_replace('.php', '.blade.php', "/{$blade}");
-
-				// The index file is expected to be in the same directory as the class file
-				$index = dirname($path) . $bladePath;
-
-				// Check each extension to see if the file exists in the directory
-				foreach ($extensions as $ext) {
-					if (file_exists(base_path($index . $ext))) {
-						// If a matching file is found, set it as the skeleton to render
-						$blade_path = $index . $ext;
-						break;
-					}
-				}
-
-				// Render the matched skeleton (view) file, passing the extracted data
-				if (isset($blade_path)) {
-					Blade::load(base_path($blade_path), $data);
-				}
-
+				Blade::load($path, $data);
 				return ob_get_clean();
 			};
 

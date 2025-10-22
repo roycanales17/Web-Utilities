@@ -7,7 +7,7 @@
 	class Component extends Command
 	{
 		protected string $signature = 'make:component';
-		protected string $description = 'Creates stream wire component.';
+		protected string $description = 'Creates a Stream-Wire component.';
 
 		public function handle(string $className = ''): void
 		{
@@ -18,49 +18,70 @@
 
 			$this->info('⏳ Initializing component class file generation...');
 
+			// Normalize and sanitize input
 			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "components/$className");
 			$directories = explode('/', $className);
-			$className = ucfirst($directories[count($directories) - 1]);
+			$className = ucfirst(array_pop($directories));
 
-			array_pop($directories);
-			$fakePath = "/" . implode('/', $directories) . "/" . $className;
-			$basePath = base_path($fakePath);
-			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', array_merge($directories, [ $className ]))) . ";";
+			// Define relative paths
+			$relativeComponentDir = implode('/', $directories);
+			$relativeViewDir = './views/' . implode('/', $directories);
 
-			$content = <<<PHP
-			<?php
+			// Use base_path() to resolve absolute directories
+			$componentDir = base_path($relativeComponentDir);
+			$viewDir = base_path($relativeViewDir);
 
-				{$namespaceDeclaration}
+			// Namespace generation
+			$namespaceParts = array_map('ucfirst', $directories);
+			$namespace = !empty($namespaceParts)
+				? 'namespace ' . implode('\\', $namespaceParts) . ';'
+				: '';
 
-				use App\Utilities\Handler\Component;
+			// File names
+			$componentFilename = $className . '.php';
+			$bladeFilename = strtolower($className) . '.blade.php';
 
-				class {$className} extends Component
-				{
-					 /** @see .$fakePath/index.blade.php */
-					public function render(): array
-					{
-						return \$this->compile();
-					}
-				}
-			PHP;
+			// Component class file content
+			$componentContent = <<<PHP
+            <?php
 
-			$componentPath = implode('\\', array_map('ucfirst', array_merge($directories, [ $className ])));
-			$indexContent = <<<PHP
-			@php
-				use {$componentPath}\\{$className};
-				/**
-				 * This file is rendered via the following component class:
-				 *
-				 * @see {$componentPath}\\{$className}::render()
-				 */
-			@endphp
-			PHP;
+                {$namespace}
 
-			// Create the PHP file
-			if ($this->create("$className.php", $content, $basePath) && $this->create('index.blade.php', $indexContent, $basePath)) {
-				$this->success("✅ Component class file '{$className}.php' has been successfully created at '{$basePath}' and is ready for use.");
+                use App\Utilities\Handler\Component;
+
+                class {$className} extends Component
+                {
+                    /** @see {$relativeViewDir}/{$bladeFilename} */
+                    public function render(): array
+                    {
+                        return \$this->compile();
+                    }
+                }
+            PHP;
+
+			// Blade template content
+			$componentNamespace = implode('\\', $namespaceParts);
+			$indexContent = <<<BLADE
+            @php
+                use {$componentNamespace}\\{$className};
+                /**
+                 * This file is rendered via the following component class:
+                 * @see {$componentNamespace}\\{$className}::render()
+                 */
+            @endphp
+            BLADE;
+
+			// Create files using your existing `create()` helper
+			$classCreated = $this->create($componentFilename, $componentContent, $componentDir);
+			$viewCreated = $this->create($bladeFilename, $indexContent, $viewDir);
+
+			// Output results
+			if ($classCreated && $viewCreated) {
+				$this->success("✅ Component '{$className}' successfully created!");
+				$this->info("📄 Class: {$componentDir}/{$componentFilename}");
+				$this->info("📄 View:  {$viewDir}/{$bladeFilename}");
 			} else {
-				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
+				$this->error("❌ Failed to create component files for '{$className}'.");
 			}
 		}
 	}

@@ -774,10 +774,10 @@ php artisan make:component Counter
 
 This will create:
 
-| File                              | Description                                       |
-| --------------------------------- | ------------------------------------------------- |
-| `/components/Counter/Counter.php` | Contains the backend logic and lifecycle methods. |
-| `/components/Counter/index.php`   | Defines the frontend markup and data bindings.    |
+| File                                   | Description                                       |
+|----------------------------------------| ------------------------------------------------- |
+| `./components/Counter.php`             | Contains the backend logic and lifecycle methods. |
+| `./views/components/counter.blade.php` | Defines the frontend markup and data bindings.    |
 
 
 ### Component Lifecycle
@@ -801,7 +801,7 @@ Your component may define any of the following methods:
 
 
 ### Example 1 — Simple Counter Component
-`/components/Counter/Counter.php`
+`./components/Counter.php`
 ```php
 namespace Components\Counter;
 
@@ -821,13 +821,13 @@ class Counter extends Component
 }
 ```
 
-`/components/Counter/index.blade.php`
+`./views/components/counter.blade.php`
 ```bladehtml
 @php
-use Components\Counter\Counter;
+use Components\Counter;
 /**
  * This file is rendered by:
- * @see Components\Counter\Counter::render()
+ * @see Components\Counter::render()
  */
 @endphp
 
@@ -883,7 +883,7 @@ use Components\Counter\Counter;
 ### Usage in Blade or PHP Views
 To render a component:
 ```php
-$component = Components\Counter\Counter::class;
+$component = Components\Counter::class;
 $init_params = ['name' => 'Robroy'];
 $asynchronous = true;
 

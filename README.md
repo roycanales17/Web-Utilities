@@ -811,7 +811,7 @@ class Counter extends Component
 {
     public string $name = "Robroy";
 
-    /** @see ./components/Counter/index.blade.php */
+    /** @see ./views/components/counter.blade.php */
     public function render(): array
     {
         return $this->compile([
@@ -891,11 +891,13 @@ echo stream($component, $init_params, $asynchronous);
 ```
 
 #### Parameters
-| Parameter       | Type     | Description                                                                                 |
-| --------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `$component`    | `string` | Fully-qualified class name of the component.                                                |
-| `$init_params`  | `array`  | Optional initial data assigned to the component’s properties.                               |
-| `$asynchronous` | `bool`   | Whether the component should be reactive (AJAX-driven). Set to `true` to enable reactivity. |
+
+| Parameter         | Type     | Description                                                                                                                                                                                                                                                              |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **$component**    | `string` | Fully-qualified class name of the component.                                                                                                                                                                                                                             |
+| **$init_params**  | `array`  | Optional initial data to assign to the component’s public properties during initialization.                                                                                                                                                                              |
+| **$asynchronous** | `bool`   | Determines whether the component should load asynchronously. When set to `true`, a loader or skeleton placeholder is rendered immediately, and the actual component is loaded in the background—allowing other components or page processes to continue without waiting. |
+
 
 ### Available Frontend Directives
 

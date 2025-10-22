@@ -32,7 +32,7 @@
 	 */
 	function session(string $key): mixed
 	{
-		return Session::get($key);
+		return Session::get($key, Session::flash($key));
 	}
 
 	/**

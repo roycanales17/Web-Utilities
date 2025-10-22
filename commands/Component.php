@@ -25,7 +25,7 @@
 
 			// Define relative paths
 			$relativeComponentDir = implode('/', $directories);
-			$relativeViewDir = './views/' . implode('/', $directories);
+			$relativeViewDir = 'views/' . implode('/', $directories);
 
 			// Use base_path() to resolve absolute directories
 			$componentDir = base_path($relativeComponentDir);

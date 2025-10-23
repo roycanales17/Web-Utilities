@@ -147,7 +147,6 @@
 	 * @param array $data Data to be extracted and passed into the view.
 	 * @param string $directory Directory for
 	 * @return string Rendered HTML content.
-	 * @throws CompilerException
 	 */
 	function view(string $path, array $data = [], string $directory = 'views'): string
 	{

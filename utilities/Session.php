@@ -165,6 +165,11 @@
 			return $flashValue;
 		}
 
+		public static function pullFlashedData(): array
+		{
+			return $_SESSION['__flash'] ?? [];
+		}
+
 		/**
 		 * Destroys the current session and clears all data.
 		 *

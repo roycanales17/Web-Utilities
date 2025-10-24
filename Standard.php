@@ -362,3 +362,69 @@
 		$base = dirname(realpath(__DIR__ . '/../../'));
 		return $path ? $base . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : $base;
 	}
+
+	/**
+	 * Retrieve an old input value from the session flash data.
+	 *
+	 * This is typically used to repopulate form inputs after validation
+	 * errors or failed submissions.
+	 *
+	 * Example usage in Blade:
+	 * ```blade
+	 * <input type="email" name="email" value="{{ input('email') }}">
+	 * ```
+	 *
+	 * @param string $name  The input field name.
+	 * @return mixed|string The flashed input value or an empty string if not set.
+	 */
+	function input(string $name): mixed
+	{
+		return Session::flash("input:$name") ?: '';
+	}
+
+	/**
+	 * Retrieve a specific error message from the session flash data.
+	 *
+	 * Supports both field-specific and general error messages.
+	 * If `$name` is `"message"`, it retrieves the general `message:error` key.
+	 *
+	 * Example usage in Blade:
+	 * ```blade
+	 * <span class="text-red-500 text-sm">{{ error('email') }}</span>
+	 * <div>{{ error('message') }}</div>
+	 * ```
+	 *
+	 * @param string $name  The error key or `"message"` for general errors.
+	 * @return mixed|string The flashed error message or an empty string if not set.
+	 */
+	function error(string $name): mixed
+	{
+		if ($name == 'message') {
+			return Session::flash("message:error") ?: '';
+		}
+
+		return Session::flash("error:$name") ?: '';
+	}
+
+	/**
+	 * Retrieve a success message from the session flash data.
+	 *
+	 * Supports both field-specific and general success messages.
+	 * If `$name` is `"message"`, it retrieves the general `message:success` key.
+	 *
+	 * Example usage in Blade:
+	 * ```blade
+	 * <div class="text-green-500">{{ success('message') }}</div>
+	 * ```
+	 *
+	 * @param string $name  The message key or `"message"` for general success messages.
+	 * @return mixed|string The flashed success message or an empty string if not set.
+	 */
+	function success(string $name): mixed
+	{
+		if ($name == 'message') {
+			return Session::flash("message:success") ?: '';
+		}
+
+		return Session::flash("success:$name") ?: '';
+	}

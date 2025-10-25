@@ -197,4 +197,28 @@
 		{
 			return $_SERVER['HTTP_X_REQUEST_ID'] ?? bin2hex(random_bytes(8));
 		}
+
+		/**
+		 * Builds a fully qualified URL with optional query parameters.
+		 *
+		 * @param string $path   The URL path (e.g. "/reset-password")
+		 * @param array  $params Optional query parameters to append (e.g. ['token' => 'abc123'])
+		 *
+		 * @return string The complete URL (e.g. "https://example.com/reset-password?token=abc123")
+		 */
+		public static function makeURL(string $path, array $params = []): string
+		{
+			$base = rtrim(config('APP_URL', ''), '/');
+
+			if (empty($base)) {
+				$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
+				$base = $scheme . self::HostName();
+			}
+
+			$path = '/' . ltrim($path, '/');
+			$query = !empty($params) ? '?' . http_build_query($params) : '';
+
+			return $base . $path . $query;
+		}
+
 	}

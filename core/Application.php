@@ -115,16 +115,20 @@
 						});
 					} else {
 						if (Request::header('X-STREAM-WIRE')) {
-							$routeObject->captured(function($content) {
+							$resolved = $routeObject->captured(function($content) {
 								echo($content);
-							}, true);
+							});
 						} else {
-							$routeObject->captured($route['captured'], true);
+							$resolved = $routeObject->captured($route['captured']);
+						}
+
+						if ($resolved) {
+							break;
 						}
 					}
 				}
 
-				if (!$cli) {
+				if (!$cli && !($resolved ?? false)) {
 					if (file_exists(base_path('/views/404.blade.php')) || file_exists(base_path('/views/404.php'))) {
 						echo view('404');
 					}

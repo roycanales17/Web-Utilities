@@ -34,7 +34,7 @@
             }
 
             foreach ($migrations as $record) {
-                $file = base_path('database/' . $record['migration']);
+                $file = base_path('migrations/' . $record['migration']);
                 if (!file_exists($file)) {
                     $this->error("⚠️ Migration file missing: {$file}");
                     continue;

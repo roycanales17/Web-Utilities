@@ -18,7 +18,7 @@
 
             $timestamp = date('Y_m_d_His');
             $filename = "{$timestamp}_{$className}.php";
-            $path = base_path('database/' . $filename);
+            $path = base_path('migrations/' . $filename);
 
             // Convert name to class name (snake_case → PascalCase)
             $className = str_replace(' ', '', ucwords(str_replace('_', ' ', $className)));

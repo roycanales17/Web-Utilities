@@ -24,7 +24,7 @@
                 $this->info("🧱 Created 'migration' table.");
             }
 
-            $migrationPath = base_path('database');
+            $migrationPath = base_path('migrations');
 
             if (!is_dir($migrationPath)) {
                 $this->error("❌ Migration directory not found: {$migrationPath}");

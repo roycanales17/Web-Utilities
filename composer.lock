@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8df386d583635046869f194a0890cfd9",
+    "content-hash": "8ad701e9b594a7b7a1b58bde3fb346da",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -900,16 +900,16 @@
         },
         {
             "name": "roy404/artisan",
-            "version": "v1.2.4",
+            "version": "1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-CLI-Artisan.git",
-                "reference": "4df8476d6694fa354abbf7d27530a00bda93145d"
+                "reference": "5974b37085d3adecac2afb24a4f86d2152b9a520"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-CLI-Artisan/zipball/4df8476d6694fa354abbf7d27530a00bda93145d",
-                "reference": "4df8476d6694fa354abbf7d27530a00bda93145d",
+                "url": "https://api.github.com/repos/roycanales17/PHP-CLI-Artisan/zipball/5974b37085d3adecac2afb24a4f86d2152b9a520",
+                "reference": "5974b37085d3adecac2afb24a4f86d2152b9a520",
                 "shasum": ""
             },
             "require": {
@@ -940,9 +940,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-CLI-Artisan/issues",
-                "source": "https://github.com/roycanales17/PHP-CLI-Artisan/tree/v1.2.4"
+                "source": "https://github.com/roycanales17/PHP-CLI-Artisan/tree/v1.2.5"
             },
-            "time": "2025-09-28T03:58:37+00:00"
+            "time": "2025-10-27T13:52:09+00:00"
         },
         {
             "name": "roy404/blades",
@@ -1091,16 +1091,16 @@
         },
         {
             "name": "roy404/routes",
-            "version": "4.2.6",
+            "version": "4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-Routes.git",
-                "reference": "ec191c64aad57de042305ca02ac2a110e32eac9f"
+                "reference": "3db170963268684045c73354bf2b690d3e71d8ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-Routes/zipball/ec191c64aad57de042305ca02ac2a110e32eac9f",
-                "reference": "ec191c64aad57de042305ca02ac2a110e32eac9f",
+                "url": "https://api.github.com/repos/roycanales17/PHP-Routes/zipball/3db170963268684045c73354bf2b690d3e71d8ac",
+                "reference": "3db170963268684045c73354bf2b690d3e71d8ac",
                 "shasum": ""
             },
             "require": {
@@ -1109,7 +1109,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "App\\Routes\\": "src/"
+                    "App\\Routes\\": "app/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1133,9 +1133,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-Routes/issues",
-                "source": "https://github.com/roycanales17/PHP-Routes/tree/v4.2.6"
+                "source": "https://github.com/roycanales17/PHP-Routes/tree/v4.3.0"
             },
-            "time": "2025-10-25T07:40:14+00:00"
+            "time": "2025-10-27T11:27:41+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",

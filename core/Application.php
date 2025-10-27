@@ -106,7 +106,7 @@
 						root: base_path('/routes'),
 						routes: $route['routes'] ?? ['web.php'],
 						prefix: $route['prefix'] ?? '',
-						domain: $route['domain'] ?? config('APP_DOMAIN', 'localhost')
+						domain: $route['domain'] ?? config('APP_URL', 'localhost')
 					);
 
 					if ($cli) {

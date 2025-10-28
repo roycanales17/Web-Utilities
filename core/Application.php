@@ -59,6 +59,7 @@
 				$this->setGlobalDefines();
 				$this->setDevelopment();
 				$this->setDatabaseConfig();
+				$this->setMailConfig();
 				$this->setSessionConfig();
 				$this->setPreloadFiles();
 				$this->setScheduler();
@@ -80,21 +81,6 @@
 				if ($cache = $conf['cache']['driver'] ?? '') {
 					$cache_attr = $conf['cache'][$cache];
 					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
-				}
-
-				// Configure mail
-				$mail = $conf['mailing'] ?? [];
-				if (!empty($mail['enabled'])) {
-					$credentials = [];
-
-					if (!empty($mail['username']) && !empty($mail['password'])) {
-						$credentials = [
-							'username' => $mail['username'],
-							'password' => $mail['password'],
-						];
-					}
-
-					Mail::configure($mail['host'], $mail['port'], $mail['encryption'], $mail['smtp'], $credentials);
 				}
 
 				// This display the content page

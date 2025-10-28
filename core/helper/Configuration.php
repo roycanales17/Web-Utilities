@@ -4,6 +4,7 @@
 
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Utilities\Config;
+	use App\Utilities\Mail;
 	use App\Utilities\Session;
 	use App\Utilities\Stream;
 	use App\Databases\Database;
@@ -67,6 +68,22 @@
 				foreach ($connections as $server => $config) {
 					Database::configure($server, $config);
 				}
+			}
+		}
+
+		protected function setMailConfig(): void {
+			$mail = $this->config['mailing'] ?? [];
+			if (!empty($mail['enabled'])) {
+				$credentials = [];
+
+				if (!empty($mail['username']) && !empty($mail['password'])) {
+					$credentials = [
+						'username' => $mail['username'],
+						'password' => $mail['password'],
+					];
+				}
+
+				Mail::configure($mail['host'], $mail['port'], $mail['encryption'], $mail['smtp'], $credentials);
 			}
 		}
 

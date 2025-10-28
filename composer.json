@@ -33,7 +33,7 @@
   ],
   "require": {
     "php": "^8.1",
-    "roy404/blades": "^1.4",
+    "roy404/blades": "^1.4.6",
     "roy404/request": "^3.0",
     "roy404/artisan": "^1.0",
     "roy404/eloquent": "^2.5",

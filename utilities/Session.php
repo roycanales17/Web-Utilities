@@ -32,11 +32,11 @@
 		public static function configure(array $config): void
 		{
 			if (session_status() === PHP_SESSION_NONE) {
-				$config['driver'] = $config['driver'] ?? 'file';
+				$config['session']['driver'] = $config['session']['driver'] ?? 'file';
 
 				ini_set('session.gc_maxlifetime', ($config['lifetime'] ?? 120) * 60);
 
-				if ($config['driver'] === 'file') {
+				if ($config['session']['driver'] === 'file') {
 					$storagePath = $config['session']['storage_path'] ?? '../storage/sessions';
 					if (!is_dir($storagePath)) {
 						mkdir($storagePath, 0755, true);
@@ -53,7 +53,7 @@
 					'samesite' => $config['session']['same_site'] ?? 'lax',
 				]);
 
-				switch ($config['driver']) {
+				switch ($config['session']['driver']) {
 					case 'redis':
 						// session_set_save_handler(new RedisSessionHandler($object), true);
 						break;

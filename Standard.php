@@ -5,9 +5,9 @@
 	use App\Utilities\Config;
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
+	use App\View\Compilers\Component;
 	use App\Utilities\Handler\StreamHandler;
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\View\Compilers\scheme\CompilerException;
 
 	/**
 	 * Generates a URI for a named route with optional parameter replacements.
@@ -150,17 +150,21 @@
 	 */
 	function view(string $path, array $data = [], string $directory = 'views'): string
 	{
-		ob_start();
-		$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
-		$mainPath = base_path("/$directory/{$normalizedPath}.php");
-		$bladePath = base_path("/$directory/{$normalizedPath}.blade.php");
+		$compiled = function() use ($path, $data, $directory) {
+			ob_start();
+			$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
+			$mainPath = base_path("/$directory/{$normalizedPath}.php");
+			$bladePath = base_path("/$directory/{$normalizedPath}.blade.php");
 
-		if (file_exists($bladePath)) {
-			$mainPath = $bladePath;
-		}
+			if (file_exists($bladePath)) {
+				$mainPath = $bladePath;
+			}
 
-		Blade::load($mainPath, $data);
-		return ob_get_clean();
+			Blade::load($mainPath, $data);
+			return ob_get_clean();
+		};
+
+		return Component::renderComponents($compiled());
 	}
 
 	/**

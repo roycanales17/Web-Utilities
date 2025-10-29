@@ -41,6 +41,7 @@
 				Database::table($this->table)
 					->where('id', $id)
 					->set('data', $data)
+					->set('user_id', $_SESSION['user_id'] ?? null)
 					->set('ip_address', $ip)
 					->set('last_activity', $now)
 					->update();
@@ -48,6 +49,7 @@
 				Database::create($this->table, [
 					'id' => $id,
 					'data' => $data,
+					'user_id' => $_SESSION['user_id'] ?? null,
 					'ip_address' => $ip,
 					'last_activity' => $now
 				]);

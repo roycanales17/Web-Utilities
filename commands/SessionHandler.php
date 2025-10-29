@@ -18,6 +18,7 @@
 				Schema::create('sessions', function (Table $table) {
 					$table->text('id');
 					$table->text('data');
+					$table->integer('user_id')->nullable()->default(null);
 					$table->string('ip_address', 128)->default(Server::IPAddress());
 					$table->timestamp('last_activity')->defaultNow()->updateNow();
 					$table->unique('id');

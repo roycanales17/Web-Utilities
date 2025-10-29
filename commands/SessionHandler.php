@@ -16,7 +16,7 @@
 		{
 			if (!Schema::hasTable('sessions')) {
 				Schema::create('sessions', function (Table $table) {
-					$table->text('id');
+					$table->string('id', 64);
 					$table->text('data');
 					$table->integer('user_id')->nullable()->default(null);
 					$table->string('ip_address', 128)->default(Server::IPAddress());

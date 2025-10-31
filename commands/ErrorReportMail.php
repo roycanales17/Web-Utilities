@@ -41,7 +41,7 @@
 							->subject(\$subject)
 							->from(\$from)
 							->to(\$this->to)
-							->build();
+							->queue();
 					}
 				}
 			PHP;

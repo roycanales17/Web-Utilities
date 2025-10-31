@@ -6,7 +6,7 @@
 
 	abstract class Mailable
 	{
-		private string $to = '';
+		private array $to = [];
 		private string $from = '';
 		private string $subject = '';
 		private string $replyTo = '';
@@ -21,6 +21,9 @@
 		private string $plainBody = '';
 		private string $altBody = '';
 
+		/**
+		 * Render the HTML view.
+		 */
 		protected function view(string $view, array $data = []): self
 		{
 			$this->body = view($view, $data);
@@ -31,6 +34,9 @@
 			return $this;
 		}
 
+		/**
+		 * Render plain text view.
+		 */
 		protected function text(string $view, array $data = []): self
 		{
 			$this->altBody = view($view, $data);
@@ -49,21 +55,27 @@
 			return $this;
 		}
 
-		protected function to(string $to): self
+		/**
+		 * Accepts single or multiple recipients.
+		 */
+		protected function to(string|array $to): self
 		{
-			$this->to = $to;
+			$emails = is_array($to) ? $to : [$to];
+			$this->to = array_merge($this->to, array_filter($emails, fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL)));
 			return $this;
 		}
 
-		protected function cc(string $cc): self
+		protected function cc(string|array $cc): self
 		{
-			$this->cc[] = $cc;
+			$emails = is_array($cc) ? $cc : [$cc];
+			$this->cc = array_merge($this->cc, array_filter($emails, fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL)));
 			return $this;
 		}
 
-		protected function bcc(string $bcc): self
+		protected function bcc(string|array $bcc): self
 		{
-			$this->bcc[] = $bcc;
+			$emails = is_array($bcc) ? $bcc : [$bcc];
+			$this->bcc = array_merge($this->bcc, array_filter($emails, fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL)));
 			return $this;
 		}
 
@@ -79,9 +91,9 @@
 			return $this;
 		}
 
-		protected function embed(string $imagePath): self
+		protected function embed(string $path, string $cid = null): self
 		{
-			$this->embedded[] = $imagePath;
+			$this->embedded[] = ['path' => $path, 'cid' => $cid ?? md5($path)];
 			return $this;
 		}
 
@@ -103,6 +115,9 @@
 			return $this;
 		}
 
+		/**
+		 * Build and send the email.
+		 */
 		protected function build(): bool
 		{
 			$mail = Mail::to($this->to);
@@ -110,12 +125,8 @@
 			$mail->charset($this->charset);
 			$mail->contentType($this->contentType);
 			$mail->subject($this->subject);
-			$mail->body($this->body);
 			$mail->from($this->from);
-
-			if (!empty($this->altBody) && method_exists($mail, 'altBody')) {
-				$mail->altBody($this->altBody);
-			}
+			$mail->body($this->body ?: $this->plainBody);
 
 			if ($this->replyTo)
 				$mail->header('Reply-To', $this->replyTo);
@@ -129,27 +140,54 @@
 			foreach ($this->bcc as $email)
 				$mail->bcc($email);
 
-			foreach ($this->embedded as $image) {
-				if (isset($image['cid'], $image['path'])) {
-					$mail->embedImage($image['path'], $image['cid']);
-				}
-			}
+			foreach ($this->embedded as $image)
+				$mail->embedImage($image['path'], $image['cid']);
 
-			if ($this->attachments) {
-				foreach ($this->attachments as $attachment) {
-					if (isset($attachment['content'], $attachment['filename'])) {
-						$mail->attach(
-							$attachment['content'],
-							$attachment['filename'],
-							$attachment['opt'] ?? []
-						);
-					}
-				}
-			}
+			foreach ($this->attachments as $attachment)
+				if (isset($attachment['content'], $attachment['filename']))
+					$mail->attach(
+						$attachment['content'],
+						$attachment['filename'],
+						$attachment['opt'] ?? []
+					);
 
-			$mail->body($this->body ?: $this->plainBody);
 			return $mail->send();
 		}
 
+		/**
+		 * Send asynchronously via queue (background).
+		 */
+		public function queue(): bool
+		{
+			$mail = Mail::to($this->to)
+				->from($this->from)
+				->subject($this->subject)
+				->body($this->body ?: $this->plainBody)
+				->charset($this->charset)
+				->contentType($this->contentType);
+
+			foreach ($this->cc as $email)
+				$mail->cc($email);
+
+			foreach ($this->bcc as $email)
+				$mail->bcc($email);
+
+			foreach ($this->attachments as $attachment)
+				if (isset($attachment['content'], $attachment['filename']))
+					$mail->attach(
+						$attachment['content'],
+						$attachment['filename'],
+						$attachment['opt'] ?? []
+					);
+
+			foreach ($this->embedded as $image)
+				$mail->embedImage($image['path'], $image['cid']);
+
+			return $mail->queue();
+		}
+
+		/**
+		 * Child classes must define `send()`.
+		 */
 		abstract public function send(): bool;
 	}

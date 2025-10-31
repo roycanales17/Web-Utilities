@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.359.0",
+            "version": "3.359.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "7231e7c309d6262855289511d6ee124fafbe664f"
+                "reference": "bc3244323c96d667caf6ff1c7b1d238781e5b925"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7231e7c309d6262855289511d6ee124fafbe664f",
-                "reference": "7231e7c309d6262855289511d6ee124fafbe664f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bc3244323c96d667caf6ff1c7b1d238781e5b925",
+                "reference": "bc3244323c96d667caf6ff1c7b1d238781e5b925",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.2"
             },
-            "time": "2025-10-29T00:06:16+00:00"
+            "time": "2025-10-30T18:16:03+00:00"
         },
         {
             "name": "dragonmantank/cron-expression",
@@ -993,16 +993,16 @@
         },
         {
             "name": "roy404/eloquent",
-            "version": "2.5.2",
+            "version": "2.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Database-ORM.git",
-                "reference": "e5e3e50f784284025c8bf81d80c660c5e7e8d733"
+                "reference": "2786af924c86d1434d692d33e008eb282ccd53a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/e5e3e50f784284025c8bf81d80c660c5e7e8d733",
-                "reference": "e5e3e50f784284025c8bf81d80c660c5e7e8d733",
+                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/2786af924c86d1434d692d33e008eb282ccd53a0",
+                "reference": "2786af924c86d1434d692d33e008eb282ccd53a0",
                 "shasum": ""
             },
             "require": {
@@ -1035,9 +1035,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Database-ORM/issues",
-                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.2"
+                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.3"
             },
-            "time": "2025-10-29T01:24:35+00:00"
+            "time": "2025-10-31T03:46:13+00:00"
         },
         {
             "name": "roy404/request",
@@ -1291,16 +1291,16 @@
         },
         {
             "name": "webmozart/assert",
-            "version": "1.12.0",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webmozarts/assert.git",
-                "reference": "541057574806f942c94662b817a50f63f7345360"
+                "reference": "9be6926d8b485f55b9229203f962b51ed377ba68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozarts/assert/zipball/541057574806f942c94662b817a50f63f7345360",
-                "reference": "541057574806f942c94662b817a50f63f7345360",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/9be6926d8b485f55b9229203f962b51ed377ba68",
+                "reference": "9be6926d8b485f55b9229203f962b51ed377ba68",
                 "shasum": ""
             },
             "require": {
@@ -1343,9 +1343,9 @@
             ],
             "support": {
                 "issues": "https://github.com/webmozarts/assert/issues",
-                "source": "https://github.com/webmozarts/assert/tree/1.12.0"
+                "source": "https://github.com/webmozarts/assert/tree/1.12.1"
             },
-            "time": "2025-10-20T12:43:39+00:00"
+            "time": "2025-10-29T15:56:20+00:00"
         }
     ],
     "packages-dev": [],

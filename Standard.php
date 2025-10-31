@@ -448,9 +448,10 @@
 	 * @param string $path  The relative path to the asset.
 	 * @return string       The fully-qualified asset URL.
 	 */
-	function asset(string $path): string
+	function asset(string $path, string $version = '1.0'): string
 	{
 		$path = ltrim($path, '/');
-		return Server::makeURL($path);
+		$version = config('APP_VERSION', $version);
+		return Server::makeURL($path, ['v' => $version]);
 	}
 

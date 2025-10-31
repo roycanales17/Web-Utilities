@@ -241,7 +241,7 @@
 	{
 		$stream = new StreamHandler($class, $constructParams, $asynchronous);
 
-		if (config('STREAM_DEBUG', true)) {
+		if (config('DEVELOPMENT', true) && config('STREAM_DEBUG', true)) {
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 			$context = [];
 			$resolvedPath = Session::flash('__resolved_path__');

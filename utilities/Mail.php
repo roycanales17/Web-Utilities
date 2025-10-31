@@ -199,18 +199,32 @@
 		}
 
 		/**
-		 * Set recipient email(s).
+		 * Add one or more recipient email addresses.
 		 *
 		 * @param string|array $emails
 		 * @return self
 		 */
 		public static function to(string|array $emails): self
 		{
+			// Reuse existing instance if needed
 			$instance = new self();
-			if (is_string($emails))
-				$emails = [$emails];
 
-			$instance->recipients = array_filter($emails, fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL));
+			// Normalize to array
+			if (is_string($emails)) {
+				$emails = [$emails];
+			}
+
+			// Filter valid email addresses
+			$validEmails = array_filter($emails, fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL));
+
+			// Initialize if not set
+			if (!isset($instance->recipients)) {
+				$instance->recipients = [];
+			}
+
+			// Merge with existing recipients (avoid duplicates)
+			$instance->recipients = array_unique(array_merge($instance->recipients, $validEmails));
+
 			return $instance;
 		}
 
@@ -500,5 +514,36 @@
 			} catch (Exception $e) {
 				throw new Exception('Mailer Error: ' . $e->getMessage());
 			}
+		}
+
+		public function queue(): bool
+		{
+			$payload = [
+				'recipients' => $this->recipients,
+				'from' => $this->from,
+				'subject' => $this->subject,
+				'body' => $this->body,
+				'cc' => $this->cc,
+				'bcc' => $this->bcc,
+				'replyTo' => $this->replyTo,
+				'attachments' => $this->attachments,
+				'embeddedImages' => $this->embeddedImages,
+				'headers' => $this->headers,
+				'charset' => $this->charset,
+				'contentType' => $this->contentType,
+			];
+
+			$jsonPayload = escapeshellarg(base64_encode(json_encode($payload)));
+
+			$parts = [
+				'/usr/local/bin/php',
+				base_path('artisan'),
+				'mail:queue',
+				$jsonPayload,
+			];
+
+			$cmd = implode(' ', $parts) . ' >> /var/log/artisan-mail.log 2>&1 &';
+			exec($cmd);
+			return true;
 		}
 	}

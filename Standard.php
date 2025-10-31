@@ -3,6 +3,7 @@
 	use App\Headers\Request;
 	use App\Console\Terminal;
 	use App\Utilities\Config;
+	use App\Utilities\Server;
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
 	use App\View\Compilers\Component;
@@ -432,3 +433,24 @@
 
 		return Session::flash("success:$name") ?: '';
 	}
+
+
+	/**
+	 * Generate a full URL for a given asset using the Server::makeURL helper.
+	 *
+	 * Example usage in Blade:
+	 * ```blade
+	 * <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+	 * <script src="{{ asset('js/app.js') }}"></script>
+	 * <img src="{{ asset('images/logo.png') }}" alt="Logo">
+	 * ```
+	 *
+	 * @param string $path  The relative path to the asset.
+	 * @return string       The fully-qualified asset URL.
+	 */
+	function asset(string $path): string
+	{
+		$path = ltrim($path, '/');
+		return Server::makeURL($path);
+	}
+

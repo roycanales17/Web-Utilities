@@ -208,19 +208,31 @@
 		 */
 		public static function makeURL(string $path, array $params = []): string
 		{
+			$development = config('DEVELOPMENT', true);
 			$base = rtrim(config('APP_URL', ''), '/');
 
 			if (empty($base)) {
 				$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
 				$host = self::HostName();
-				$host = preg_replace('/:\d+$/', '', $host);
+
+				if (!$development) {
+					$host = preg_replace('/:\d+$/', '', $host);
+				}
 
 				$base = $scheme . $host;
 			} else {
 				$parsed = parse_url($base);
 				$scheme = ($parsed['scheme'] ?? (self::IsSecureConnection() ? 'https' : 'http')) . '://';
-				$host = preg_replace('/:\d+$/', '', ($parsed['host'] ?? self::HostName()));
-				$base = $scheme . $host;
+				$host = $parsed['host'] ?? self::HostName();
+
+				// Only keep port in development
+				$port = '';
+				if ($development && !empty($parsed['port'])) {
+					$port = ':' . $parsed['port'];
+				}
+
+				$base = $scheme . $host . $port;
+
 				if (!empty($parsed['path'])) {
 					$base .= rtrim($parsed['path'], '/');
 				}
@@ -228,6 +240,7 @@
 
 			$path = '/' . ltrim($path, '/');
 			$query = !empty($params) ? '?' . http_build_query($params) : '';
+
 			return $base . $path . $query;
 		}
 	}

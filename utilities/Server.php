@@ -204,7 +204,7 @@
 		 * @param string $path   The URL path (e.g. "/reset-password")
 		 * @param array  $params Optional query parameters to append (e.g. ['token' => 'abc123'])
 		 *
-		 * @return string The complete URL (e.g. "https://example.com/reset-password?token=abc123")
+		 * @return string
 		 */
 		public static function makeURL(string $path, array $params = []): string
 		{
@@ -212,13 +212,22 @@
 
 			if (empty($base)) {
 				$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
-				$base = $scheme . self::HostName();
+				$host = self::HostName();
+				$host = preg_replace('/:\d+$/', '', $host);
+
+				$base = $scheme . $host;
+			} else {
+				$parsed = parse_url($base);
+				$scheme = ($parsed['scheme'] ?? (self::IsSecureConnection() ? 'https' : 'http')) . '://';
+				$host = preg_replace('/:\d+$/', '', ($parsed['host'] ?? self::HostName()));
+				$base = $scheme . $host;
+				if (!empty($parsed['path'])) {
+					$base .= rtrim($parsed['path'], '/');
+				}
 			}
 
 			$path = '/' . ltrim($path, '/');
 			$query = !empty($params) ? '?' . http_build_query($params) : '';
-
 			return $base . $path . $query;
 		}
-
 	}

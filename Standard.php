@@ -448,10 +448,21 @@
 	 * @param string $path  The relative path to the asset.
 	 * @return string       The fully-qualified asset URL.
 	 */
-	function asset(string $path, string $version = '1.0'): string
+	function asset(string $path): string
 	{
+		static $cache = [];
+
 		$path = ltrim($path, '/');
-		$version = config('APP_VERSION', $version);
-		return Server::makeURL($path, ['v' => $version]);
+		$file = base_path("public/$path");
+
+		if (!isset($cache[$path])) {
+			if (file_exists($file)) {
+				$cache[$path] = filemtime($file);
+			} else {
+				$cache[$path] = config('APP_VERSION', '1.0');
+			}
+		}
+
+		return Server::makeURL($path, ['v' => $cache[$path]]);
 	}
 

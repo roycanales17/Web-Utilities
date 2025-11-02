@@ -8,14 +8,18 @@
 
 	class MailQueue extends Command
 	{
-		protected string $signature = 'mail:queue {payload}';
+		protected string $signature = 'mail:queue';
 		protected string $description = 'Process a queued email message';
 
-		public function handle(string $payload = ''): void
+		public function handle(string $filePath = ''): void
 		{
-			$encodedPayload = $payload;
-			$decodedJson = base64_decode($encodedPayload);
-			$config = json_decode($decodedJson, true);
+			if (!file_exists($filePath)) {
+				$this->error('Payload file not found.');
+				return;
+			}
+
+			$config = json_decode(file_get_contents($filePath), true);
+			unlink($filePath);
 
 			if (empty($config)) {
 				$this->error('Invalid or empty email payload.');

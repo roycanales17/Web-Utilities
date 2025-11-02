@@ -533,16 +533,15 @@
 				'contentType' => $this->contentType,
 			];
 
-			$jsonPayload = escapeshellarg(base64_encode(json_encode($payload)));
+			$tempFile = tempnam(sys_get_temp_dir(), 'mail_');
+			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE));
 
-			$parts = [
-				'/usr/local/bin/php',
-				base_path('artisan'),
-				'mail:queue',
-				$jsonPayload,
-			];
+			$cmd = sprintf(
+				'/usr/local/bin/php %s mail:queue %s >> /var/log/artisan-mail.log 2>&1 &',
+				escapeshellarg(base_path('artisan')),
+				escapeshellarg($tempFile)
+			);
 
-			$cmd = implode(' ', $parts) . ' >> /var/log/artisan-mail.log 2>&1 &';
 			exec($cmd);
 			return true;
 		}

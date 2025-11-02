@@ -533,12 +533,17 @@
 				'contentType' => $this->contentType,
 			];
 
-			$tempFile = tempnam(sys_get_temp_dir(), 'mail_');
-			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE));
+			$dir = base_path('logs/mails');
+			if (!is_dir($dir)) {
+				mkdir($dir, 0777, true);
+			}
 
+			$tempFile = $dir . '/queue_' . uniqid() . '.json';
+			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE));
 			$cmd = sprintf(
-				'/usr/local/bin/php %s mail:queue %s >> /var/log/artisan-mail.log 2>&1 &',
-				escapeshellarg(base_path('artisan')),
+				'%s %s mail:queue %s 2>&1',
+				'/usr/local/bin/php',
+				base_path('artisan'),
 				escapeshellarg($tempFile)
 			);
 

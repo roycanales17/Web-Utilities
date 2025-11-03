@@ -18,7 +18,7 @@
 
 			$this->info('⏳ Initializing model class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "http/Model/$className");
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Model/$className");
 			$directories = explode('/', $className);
 			$className = ucfirst($directories[count($directories) - 1]);
 

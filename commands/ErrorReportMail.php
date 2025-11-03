@@ -12,10 +12,10 @@
 		public function handle(): void
 		{
 			$className = 'ErrorReportMail';
-			$basePath = base_path("/mails");
+			$basePath = base_path("/handler/Mails");
 			$content = <<<PHP
 			<?php
-				namespace Mails;
+				namespace Handler\Mails;
 			
 				use App\Utilities\Handler\Mailable;
 				use Exception;

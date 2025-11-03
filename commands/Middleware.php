@@ -18,7 +18,7 @@
 
 			$this->info('⏳ Initializing controller class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "http/Middleware/$className");
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Middleware/$className");
 			$directories = explode('/', $className);
 			$className = ucfirst($directories[count($directories) - 1]);
 

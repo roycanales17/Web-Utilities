@@ -20,7 +20,7 @@
 			}
 
 			$this->info('Clearing application logs...');
-			$path = base_path('/logs');
+			$path = base_path('/storage/logs');
 
 			if (is_dir($path)) {
 				$this->deleteDirectory($path);

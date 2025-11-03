@@ -3,12 +3,12 @@
 	namespace App\Utilities;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\Headers\Request;
-	use App\Http\Authenticatable;
 	use App\Utilities\Handler\Component;
-	use Exception;
+	use App\Http\Authenticatable;
+	use App\Headers\Request;
 	use ReflectionException;
 	use ReflectionMethod;
+	use Exception;
 
 	final class Stream
 	{

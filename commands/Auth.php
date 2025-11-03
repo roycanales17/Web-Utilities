@@ -20,9 +20,9 @@
 
 			// Project directories
 			$targets = [
-				'mails'      => base_path('/mails'),
+				'mails'      => base_path('/handler/Mails'),
 				'views'      => base_path('/views'),
-				'http'       => base_path('/http'),
+				'handler'    => base_path('/handler'),
 				'migrations' => base_path('/migrations'),
 				'routes'     => base_path('/routes'),
 			];

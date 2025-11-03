@@ -28,7 +28,7 @@
 			$className = ucfirst(preg_replace('/[^A-Za-z0-9_]/', '', $rawClass));
 
 			// Build namespace (e.g., Mails\Test\Subdir)
-			$namespace = 'Mails' . (!empty($namespaceParts) ? '\\' . implode('\\', $namespaceParts) : '');
+			$namespace = 'Handler\Mails' . (!empty($namespaceParts) ? '\\' . implode('\\', $namespaceParts) : '');
 
 			// Build directory path (relative to /mails)
 			$relativeDir = implode(DIRECTORY_SEPARATOR, $namespaceParts);

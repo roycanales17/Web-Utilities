@@ -62,6 +62,9 @@
 			$class = get_class($e);
 			$cli = PHP_SAPI === 'cli';
 
+			$ticker = strtoupper(dechex(crc32(uniqid('', true))));
+			$ticker = substr($ticker, 0, 8);
+
 			// Skip if in exclusion list
 			foreach ($this->dontReport as $excluded) {
 				if ($e instanceof $excluded) {
@@ -100,11 +103,11 @@
 
 				// Send via email
 				if (class_exists('\Handler\Mails\ErrorReportMail')) {
-					Mail::mail(new \Handler\Mails\ErrorReportMail($e));
+					Mail::mail(new \Handler\Mails\ErrorReportMail($e, $ticker));
 				}
 
 				$context = [
-					// 🚨 Core request info (always check first)
+					'ticker'        => $ticker,
 					'url'           => Server::RequestURI(),
 					'method'        => Server::RequestMethod(),
 					'ip'            => Server::IPAddress(),
@@ -114,42 +117,28 @@
 					'is_ajax'       => Server::isAjaxRequest(),
 					'request_id'    => Server::RequestId(),
 					'response_code' => http_response_code(),
-
-					// ⏱ Timing + connection
-					'request_time' => sprintf(
-						"%s [%s]",
-						Server::RequestTime(),
-						date('Y-m-d H:i:s', Server::RequestTime())
-					),
+					'request_time'  => sprintf("%s [%s]", Server::RequestTime(), date('Y-m-d H:i:s', Server::RequestTime())),
 					'client_port'   => Server::ClientPort(),
 					'server_ip'     => Server::ServerIPAddress(),
-
-					// 🌐 Request metadata
 					'referer'       => Server::Referer(),
 					'content_type'  => Server::ContentType(),
-
-					// 👤 User/session
 					'session_id'    => session_id() ?: null,
 					'user_id'       => $_SESSION['user_id'] ?? null,
-
-					// 🔎 Request params (can be verbose but useful)
 					'get'           => $_GET ?? [],
 					'post'          => $_POST ?? [],
 					'query'         => Server::QueryString(),
-
-					// 📝 Potentially long fields (put at the bottom)
 					'raw_body'      => file_get_contents('php://input'),
 					'accept'        => Server::Accept(),
 					'user_agent'    => Server::UserAgent(),
 				];
 			}
 
-			$logger->error(strip_tags($e->getMessage()), [
+			$logger->error("[TICKER: {$ticker}] " . strip_tags($e->getMessage()), [
 				'exception' => strtoupper($class),
 				'file'      => $e->getFile(),
 				'line'      => $e->getLine(),
 				'trace'     => $e->getTraceAsString(),
-				'context'   => $context
+				'context'   => $context,
 			]);
 
 			// Display the error only in the development mode
@@ -157,15 +146,15 @@
 				$file = urlencode($e->getFile());
 				$line = $e->getLine();
 
-				// Define editor URL schemes
 				$editorUrls = [
 					'phpstorm' => "phpstorm://open?file=$file&line=$line",
 					'vscode'   => "vscode://file/$file:$line",
-					'sublime'  => "subl://open?file=$file&line=$line"
+					'sublime'  => "subl://open?file=$file&line=$line",
 				];
 				$selectedUrl = $editorUrls[$e->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
 
 				$table = [
+					'Ticker:'              => $ticker,
 					'Exception Type:'      => strtoupper($class),
 					'Message:'             => $e->getMessage(),
 					'File:'                => $e->getFile(),
@@ -176,29 +165,24 @@
 
 				if ($cli) {
 					echo "\n\033[41;37m " . $class . " \033[0m\n\n";
-
 					foreach ($table as $label => $value) {
 						echo "\033[33m$label\033[0m $value\n";
 					}
-
 					echo "\n\033[31m--- Stack Trace ---\033[0m\n";
 					echo $e->getTraceAsString() . "\n";
-
-					echo "\n\033[36mNavigate in editor:\033[0m $selectedUrl\n\n";
 				} else {
 					if (Server::isAjaxRequest()) {
 						$req = new Request();
-						$trace = array_map(function ($t) {
-							return [
-								'file'     => $t['file'] ?? '',
-								'line'     => $t['line'] ?? '',
-								'class'    => $t['class'] ?? '',
-								'function' => $t['function'] ?? '',
-							];
-						}, $e->getTrace());
+						$trace = array_map(fn($t) => [
+							'file'     => $t['file'] ?? '',
+							'line'     => $t['line'] ?? '',
+							'class'    => $t['class'] ?? '',
+							'function' => $t['function'] ?? '',
+						], $e->getTrace());
 
 						$response = [
 							'status' => 'error',
+							'ticker' => $ticker,
 							'error'  => [
 								'type'    => strtoupper($class),
 								'message' => $e->getMessage(),
@@ -214,6 +198,7 @@
 							'Pragma'        => 'no-cache',
 							'Expires'       => '0',
 							'X-Request-ID'  => Server::RequestId() ?: uniqid('req_', true),
+							'X-Ticker-ID'   => $ticker,
 						];
 
 						echo $req->response($response, 500, $headers)->json();
@@ -238,7 +223,7 @@
 					}
 				}
 			} else {
-				echo(view('error', ['email' => Config::get('APP_EMAIL', '')]));
+				echo(view('error', ['email' => Config::get('APP_EMAIL', ''), 'ticker' => $ticker]));
 			}
 		}
 	}

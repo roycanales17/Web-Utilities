@@ -25,15 +25,18 @@
 			
 					private Error|Exception \$exception;
 					private string \$to;
+					private string \$ticker;
 			
-					public function __construct(Error|Exception \$exception) {
+					public function __construct(Error|Exception \$exception, string \$ticker) {
 						\$this->to = config('ERROR_MAIL_RECEIVER', 'receiver@example.com');
+						\$this->ticker = \$ticker;
 						\$this->exception = \$exception;
 					}
 			
 					public function send(): bool {
 						\$appName = config('APP_NAME', 'Framework');
-						\$subject = "🚨 [{\$appName}] Exception Detected";
+						\$ticker = \$this->ticker;
+						\$subject = "🚨 [{\$appName}] Exception Detected #{\$ticker}";
 						\$from = config('MAIL_FROM_ADDRESS', 'support@example.com');
 			
 						return \$this->view('email_report', ['exception' => \$this->exception])

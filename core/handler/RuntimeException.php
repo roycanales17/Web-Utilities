@@ -99,8 +99,8 @@
 			if (!$cli) {
 
 				// Send via email
-				if (class_exists('\Mails\ErrorReportMail')) {
-					Mail::mail(new \Mails\ErrorReportMail($e));
+				if (class_exists('\Handler\Mails\ErrorReportMail')) {
+					Mail::mail(new \Handler\Mails\ErrorReportMail($e));
 				}
 
 				$context = [

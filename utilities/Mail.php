@@ -151,6 +151,12 @@
 		protected array $bcc = [];
 
 		/**
+		 * Log filename for storing mail logs.
+		 * @var string|null
+		 */
+		protected ?string $logFilename = null;
+
+		/**
 		 * Configure SMTP settings.
 		 *
 		 * @param array $config
@@ -417,7 +423,9 @@
 		 */
 		public function send(): bool
 		{
+			$this->logFilename ??= 'mail_' . date('Y-m-d');
 			$conf = self::$configure;
+
 			if (!empty($this->temp_config)) {
 				$conf = $this->temp_config;
 			}
@@ -516,6 +524,20 @@
 			}
 		}
 
+		/**
+		 * Set a custom log filename for this mail instance.
+		 *
+		 * @param string $filename
+		 * @return self
+		 */
+		public function logFilename(string $filename): self
+		{
+			// Sanitize filename (no path traversal, only safe characters)
+			$safeFilename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $filename);
+			$this->logFilename = $safeFilename;
+			return $this;
+		}
+
 		public function queue(): bool
 		{
 			$payload = [
@@ -531,19 +553,28 @@
 				'headers' => $this->headers,
 				'charset' => $this->charset,
 				'contentType' => $this->contentType,
+				'logFilename' => $this->logFilename
 			];
 
-			$dir = base_path('storage/logs/mails');
+			$dir = base_path('storage/logs/app/mails');
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true);
 			}
 
-			$tempFile = $dir . '/queue_' . uniqid() . '.json';
-			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE));
+			$tempFile = $dir . '/queue_' . uniqid('', true) . '.json';
+			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+			$phpBinary = PHP_BINARY ?: '/usr/bin/php';
+			$backgroundScript = realpath(__DIR__ . '/../http/MailWorker.php');
+
+			if (!file_exists($backgroundScript)) {
+				throw new Exception("Mail worker script not found at: {$backgroundScript}");
+			}
+
 			$cmd = sprintf(
-				'%s %s mail:queue %s 2>&1',
-				'/usr/local/bin/php',
-				base_path('artisan'),
+				'%s %s %s > /dev/null 2>&1 &',
+				escapeshellarg($phpBinary),
+				escapeshellarg($backgroundScript),
 				escapeshellarg($tempFile)
 			);
 

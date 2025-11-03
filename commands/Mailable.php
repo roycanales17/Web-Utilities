@@ -11,37 +11,26 @@
 
 		public function handle(string $className = ''): void
 		{
-			if (!$className) {
-				$this->error('Mail class name is required.');
+			if (empty($className)) {
+				$this->error('Controller class name is required.');
 				return;
 			}
 
-			$this->info('⏳ Initializing mail class file generation...');
+			$this->info('⏳ Initializing controller class file generation...');
 
-			// Normalize directory separators and trim slashes
-			$className = str_replace(['\\', '/'], '/', trim($className, '/'));
+			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Mails/$className");
+			$directories = explode('/', $className);
+			$className = ucfirst($directories[count($directories) - 1]);
 
-			// Split into path parts
-			$parts = explode('/', $className);
-			$rawClass = array_pop($parts);
-			$namespaceParts = array_map('ucfirst', $parts);
-			$className = ucfirst(preg_replace('/[^A-Za-z0-9_]/', '', $rawClass));
-
-			// Build namespace (e.g., Mails\Test\Subdir)
-			$namespace = 'Handler\Mails' . (!empty($namespaceParts) ? '\\' . implode('\\', $namespaceParts) : '');
-
-			// Build directory path (relative to /mails)
-			$relativeDir = implode(DIRECTORY_SEPARATOR, $namespaceParts);
-			$targetDir = base_path('mails' . ($relativeDir ? DIRECTORY_SEPARATOR . $relativeDir : ''));
-
-			// Filename
-			$filename = $className . '.php';
+			array_pop($directories);
+			$basePath = base_path("/" . implode('/', $directories));
+			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
 
 			// Generate file content
 			$content = <<<PHP
 			<?php
 
-				namespace {$namespace};
+				namespace {$namespaceDeclaration};
 				
 				use App\Utilities\Handler\Mailable;
 				
@@ -61,12 +50,10 @@
 				}
 			PHP;
 
-			// Create using helper method
-			if ($this->create($filename, $content, $targetDir)) {
-				$this->success("✅ Mail class '{$namespace}\\{$className}' has been successfully created.");
-				return;
+			if ($this->create("$className.php", $content, $basePath)) {
+				$this->success("✅ Mail class file '{$className}' has been successfully created and is ready for use.");
+			} else {
+				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
 			}
-
-			$this->error("❌ Failed to create the file '{$filename}'.");
 		}
 	}

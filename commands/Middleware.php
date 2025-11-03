@@ -6,7 +6,7 @@
 
 	class Middleware extends Command
 	{
-		protected string $signature = 'make:controller';
+		protected string $signature = 'make:middleware';
 		protected string $description = 'Generates controller class.';
 
 		public function handle(string $className = ''): void

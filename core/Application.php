@@ -87,32 +87,35 @@
 				if ($callback) $callback($conf);
 
 				// Configure Routes
-				foreach ($conf['routes'] ?? [] as $route) {
-					$routeObject = Route::configure(
-						root: base_path('/routes'),
-						routes: $route['routes'] ?? ['web.php'],
-						prefix: $route['prefix'] ?? '',
-						domain: $route['domain'] ?? config('APP_URL', 'localhost')
-					);
+				foreach ([false, true] as $validate) {
+					foreach ($conf['routes'] ?? [] as $route) {
+						$routeObject = Route::configure(
+							root: base_path('/routes'),
+							routes: $route['routes'] ?? ['web.php'],
+							prefix: $route['prefix'] ?? '',
+							domain: $route['domain'] ?? config('APP_URL', 'localhost'),
+							middleware: $route['middleware'] ?? [],
+							validate: $validate
+						);
 
-					if ($cli) {
-						$routeObject->routes(function($routes) {
-							// Store into the artisan
-						});
-					} else {
-						if (Request::header('X-STREAM-WIRE')) {
-							$resolved = $routeObject->captured(function($content) {
-								echo($content);
+						if ($cli) {
+							$routeObject->routes(function ($routes) {
+								// Store into the artisan
 							});
 						} else {
-							$resolved = $routeObject->captured($route['captured']);
-						}
+							$resolved = Request::header('X-STREAM-WIRE')
+								? $routeObject->captured(function ($content) {
+									echo $content;
+								})
+								: $routeObject->captured($route['captured']);
 
-						if ($resolved) {
-							break;
+							if ($resolved) {
+								break 2; // break both foreach loops
+							}
 						}
 					}
 				}
+
 
 				if (!$cli && !($resolved ?? false)) {
 					if (file_exists(base_path('/views/404.blade.php')) || file_exists(base_path('/views/404.php'))) {

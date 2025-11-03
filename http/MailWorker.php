@@ -2,7 +2,7 @@
 
 	use App\Utilities\Mail;
 
-	require base_path('vendor/autoload.php');
+	require_once base_path('vendor/autoload.php');
 
 	// --- CLI argument check ---
 	if ($argc < 2) {

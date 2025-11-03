@@ -541,6 +541,7 @@
 		public function queue(): bool
 		{
 			$payload = [
+				'configurations' => self::$configure,
 				'recipients' => $this->recipients,
 				'from' => $this->from,
 				'subject' => $this->subject,
@@ -564,7 +565,7 @@
 			$tempFile = $dir . '/queue_' . uniqid('', true) . '.json';
 			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
-			$phpBinary = PHP_BINARY ?: '/usr/bin/php';
+			$phpBinary = PHP_BINARY ?: '/usr/local/bin/php';
 			$backgroundScript = realpath(__DIR__ . '/../http/MailWorker.php');
 
 			if (!file_exists($backgroundScript)) {

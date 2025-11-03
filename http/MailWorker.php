@@ -2,7 +2,20 @@
 
 	use App\Utilities\Mail;
 
-	require_once base_path('vendor/autoload.php');
+	function findProjectRoot($startDir = __DIR__) {
+		$dir = realpath($startDir);
+		while ($dir && $dir !== '/' && !file_exists($dir . '/vendor/autoload.php')) {
+			$dir = dirname($dir);
+		}
+		return $dir;
+	}
+
+	$base = findProjectRoot(__DIR__);
+	if (!$base) {
+		exit("❌ Could not locate project root containing vendor/autoload.php\n");
+	}
+
+	require_once $base . '/vendor/autoload.php';
 
 	// --- CLI argument check ---
 	if ($argc < 2) {
@@ -14,24 +27,36 @@
 		exit("Queue file not found: {$file}\n");
 	}
 
-	// --- Load and decode ---
+// --- Load and decode ---
 	$data = json_decode(file_get_contents($file), true);
 	if (!$data || !is_array($data)) {
 		exit("Invalid email payload.\n");
 	}
 
-	// --- Determine log file early ---
+// --- Determine log file early ---
 	$logDir = base_path('storage/logs/app/mails');
 	if (!is_dir($logDir)) {
 		mkdir($logDir, 0777, true);
 	}
 
-	// Use custom log name or fallback
 	$logFile = !empty($data['logFilename'])
 		? "{$logDir}/{$data['logFilename']}.log"
-		: "{$logDir}/mail_worker.log";
+		: "{$logDir}/mail-worker.log";
 
 	try {
+		$conf = $data['configurations'] ?? [];
+		if (!empty($conf)) {
+			Mail::configure(
+				$conf['host'] ?? 'localhost',
+				(int)($conf['port'] ?? 587),
+				$conf['encryption'] ?? 'tls',
+				$conf['mailer'] ?? 'smtp',
+				$conf['credentials'] ?? []
+			);
+		} else {
+			file_put_contents($logFile, '[' . date('Y-m-d H:i:s') . "] ⚠️ No mail configuration found in payload.\n", FILE_APPEND);
+		}
+
 		// --- Build the mail ---
 		$mail = Mail::to($data['recipients'])
 			->from($data['from'])
@@ -84,7 +109,6 @@
 		);
 
 	} catch (Throwable $e) {
-		// Log failure (always available since $logFile defined early)
 		$errorMessage = '[' . date('Y-m-d H:i:s') . '] ❌ Error: ' . $e->getMessage();
 		if ($e->getFile()) {
 			$errorMessage .= ' in ' . basename($e->getFile()) . ':' . $e->getLine();
@@ -93,5 +117,5 @@
 
 		file_put_contents($logFile, $errorMessage, FILE_APPEND);
 	} finally {
-		@unlink($file); // cleanup queue file
+		@unlink($file);
 	}

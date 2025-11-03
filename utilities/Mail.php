@@ -533,7 +533,7 @@
 				'contentType' => $this->contentType,
 			];
 
-			$dir = base_path('logs/mails');
+			$dir = base_path('storage/logs/mails');
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true);
 			}

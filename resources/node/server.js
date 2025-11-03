@@ -24,7 +24,7 @@ const server = http.createServer(app);
 // Logger instance
 const logger = new Logger({
     level: Logger.LEVELS.INFO,
-    logDir: "logs",
+    logDir: "storage/logs",
     fileName: "socket.log"
 });
 

@@ -63,4 +63,10 @@
 
 			$this->create($classInfo['class'] . '.php', $content, $basePath);
 		}
+
+		protected function getRealPath(string $path): string
+		{
+			$path = trim($path, '/');
+			return realpath(__DIR__ . "/../$path");
+		}
 	}

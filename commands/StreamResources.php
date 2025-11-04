@@ -94,4 +94,10 @@
 			echo "       App\\Routes\\Route::post('/api/stream-wire/{identifier}', [App\\Utilities\\Stream::class, 'capture']);" . PHP_EOL . PHP_EOL;
 			echo "\033[32m✔️ All set! You're ready to stream DOM resources! 🚀\033[0m" . PHP_EOL . PHP_EOL;
 		}
+
+		protected function getRealPath(string $path): string
+		{
+			$path = trim($path, '/');
+			return realpath(__DIR__ . "/../$path");
+		}
 	}

@@ -208,39 +208,21 @@
 		 */
 		public static function makeURL(string $path, array $params = []): string
 		{
-			$development = config('DEVELOPMENT', true);
-			$base = trim(config('APP_URL', ''), '/');
-
 			// Normalize path
 			$path = '/' . ltrim($path, '/');
 			$query = !empty($params) ? '?' . http_build_query($params) : '';
 
-			// If APP_URL is defined, use it directly (even in development)
-			if (!empty($base)) {
-				// Ensure scheme is included
-				if (!preg_match('#^https?://#', $base)) {
-					$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
-					$base = $scheme . $base;
-				}
-
-				// Clean trailing slash
-				$base = rtrim($base, '/');
-				return $base . $path . $query;
-			}
-
-			// If APP_URL not set, derive from environment
+			// Detect scheme (https/http)
 			$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
-			$host = self::HostName();
 
-			// --- Smart port handling ---
-			// Always preserve port in development (localhost or custom domains like pa.test:8080)
-			// Strip only if explicitly in production AND host has a port pattern
-			if (!$development) {
-				$host = preg_replace('/:\d+$/', '', $host);
-			}
+			// Detect host + port directly from current request
+			$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+			$host = trim($host);
 
-			$base = $scheme . $host;
+			// Normalize: remove duplicate slashes or trailing slash
+			$base = rtrim($scheme . $host, '/');
 
+			// Return full URL
 			return $base . $path . $query;
 		}
 	}

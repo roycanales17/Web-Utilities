@@ -100,7 +100,7 @@
 		 * Recipient email addresses.
 		 * @var array
 		 */
-		protected array $recipients;
+		protected array $recipients = [];
 
 		/**
 		 * Email subject.
@@ -557,12 +557,12 @@
 				'logFilename' => $this->logFilename
 			];
 
-			$dir = base_path('storage/logs/app/mails');
+			$dir = base_path('storage/logs/app/mails/queue');
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true);
 			}
 
-			$tempFile = $dir . '/queue_' . uniqid('', true) . '.json';
+			$tempFile = $dir . '/' . uniqid('', true) . '.json';
 			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
 			$phpBinary = PHP_BINARY ?: '/usr/local/bin/php';

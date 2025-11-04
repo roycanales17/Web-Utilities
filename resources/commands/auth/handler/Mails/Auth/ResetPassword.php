@@ -1,5 +1,5 @@
 <?php
-    namespace Mails\mails\Auth;
+    namespace Handler\Mails\Auth;
 
     use App\Utilities\Handler\Mailable;
 	use App\Utilities\Server;

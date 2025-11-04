@@ -1,6 +1,6 @@
 <?php
 
-	namespace Http\Controller\Authentication;
+	namespace Handler\Controller\Authentication;
 
 	use App\Headers\Request;
     use App\Headers\Redirect;

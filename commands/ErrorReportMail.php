@@ -11,17 +11,17 @@
 		
 		public function handle(): void
 		{
-			$className = 'ErrorReportMail';
-			$basePath = base_path("/handler/Mails");
+			$classInfo = $this->extractClassInfo('ErrorReportMail', 'handler/Mails');
+			$basePath = base_path('/' . $classInfo['directory']);
 			$content = <<<PHP
 			<?php
-				namespace Handler\Mails;
+				namespace {$classInfo['namespace']};
 			
 				use App\Utilities\Handler\Mailable;
 				use Exception;
 				use Error;
 			
-				class ErrorReportMail extends Mailable {
+				class {$classInfo['class']} extends Mailable {
 			
 					private Error|Exception \$exception;
 					private string \$to;
@@ -49,24 +49,18 @@
 				}
 			PHP;
 
-			$source = realpath(__DIR__ . '/../resources/blades/email_report.blade.php');
-			$destination_dir = base_path('views');
+			$source = $this->getRealPath("resources/blades/email_report.blade.php");
+			$destination_dir = base_path($this->getDefaultDirectoryView());
 			$destination = $destination_dir . '/email_report.blade.php';
 
-			if (!is_dir($destination_dir)) {
-				mkdir($destination_dir, 0755, true);
+			if (!$this->createDirectory($destination_dir)) {
+				return;
 			}
 
-			if ($source && file_exists($source)) {
-				if (copy($source, $destination)) {
-					$this->success("✅ File copied successfully to: {$destination}");
-				}
+			if (!$this->moveFile($source, $destination)) {
+				return;
 			}
 
-			if ($this->create("$className.php", $content, $basePath)) {
-				$this->success("✅ Error reporting email file '{$className}' has been successfully created and is ready for use.");
-			} else {
-				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
-			}
+			$this->create($classInfo['class'] . '.php', $content, $basePath);
 		}
 	}

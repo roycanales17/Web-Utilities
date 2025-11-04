@@ -11,7 +11,7 @@
 
 		public function handle(): void
 		{
-			$source = realpath(__DIR__ . '/../resources/node');
+			$source = $this->getRealPath("resources/node");
 			$destination = base_path('node');
 			$publicSocket = base_path('public/socket.js');
 

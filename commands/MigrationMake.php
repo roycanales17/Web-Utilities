@@ -9,44 +9,48 @@
 		protected string $signature = 'make:migration';
 		protected string $description = 'Create a new migration file';
 
-		public function handle(string $className = ''): void
+		public function handle(string $migrationName = ''): void
 		{
-			if (!$className) {
-				$this->error("❌ Migration name is required.");
+			if (empty($migrationName)) {
+				$this->error("Migration name is required.");
 				return;
 			}
 
+			// Normalize migration name to class name (PascalCase)
+			$classInfo = $this->extractClassInfo($migrationName, 'migrations');
+			$className = $classInfo['class'];
+
+			// File name with timestamp
 			$timestamp = date('Y_m_d_His');
 			$filename = "{$timestamp}_{$className}.php";
-			$path = base_path('migrations/' . $filename);
+			$basePath = base_path($classInfo['directory']);
 
-			// Convert name to class name (snake_case → PascalCase)
-			$className = str_replace(' ', '', ucwords(str_replace('_', ' ', $className)));
+			$content = <<<PHP
+			<?php
 
-			$stub = <<<PHP
-            <?php
+				use App\Databases\Schema;
+				use App\Databases\Handler\Blueprints\Table;
 
-                use App\Databases\Schema;
-                use App\Databases\Handler\Blueprints\Table;
+				class {$className}
+				{
+					/**
+					 * Apply the migration
+					 */
+					public function up(): void
+					{
+						// TODO: Implement table creation or alteration here
+					}
 
-                class {$className}
-                {
-                    public function up(): void
-                    {
-                        // TODO: Implement table creation here
-                    }
+					/**
+					 * Reverse the migration
+					 */
+					public function down(): void
+					{
+						// TODO: Implement rollback logic here
+					}
+				}
+			PHP;
 
-                    public function down(): void
-                    {
-                        // TODO: Implement rollback here
-                    }
-                }
-            PHP;
-
-			if (file_put_contents($path, $stub)) {
-				$this->success("✅ Migration created: {$filename}");
-			} else {
-				$this->error("❌ Failed to create migration file.");
-			}
+			$this->create($filename, $content, $basePath);
 		}
 	}

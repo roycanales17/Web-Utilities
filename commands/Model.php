@@ -7,7 +7,7 @@
 	class Model extends Command
 	{
 		protected string $signature = 'make:model';
-		protected string $description = 'Generates model class.';
+		protected string $description = 'Generates a model class.';
 
 		public function handle(string $className = ''): void
 		{
@@ -18,35 +18,34 @@
 
 			$this->info('⏳ Initializing model class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Model/$className");
-			$directories = explode('/', $className);
-			$className = ucfirst($directories[count($directories) - 1]);
-
-			array_pop($directories);
-			$basePath = base_path("/" . implode('/', $directories));
-			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
+			// Extract class info and handle directories/namespaces
+			$classInfo = $this->extractClassInfo($className, 'handler/Model');
+			$className = $classInfo['class'];
+			$basePath = base_path($classInfo['directory']);
+			$namespace = $classInfo['namespace'];
 
 			$table = strtolower($className);
+
 			$content = <<<PHP
 			<?php
-			
-				{$namespaceDeclaration}
-			
+
+				namespace {$namespace};
+
 				use App\Databases\Facade\Model;
-				
+
 				class {$className} extends Model
 				{
+					/** @var string Primary key of the table */
 					public string \$primary_key = 'id';
+
+					/** @var string Table name */
 					public string \$table = '{$table}';
+
+					/** @var array Fillable attributes */
 					public array \$fillable = [];
 				}
 			PHP;
 
-			// Create the PHP file
-			if ($this->create("$className.php", $content, $basePath)) {
-				$this->success("✅ Model class file '{$className}' has been successfully created and is ready for use.");
-			} else {
-				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
-			}
+			$this->create("$className.php", $content, $basePath);
 		}
 	}

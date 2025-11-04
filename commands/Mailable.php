@@ -1,43 +1,39 @@
 <?php
 
 	namespace Commands;
-	
+
 	use App\Console\Command;
-	
-	class Mailable extends Command {
-		
+
+	class Mailable extends Command
+	{
 		protected string $signature = 'make:mail';
 		protected string $description = 'Generate a new mailable class.';
 
 		public function handle(string $className = ''): void
 		{
 			if (empty($className)) {
-				$this->error('Controller class name is required.');
+				$this->error('Mail class name is required.');
 				return;
 			}
 
-			$this->info('⏳ Initializing controller class file generation...');
+			$this->info('⏳ Initializing mail class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Mails/$className");
-			$directories = explode('/', $className);
-			$className = ucfirst($directories[count($directories) - 1]);
+			// Extract class info (directory, namespace, class name)
+			$classInfo = $this->extractClassInfo($className, 'handler/Mails');
+			$basePath = base_path($classInfo['directory']);
 
-			array_pop($directories);
-			$basePath = base_path("/" . implode('/', $directories));
-			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
-
-			// Generate file content
+			// Class file content
 			$content = <<<PHP
 			<?php
-
-				namespace {$namespaceDeclaration};
+			
+				namespace {$classInfo['namespace']};
 				
 				use App\Utilities\Handler\Mailable;
 				
-				class {$className} extends Mailable
+				class {$classInfo['class']} extends Mailable
 				{
 					public array \$data;
-
+				
 					public function __construct(array \$data)
 					{
 						\$this->data = \$data;
@@ -50,10 +46,7 @@
 				}
 			PHP;
 
-			if ($this->create("$className.php", $content, $basePath)) {
-				$this->success("✅ Mail class file '{$className}' has been successfully created and is ready for use.");
-			} else {
-				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
-			}
+			// Create the PHP class file
+			$this->create("{$classInfo['class']}.php", $content, $basePath);
 		}
 	}

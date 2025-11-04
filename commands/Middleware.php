@@ -3,11 +3,12 @@
 	namespace Commands;
 
 	use App\Console\Command;
+	use App\Headers\Request;
 
 	class Middleware extends Command
 	{
 		protected string $signature = 'make:middleware';
-		protected string $description = 'Generates controller class.';
+		protected string $description = 'Generates a new middleware class.';
 
 		public function handle(string $className = ''): void
 		{
@@ -16,42 +17,64 @@
 				return;
 			}
 
-			$this->info('⏳ Initializing controller class file generation...');
+			$this->info('⏳ Initializing middleware class file generation...');
 
-			$className = preg_replace('/[^A-Za-z0-9_\/]/', '', "handler/Middleware/$className");
-			$directories = explode('/', $className);
-			$className = ucfirst($directories[count($directories) - 1]);
+			// Extract class info (directory, namespace, class name)
+			$classInfo = $this->extractClassInfo($className, 'handler/Middleware');
+			$basePath = base_path($classInfo['directory']);
 
-			array_pop($directories);
-			$basePath = base_path("/" . implode('/', $directories));
-			$namespaceDeclaration = "namespace ". implode('\\', array_map('ucfirst', $directories)) . ";";
-
+			// Class file content
 			$content = <<<PHP
 			<?php
-			
-				{$namespaceDeclaration}
+
+				namespace {$classInfo['namespace']};
 				
 				use App\Headers\Request;
 				
-				class {$className}
+				class {$classInfo['class']}
 				{
+					/**
+					 * Handle an incoming request.
+					 *
+					 * @param  Request \$request
+					 * @return mixed
+					 */
 					public function handle(Request \$request)
 					{
-						// If invalid redirect 
-						if (0) {
-							return redirect('/unauthorized', 400);
+						// Example pre-processing: authentication/validation
+						if (!\$this->authorize(\$request)) {
+							return redirect('/unauthorized', 403);
 						}
-			
+				
+						\$response = 'ok!';
+				
+						// Example post-processing: logging, response modification
+						\$this->log(\$request, \$response);
+				
+						// Return True if success
 						return true;
+					}
+				
+					/**
+					 * Perform authorization/validation logic.
+					 */
+					protected function authorize(Request \$request): bool
+					{
+						// Default: allow all requests
+						return true;
+					}
+				
+					/**
+					 * Example logging or post-processing.
+					 */
+					protected function log(Request \$request, mixed \$response): void
+					{
+						// You could log request details here
 					}
 				}
 			PHP;
 
 			// Create the PHP file
-			if ($this->create("$className.php", $content, $basePath)) {
-				$this->success("✅ Middleware class file '{$className}' has been successfully created and is ready for use.");
-			} else {
-				$this->error("❌ Failed to create the file '{$className}.php' at '{$basePath}'.");
-			}
+			$this->create("{$classInfo['class']}.php", $content, $basePath);
 		}
 	}

@@ -18,7 +18,6 @@
             }
 
             $this->info("Exporting schema for table: {$table}");
-
             $result = Schema::exportTable($table);
             $dump = $result['Create Table'] ?? null;
 

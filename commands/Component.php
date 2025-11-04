@@ -17,14 +17,14 @@
 			}
 
 			$this->info('⏳ Initializing component class file generation...');
-			$classInfo = $this->extractClassInfo($className, 'components');
+			$classInfo = $this->extractClassInfo($className, 'component');
 
 			// File names
 			$componentFilename = $classInfo['class'] . '.php';
 			$bladeFilename = lcfirst($classInfo['class']) . '.blade.php';
 
 			// Hint path
-			$relativeViewDir = $this->getDefaultDirectoryView() . strtolower($classInfo['directory']) . "/stream";
+			$relativeViewDir = $this->getDefaultDirectoryView() . $classInfo['directory'];
 			$viewDir = base_path($relativeViewDir);
 
 			// Component class file content

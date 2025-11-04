@@ -37,7 +37,7 @@
 		}
 
 		// --- Determine log file early ---
-		$logDir = base_path('storage/logs/app/mails');
+		$logDir = base_path('storage/private/logs/app/mails');
 		if (!is_dir($logDir)) {
 			mkdir($logDir, 0777, true);
 		}

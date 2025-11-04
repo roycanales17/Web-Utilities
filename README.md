@@ -240,7 +240,7 @@ use App\Utilities\Logger;
 // 1️⃣ Log filename (optional, default: 'app.log')
 // 2️⃣ Directory path where logs are stored
 
-$logger = new Logger('app.log', 'storage/logs');
+$logger = new Logger('app.log', 'storage/private/logs');
 
 // ------------------------------------------------------
 // STEP 2: Logging Different Message Types

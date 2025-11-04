@@ -557,7 +557,7 @@
 				'logFilename' => $this->logFilename
 			];
 
-			$dir = base_path('storage/logs/app/mails/queue');
+			$dir = base_path('storage/private/logs/app/mails/queue');
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true);
 			}

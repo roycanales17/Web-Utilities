@@ -24,7 +24,7 @@
 		 * @param string $logFile Log file name (default: 'app.log').
 		 * @param string $logDirectory Directory to store logs (default: 'logs').
 		 */
-		public function __construct(string $logFile = 'app.log', string $logDirectory = 'storage/logs')
+		public function __construct(string $logFile = 'app.log', string $logDirectory = 'storage/private/logs')
 		{
 			$this->logDirectory = base_path(trim($logDirectory, '/'));
 			$this->logFile = $logFile;

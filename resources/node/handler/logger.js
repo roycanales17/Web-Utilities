@@ -38,7 +38,7 @@ class Logger {
     constructor(options = {}) {
         const {
             level = Logger.LEVELS.WARN,
-            logDir = "storage/logs",
+            logDir = "storage/private/logs",
             fileName = "socket.log"
         } = options;
 

@@ -209,37 +209,37 @@
 		public static function makeURL(string $path, array $params = []): string
 		{
 			$development = config('DEVELOPMENT', true);
-			$base = rtrim(config('APP_URL', ''), '/');
+			$base = trim(config('APP_URL', ''), '/');
 
-			if (empty($base)) {
-				$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
-				$host = self::HostName();
-
-				if (!$development) {
-					$host = preg_replace('/:\d+$/', '', $host);
-				}
-
-				$base = $scheme . $host;
-			} else {
-				$parsed = parse_url($base);
-				$scheme = ($parsed['scheme'] ?? (self::IsSecureConnection() ? 'https' : 'http')) . '://';
-				$host = $parsed['host'] ?? self::HostName();
-
-				// Only keep port in development
-				$port = '';
-				if ($development && !empty($parsed['port'])) {
-					$port = ':' . $parsed['port'];
-				}
-
-				$base = $scheme . $host . $port;
-
-				if (!empty($parsed['path'])) {
-					$base .= rtrim($parsed['path'], '/');
-				}
-			}
-
+			// Normalize path
 			$path = '/' . ltrim($path, '/');
 			$query = !empty($params) ? '?' . http_build_query($params) : '';
+
+			// If APP_URL is defined, use it directly (even in development)
+			if (!empty($base)) {
+				// Ensure scheme is included
+				if (!preg_match('#^https?://#', $base)) {
+					$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
+					$base = $scheme . $base;
+				}
+
+				// Clean trailing slash
+				$base = rtrim($base, '/');
+				return $base . $path . $query;
+			}
+
+			// If APP_URL not set, derive from environment
+			$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
+			$host = self::HostName();
+
+			// --- Smart port handling ---
+			// Always preserve port in development (localhost or custom domains like pa.test:8080)
+			// Strip only if explicitly in production AND host has a port pattern
+			if (!$development) {
+				$host = preg_replace('/:\d+$/', '', $host);
+			}
+
+			$base = $scheme . $host;
 
 			return $base . $path . $query;
 		}

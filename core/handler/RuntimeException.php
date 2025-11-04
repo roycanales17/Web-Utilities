@@ -223,7 +223,11 @@
 					}
 				}
 			} else {
-				echo(view('error', ['email' => Config::get('APP_EMAIL', ''), 'ticker' => $ticker]));
+				if (!file_exists(base_path($errorPath = "views/errors/exception.blade.php"))) {
+					die("Missing exception view. Please create the file at: {$errorPath}");
+				}
+
+				echo(view($errorPath, ['email' => Config::get('APP_EMAIL', ''), 'ticker' => $ticker]));
 			}
 		}
 	}

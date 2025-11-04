@@ -39,7 +39,7 @@
 						\$subject = "🚨 [{\$appName}] Exception Detected #{\$ticker}";
 						\$from = config('MAIL_FROM_ADDRESS', 'support@example.com');
 			
-						return \$this->view('email_report', ['exception' => \$this->exception])
+						return \$this->view('errors.mails.email-report', ['exception' => \$this->exception])
 							->contentType('text/html')
 							->subject(\$subject)
 							->from(\$from)
@@ -49,9 +49,9 @@
 				}
 			PHP;
 
-			$source = $this->getRealPath("resources/blades/email_report.blade.php");
+			$source = $this->getRealPath("resources/blades/email-report.blade.php");
 			$destination_dir = base_path($this->getDefaultDirectoryView());
-			$destination = $destination_dir . '/email_report.blade.php';
+			$destination = $destination_dir . '/errors/mails/email-report.blade.php';
 
 			if (!$this->createDirectory($destination_dir)) {
 				return;

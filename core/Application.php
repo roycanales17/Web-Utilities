@@ -110,19 +110,19 @@
 								: $routeObject->captured($route['captured']);
 
 							if ($resolved) {
-								break 2; // break both foreach loops
+								break 2;
 							}
 						}
 					}
 				}
 
-
 				if (!$cli && !($resolved ?? false)) {
-					if (file_exists(base_path('/views/404.blade.php')) || file_exists(base_path('/views/404.php'))) {
+					if (file_exists(base_path($emptyPagePath = "/views/errors/404.blade.php"))) {
 						echo view('404');
+					} else {
+						throw new Exception("Missing 404 page. Please create the file at: {$emptyPagePath}");
 					}
 					ob_end_flush();
-
 				}
 
 			} catch (Exception|Throwable $e) {

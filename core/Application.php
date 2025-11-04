@@ -89,6 +89,10 @@
 				// Configure Routes
 				foreach ([false, true] as $validate) {
 					foreach ($conf['routes'] ?? [] as $route) {
+						if ($cli && $validate) {
+							continue;
+						}
+
 						$routeObject = Route::configure(
 							root: base_path('/routes'),
 							routes: $route['routes'] ?? ['web.php'],

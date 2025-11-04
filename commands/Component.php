@@ -17,7 +17,7 @@
 			}
 
 			$this->info('⏳ Initializing component class file generation...');
-			$classInfo = $this->extractClassInfo($className, 'component');
+			$classInfo = $this->extractClassInfo($className, 'components');
 
 			// File names
 			$componentFilename = $classInfo['class'] . '.php';

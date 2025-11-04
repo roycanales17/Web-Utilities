@@ -11,7 +11,7 @@
 
 		public function handle(): void
 		{
-			$mainResources = realpath(__DIR__ . '/../resources/commands/auth');
+			$mainResources = $this->getRealPath("resources/commands/auth");
 
 			if (!$mainResources) {
 				$this->error('Auth resources not found.');

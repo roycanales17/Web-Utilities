@@ -49,8 +49,9 @@
 		public static function capture(Request $req): string
 		{
 			$startedTime = hrtime(true);
+			$isStreamWire = Request::header('X-STREAM-WIRE') || ($_SERVER['HTTP_X_STREAM_WIRE'] ?? null);
 
-			if (Request::header('X-STREAM-WIRE')) {
+			if ($isStreamWire) {
 				$validate = $req->validate([
 					'_component' => 'required|string',
 					'_method' => 'required|string',

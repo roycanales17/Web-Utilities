@@ -122,7 +122,7 @@
 
 				if (!$cli && !($resolved ?? false)) {
 					if (file_exists(base_path($emptyPagePath = "/views/errors/404.blade.php"))) {
-						echo view('404');
+						echo view('errors/404');
 					} else {
 						throw new Exception("Missing 404 page. Please create the file at: {$emptyPagePath}");
 					}

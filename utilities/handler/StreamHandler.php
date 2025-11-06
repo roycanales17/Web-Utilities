@@ -200,7 +200,7 @@
 					echo($component->parse(trace: $this->trace));
 				}
 
-				return Blade::compile(ob_get_clean());
+				return Blade::compileAndCapture(ob_get_clean());
 			}
 
 			throw new StreamException("Unable to generate stream, class is not provided.");

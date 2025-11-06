@@ -152,7 +152,6 @@
 	function view(string $path, array $data = [], string $directory = 'views'): string
 	{
 		$compiled = function() use ($path, $data, $directory) {
-			ob_start();
 			$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
 			$mainPath = base_path("/$directory/{$normalizedPath}.php");
 			$bladePath = base_path("/$directory/{$normalizedPath}.blade.php");
@@ -161,8 +160,7 @@
 				$mainPath = $bladePath;
 			}
 
-			Blade::load($mainPath, $data);
-			return ob_get_clean();
+			return Blade::load($mainPath, $data);
 		};
 
 		return Component::renderComponents($compiled());

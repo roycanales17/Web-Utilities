@@ -505,13 +505,8 @@ HTML;
 		protected function compile(array $data = []): array
 		{
 			$loadBaseComponent = function() use ($data) {
-				ob_start();
-
-				// Set the root directory and determine the path of the class file
 				$path = base_path("/views/". str_replace(['.', '\\'], '/', get_called_class()) . ".blade.php");
-
-				Blade::load($path, $data);
-				return ob_get_clean();
+				return Blade::load($path, $data);
 			};
 
 			$baseComponent = '';

@@ -7,6 +7,9 @@
 	use App\View\Compilers\Blade;
 	use App\Utilities\Stream;
 
+	use InvalidArgumentException;
+	use ReflectionException;
+
 	final class StreamHandler
 	{
 		private array $action = [];
@@ -117,7 +120,7 @@
 			}
 
 			if (!is_string($method) || !method_exists($class, $method)) {
-				throw new \InvalidArgumentException("Invalid target action method '{$method}'.");
+				throw new InvalidArgumentException("Invalid target action method '{$method}'.");
 			}
 
 			$encodedArgs = [];
@@ -171,7 +174,7 @@
 		 * This returns the component interface.
 		 *
 		 * @throws CompilerException
-		 * @throws StreamException
+		 * @throws StreamException|ReflectionException
 		 */
 		public function __toString(): string {
 			ob_start();

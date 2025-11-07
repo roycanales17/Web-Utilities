@@ -3,10 +3,8 @@
 	namespace App\Utilities\Handler;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\View\Compilers\scheme\CompilerException;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Config;
-	use App\Utilities\Server;
 	use ReflectionProperty;
 	use ReflectionClass;
 	use Exception;
@@ -298,7 +296,7 @@ HTML;
 			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
-			$dev = Config::get('DEVELOPMENT');
+			$dev = Config::get('DEVELOPMENT', true);
 
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
@@ -577,7 +575,7 @@ HTML;
 						return [];
 					}
 
-					throw new \Exception("Stream Response: Class {$class} does not exist.");
+					throw new Exception("Stream Response: Class {$class} does not exist.");
 				};
 
 				if (!$isSingleAction) {

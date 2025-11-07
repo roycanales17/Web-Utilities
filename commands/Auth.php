@@ -78,8 +78,6 @@
 			}
 
 			$this->success('Auth resources successfully copied to project directories.');
-
-			// ✅ Prompt to setup Routes.php
 			$this->ensureAuthRouteExists();
 		}
 

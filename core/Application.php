@@ -10,7 +10,6 @@
 	use App\Utilities\Storage;
 	use App\Utilities\Config;
 	use App\Utilities\Cache;
-	use App\Utilities\Mail;
 	use App\Headers\Request;
 	use App\Routes\Route;
 	use Exception;
@@ -102,11 +101,7 @@
 							validate: $validate
 						);
 
-						if ($cli) {
-							$routeObject->routes(function ($routes) {
-								// Store into the artisan
-							});
-						} else {
+						if (!$cli) {
 							$resolved = Request::header('X-STREAM-WIRE')
 								? $routeObject->captured(function ($content) {
 									echo $content;

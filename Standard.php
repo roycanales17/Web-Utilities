@@ -153,14 +153,8 @@
 	{
 		$compiled = function() use ($path, $data, $directory) {
 			$normalizedPath = preg_replace('/\.php$/', '', trim(str_replace('.', '/', $path), '/'));
-			$mainPath = base_path("/$directory/{$normalizedPath}.php");
 			$bladePath = base_path("/$directory/{$normalizedPath}.blade.php");
-
-			if (file_exists($bladePath)) {
-				$mainPath = $bladePath;
-			}
-
-			return Blade::load($mainPath, $data);
+			return Blade::load($bladePath, $data);
 		};
 
 		return Component::renderComponents($compiled());

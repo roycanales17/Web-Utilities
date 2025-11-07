@@ -384,7 +384,7 @@
 	 * @param string $name  The input field name.
 	 * @return mixed|string The flashed input value or an empty string if not set.
 	 */
-	function input(string $name): mixed
+	function old(string $name): mixed
 	{
 		return Session::flash("input:$name") ?: '';
 	}

@@ -3,6 +3,7 @@
 	namespace App\Http;
 
 	use App\Headers\Redirect;
+	use App\Headers\Response;
 	use App\Utilities\Session;
 
 	/**
@@ -196,5 +197,15 @@
 		protected function call(string $method, array $params = []): mixed
 		{
 			return call_user_func_array([$this, $method], $params);
+		}
+
+		/**
+		 * No Content
+		 *
+		 * @return Response
+		 */
+		protected function noContent(): Response
+		{
+			return response('', 204);
 		}
 	}

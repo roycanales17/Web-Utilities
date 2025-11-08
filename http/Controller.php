@@ -5,6 +5,7 @@
 	use App\Headers\Redirect;
 	use App\Headers\Response;
 	use App\Utilities\Session;
+	use App\Utilities\Handler\LazyData;
 
 	/**
 	 * Base Controller
@@ -200,12 +201,23 @@
 		}
 
 		/**
-		 * No Content
+		 * Return a 204 No Content response.
 		 *
 		 * @return Response
 		 */
 		protected function noContent(): Response
 		{
 			return response('', 204);
+		}
+
+		/**
+		 * Create a lazy data container.
+		 *
+		 * @param callable $callback Callback that returns the data when needed.
+		 * @return LazyData
+		 */
+		protected function lazyData(callable $callback): LazyData
+		{
+			return new LazyData($callback);
 		}
 	}

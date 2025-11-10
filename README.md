@@ -23,7 +23,7 @@ This library includes a range of utility classes to handle common development ne
 
 - [**Cache**](#cache) — Simplified caching interface for fast, temporary storage.
 - [**Carbon**](#carbon) — Simplified date and time manipulation.
-- [**Config**](#config) — Easy access to configuration files and environment-based settings.
+- [**Environment**](#environment) — Easy access to environment-based settings.
 - [**Logger**](#logger) — Lightweight logging system to track events, errors, and debug output.
 - [**Mail**](#mail) — Utility for sending emails with flexible transport options.
 - [**Storage**](#storage) — Easy-to-use file storage and management with local and cloud support (e.g., AWS S3).

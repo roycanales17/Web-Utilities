@@ -97,7 +97,7 @@
 							root: base_path('/routes'),
 							routes: $route['routes'] ?? ['web.php'],
 							prefix: $route['prefix'] ?? '',
-							domain: $route['domain'] ?? get_constant('APP_URL', 'localhost'),
+							domain: $route['domain'] ?? env('APP_URL', 'localhost'),
 							middleware: $route['middleware'] ?? [],
 							validate: $validate
 						);

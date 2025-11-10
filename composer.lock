@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e89b2c2c71230d3833d1bd43ccba2587",
+    "content-hash": "26b3398cef586e921a9631f56ad5fa89",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.359.7",
+            "version": "3.359.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "4f0eb3ec995c823d5178e7f73160786c7992c35c"
+                "reference": "a5be7ed5efd25d70a74275daeff896b896d9c286"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4f0eb3ec995c823d5178e7f73160786c7992c35c",
-                "reference": "4f0eb3ec995c823d5178e7f73160786c7992c35c",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/a5be7ed5efd25d70a74275daeff896b896d9c286",
+                "reference": "a5be7ed5efd25d70a74275daeff896b896d9c286",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.7"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.8"
             },
-            "time": "2025-11-06T19:33:53+00:00"
+            "time": "2025-11-07T19:48:19+00:00"
         },
         {
             "name": "dragonmantank/cron-expression",
@@ -945,16 +945,16 @@
         },
         {
             "name": "roy404/blades",
-            "version": "1.6.6",
+            "version": "1.6.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-Blades-Compiler.git",
-                "reference": "4ccc8bfe9a8b9b4ffaddb6f9fa2e34722afb2bf3"
+                "reference": "9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-Blades-Compiler/zipball/4ccc8bfe9a8b9b4ffaddb6f9fa2e34722afb2bf3",
-                "reference": "4ccc8bfe9a8b9b4ffaddb6f9fa2e34722afb2bf3",
+                "url": "https://api.github.com/repos/roycanales17/PHP-Blades-Compiler/zipball/9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf",
+                "reference": "9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf",
                 "shasum": ""
             },
             "require": {
@@ -986,22 +986,22 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-Blades-Compiler/issues",
-                "source": "https://github.com/roycanales17/PHP-Blades-Compiler/tree/v1.6.6"
+                "source": "https://github.com/roycanales17/PHP-Blades-Compiler/tree/v1.6.8"
             },
-            "time": "2025-11-07T01:34:08+00:00"
+            "time": "2025-11-07T01:59:45+00:00"
         },
         {
             "name": "roy404/eloquent",
-            "version": "2.5.3",
+            "version": "2.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Database-ORM.git",
-                "reference": "2786af924c86d1434d692d33e008eb282ccd53a0"
+                "reference": "af3d987494eda4985b061b356b0945e4fd7b58d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/2786af924c86d1434d692d33e008eb282ccd53a0",
-                "reference": "2786af924c86d1434d692d33e008eb282ccd53a0",
+                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/af3d987494eda4985b061b356b0945e4fd7b58d4",
+                "reference": "af3d987494eda4985b061b356b0945e4fd7b58d4",
                 "shasum": ""
             },
             "require": {
@@ -1034,9 +1034,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Database-ORM/issues",
-                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.3"
+                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.5"
             },
-            "time": "2025-10-31T03:46:13+00:00"
+            "time": "2025-11-08T03:26:53+00:00"
         },
         {
             "name": "roy404/request",

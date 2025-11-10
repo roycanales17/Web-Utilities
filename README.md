@@ -181,41 +181,26 @@ var_dump($now, $today, $futureDate, $pastDate, $isFuture, $isPast, $daysBetween,
 
 ---
 
-## Config
+## Environment
 
-Provides a simple and consistent way to **load**, **access**, and **modify configuration values** across your application.
+Provides a simple and consistent way to **load** and **access** configuration values** across your application.
 
-This utility reads environment variables or configuration files, ensuring that settings are centralized, easy to maintain, and environment-aware.
+This utility reads environment variables, ensuring that settings are centralized, easy to maintain, and environment-aware.
 
 **Usage Example:**
 ```php
-use App\Utilities\Config;
 
-// ------------------------------------------------------
-// STEP 1: Retrieving Configuration Values
-// ------------------------------------------------------
-
-// Get a configuration value by key.
+// Get an environment value by key.
 // Returns 'Framework' if 'APP_NAME' is not set.
-$appName = Config::get('APP_NAME', 'Framework');
+$appName = env('APP_NAME', 'Framework');
 
 // Retrieve a database setting (example)
-$dbHost = Config::get('DB_HOST', 'localhost');
-
-// ------------------------------------------------------
-// STEP 2: Setting Configuration Values
-// ------------------------------------------------------
-
-// Dynamically set a configuration value at runtime.
-Config::set('APP_ENV', 'production');
-
-// You can also override an existing configuration key.
-Config::set('APP_DEBUG', false);
+$dbHost = env('DB_HOST', 'localhost');
 ```
 
 ### Remarks
 * **Centralized Management:** <br> Keeps environment and application settings organized in one place.
-* **Safe Defaults:** <br> The second argument of `Config::get()` provides a fallback when a key is missing.
+* **Safe Defaults:** <br> The second argument of `env()` provides a fallback when a key is missing.
 * **Runtime Flexibility:** <br> You can modify configurations on the fly, useful for testing or dynamic environments.
 * **Environment Integration:** <br> Works seamlessly with `.env` or array-based configuration files.
 * **Best Practice:** <br> Avoid hardcoding credentials or secrets — store them in environment variables instead.

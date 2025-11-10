@@ -142,7 +142,7 @@
 			]);
 
 			// Display the error only in the development mode
-			if (Config::get('DEVELOPMENT', true)) {
+			if (get_constant('DEVELOPMENT', true)) {
 				$file = urlencode($e->getFile());
 				$line = $e->getLine();
 
@@ -227,7 +227,7 @@
 					die("Missing exception view. Please create the file at: {$errorPath}");
 				}
 
-				echo(view($errorPath, ['email' => Config::get('APP_EMAIL', ''), 'ticker' => $ticker]));
+				echo(view($errorPath, ['email' => env('APP_EMAIL', 'support@test.com'), 'ticker' => $ticker]));
 			}
 		}
 	}

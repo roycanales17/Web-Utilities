@@ -133,9 +133,9 @@
         'routes' => ['auth.php'],
         'captured' => function (string \$content) {
             echo(view('auth.layout', [
-                'g_page_lang' => config('APP_LANGUAGE'),
-                'g_page_title' => config('APP_NAME'),
-                'g_page_url' => config('APP_URL'),
+                'g_page_lang' => env('APP_LANGUAGE'),
+                'g_page_title' => env('APP_NAME'),
+                'g_page_url' => env('APP_URL'),
                 'g_page_description' => "Page description here",
                 'g_page_content' => \$content
             ]));

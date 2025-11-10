@@ -7,6 +7,7 @@
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Helper\Configuration;
 	use App\Bootstrap\Helper\Performance;
+	use App\Utilities\Environment;
 	use App\Utilities\Storage;
 	use App\Utilities\Config;
 	use App\Utilities\Cache;
@@ -52,7 +53,7 @@
 				}
 
 				Request::capture();
-				Config::load($this->envPath);
+				Environment::load($this->envPath);
 
 				$this->setupConfig();
 				$this->setGlobalDefines();
@@ -96,7 +97,7 @@
 							root: base_path('/routes'),
 							routes: $route['routes'] ?? ['web.php'],
 							prefix: $route['prefix'] ?? '',
-							domain: $route['domain'] ?? config('APP_URL', 'localhost'),
+							domain: $route['domain'] ?? get_constant('APP_URL', 'localhost'),
 							middleware: $route['middleware'] ?? [],
 							validate: $validate
 						);
@@ -125,7 +126,7 @@
 				}
 
 			} catch (Exception|Throwable $e) {
-				if (!$cli && Config::get('DEVELOPMENT', true)) {
+				if (!$cli && get_constant('DEVELOPMENT', true)) {
 					while (ob_get_level() > 0) {
 						ob_end_clean();
 					}

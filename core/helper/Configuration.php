@@ -46,16 +46,13 @@
 		}
 
 		protected function setGlobalDefines(): void {
-			foreach ($this->config['defines'] ?? [] as $key => $value) {
-				if (is_string($key) && !defined($key)) {
-					Config::set($key, $value);
-					define($key, $value);
-				}
+			if (($this->config['defines'] ?? false) && is_callable($this->config['defines'])) {
+				$this->config['defines']();
 			}
 		}
 
 		protected function setDevelopment(): void {
-			$status = config('DEVELOPMENT', true);
+			$status = get_constant('DEVELOPMENT', true);
 			error_reporting($status);
 			ini_set('display_errors', $status);
 		}
@@ -100,7 +97,7 @@
 					require_once $path;
 				} else {
 					$path = trim($path, '/');
-					$path = config('APP_ROOT') . "/$path";
+					$path = base_path("/$path");
 					if (file_exists($path))
 						require_once $path;
 				}

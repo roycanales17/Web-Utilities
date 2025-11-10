@@ -296,7 +296,7 @@ HTML;
 			$startedTime = ($identifier ? $startedTime : $this->startedTime);
 
 			// For development
-			$dev = Config::get('DEVELOPMENT', true);
+			$dev = get_constant('DEVELOPMENT', true);
 
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
@@ -335,7 +335,7 @@ HTML;
 
 						stream("{$component}").finally(() => {
 							{$this->print(function () use ($dev, $component, $duration, $traceEscaped, $trace) {
-								if (!$dev && config('STREAM_DEBUG', true)) {
+								if (!$dev && get_constant('STREAM_DEBUG', true)) {
 									return;
 								}
 				
@@ -417,7 +417,7 @@ HTML;
 			$extra = [];
 			$dataAttributes = '';
 
-			$dev = Config::get('DEVELOPMENT', true);
+			$dev = get_constant('DEVELOPMENT', true);
 			$properties = $this->fetchProperties();
 
 			if ($dev) $extra['class'] = get_called_class();

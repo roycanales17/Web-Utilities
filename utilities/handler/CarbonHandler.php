@@ -14,19 +14,16 @@
 		{
 			$this->registerDate($time, $timezone);
 		}
-
 		public function addDays(int $days): self
 		{
 			$this->getDateTime()->modify("+{$days} days");
 			return $this;
 		}
-
 		public function addMonths(int $months): static
 		{
 			$this->getDateTime()->modify("+{$months} months");
 			return $this;
 		}
-
 		public function addYears(int $years): static
 		{
 			$this->getDateTime()->modify("+{$years} years");

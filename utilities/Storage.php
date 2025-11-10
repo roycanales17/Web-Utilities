@@ -136,7 +136,7 @@
 				return false; // expired
 			}
 
-			$secretKey = config('APP_KEY', 'fallback-secret');
+			$secretKey = env('APP_KEY', 'fallback-secret');
 			$data = "{$path}|{$expires}";
 			$expectedSignature = hash_hmac('sha256', $data, $secretKey);
 

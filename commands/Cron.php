@@ -13,7 +13,7 @@
 
 		public function handle(): void
 		{
-			$artisan = config('ARTISAN_FILENAME', 'artisan');
+			$artisan = env('ARTISAN_FILENAME', 'artisan');
 			$artisanPath = base_path("/{$artisan}");
 			$routePath = Schedule::getRoute();
 

@@ -21,11 +21,11 @@
 
 			if ($this->isS3Disk()) {
 				// Load AWS configuration (LocalStack or AWS)
-				$_ENV['AWS_DEFAULT_REGION']     = Config::get('AWS_DEFAULT_REGION', 'us-east-1');
-				$_ENV['AWS_ACCESS_KEY_ID']      = Config::get('AWS_ACCESS_KEY_ID', 'test');
-				$_ENV['AWS_SECRET_ACCESS_KEY']  = Config::get('AWS_SECRET_ACCESS_KEY', 'test');
-				$_ENV['AWS_BUCKET']             = Config::get('AWS_BUCKET', 'my-bucket');
-				$_ENV['AWS_ENDPOINT']           = Config::get('AWS_ENDPOINT', null);
+				$_ENV['AWS_DEFAULT_REGION']     = env('AWS_DEFAULT_REGION', 'us-east-1');
+				$_ENV['AWS_ACCESS_KEY_ID']      = env('AWS_ACCESS_KEY_ID', 'test');
+				$_ENV['AWS_SECRET_ACCESS_KEY']  = env('AWS_SECRET_ACCESS_KEY', 'test');
+				$_ENV['AWS_BUCKET']             = env('AWS_BUCKET', 'my-bucket');
+				$_ENV['AWS_ENDPOINT']           = env('AWS_ENDPOINT', null);
 
 				$config = [
 					'region'      => getenv('AWS_DEFAULT_REGION'),
@@ -76,7 +76,7 @@
 				return $this->s3Client->getObjectUrl($this->bucket, $path);
 			}
 
-			$baseUrl = config('APP_URL', Server::HostName());
+			$baseUrl = env('APP_URL', Server::HostName());
 			return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
 		}
 
@@ -103,7 +103,7 @@
 
 			// Local temporary URL
 			$timestamp = $expiration->getTimestamp();
-			$secretKey = config('APP_KEY', 'fallback-secret');
+			$secretKey = env('APP_KEY', 'fallback-secret');
 			$data = "{$path}|{$timestamp}";
 			$signature = hash_hmac('sha256', $data, $secretKey);
 
@@ -328,7 +328,7 @@
 				return false;
 			}
 
-			$secretKey = config('APP_KEY', 'fallback-secret');
+			$secretKey = env('APP_KEY', 'fallback-secret');
 			$data = "{$path}|{$expires}";
 			$expectedSignature = hash_hmac('sha256', $data, $secretKey);
 

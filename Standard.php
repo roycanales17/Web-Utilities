@@ -3,8 +3,10 @@
 	use App\Headers\Request;
 	use App\Console\Terminal;
 	use App\Utilities\Config;
+	use App\Utilities\Environment;
 	use App\Utilities\Server;
 	use App\Utilities\Session;
+	use App\Utilities\Url;
 	use App\View\Compilers\Blade;
 	use App\View\Compilers\Component;
 	use App\Utilities\Handler\StreamHandler;
@@ -39,17 +41,12 @@
 	/**
 	 * Retrieves a configuration value by key.
 	 *
-	 * @param string $key     The configuration key or constant name.
-	 * @param mixed|null $default The default value to return if the key is not found.
+	 * @param string $key The configuration key or constant name.
 	 * @return mixed
 	 */
-	function config(string $key, mixed $default = null): mixed
+	function config(string $key): mixed
 	{
-		if (Config::isEmpty()) {
-			Config::load('.env');
-		}
-
-		return Config::get($key, $default);
+		return Config::get($key);
 	}
 
 	/**
@@ -170,7 +167,7 @@
 	 */
 	function dump(mixed $data, bool $exit = false): void
 	{
-		if (config('DEVELOPMENT', true)) {
+		if (get_constant('DEVELOPMENT', true)) {
 			$printed = print_r($data, true);
 			echo <<<HTML
 				<pre> 
@@ -202,7 +199,7 @@
 			}
 
 			if ($requestToken !== $token) {
-				$message = Config::get('DEVELOPMENT', true) ? 'Invalid token' : 'Bad Request';
+				$message = get_constant('DEVELOPMENT', true) ? 'Invalid token' : 'Bad Request';
 				exit(response(['message' => $message], 400)->json());
 			}
 		}
@@ -238,7 +235,7 @@
 	{
 		$stream = new StreamHandler($class, $constructParams, $asynchronous);
 
-		if (config('DEVELOPMENT', true) && config('STREAM_DEBUG', true)) {
+		if (get_constant('DEVELOPMENT', true) && get_constant('STREAM_DEBUG', true)) {
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 			$context = [];
 			$resolvedPath = Session::flash('__resolved_path__');
@@ -264,7 +261,7 @@
 	 */
 	function createCookie(string $name, mixed $value = null, int $expire = 3600): mixed
 	{
-		return cookie(config('COOKIE_PREFIX', 'custom').":$name", $value, $expire);
+		return cookie(env('COOKIE_PREFIX', 'custom').":$name", $value, $expire);
 	}
 
 	/**
@@ -277,7 +274,7 @@
 	 */
 	function fetchCookie(string $name, mixed $default = false): mixed
 	{
-		return cookie(config('COOKIE_PREFIX', 'custom').":$name") ?? $default;
+		return cookie(env('COOKIE_PREFIX', 'custom').":$name") ?? $default;
 	}
 
 	/**
@@ -288,7 +285,7 @@
 	 */
 	function deleteCookie(string $name): mixed
 	{
-		return cookie(config('COOKIE_PREFIX', 'custom').":$name", null, -1);
+		return cookie(env('COOKIE_PREFIX', 'custom').":$name", null, -1);
 	}
 
 	/**
@@ -311,7 +308,7 @@
 	 */
 	function cookie(string $name, $value = null, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true): mixed
 	{
-		$key = config('APP_COOKIE_PASSWORD', 'f2dg23asd3141saf');
+		$key = env('APP_COOKIE_PASSWORD', 'f2dg23asd3141saf');
 		$cipher = 'AES-256-CBC';
 
 		$encrypt = function ($data) use ($cipher, $key) {
@@ -434,13 +431,6 @@
 	/**
 	 * Generate a full URL for a given asset using the Server::makeURL helper.
 	 *
-	 * Example usage in Blade:
-	 * ```blade
-	 * <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-	 * <script src="{{ asset('js/app.js') }}"></script>
-	 * <img src="{{ asset('images/logo.png') }}" alt="Logo">
-	 * ```
-	 *
 	 * @param string $path  The relative path to the asset.
 	 * @return string       The fully-qualified asset URL.
 	 */
@@ -455,10 +445,83 @@
 			if (file_exists($file)) {
 				$cache[$path] = filemtime($file);
 			} else {
-				$cache[$path] = config('APP_VERSION', '1.0');
+				$cache[$path] = env('APP_VERSION', '1.0');
 			}
 		}
 
 		return Server::makeURL($path, ['v' => $cache[$path]]);
 	}
 
+	/**
+	 * Retrieve a value from the .env file.
+	 *
+	 * Automatically loads the .env file
+	 * through Config if not already loaded.
+	 *
+	 * Example:
+	 * ```php
+	 * $appName = env('APP_NAME', 'MyApp');
+	 * $debug   = env('APP_DEBUG', false);
+	 * ```
+	 *
+	 * @param string $key      The environment variable name.
+	 * @param mixed  $default  The default value if not found.
+	 * @return mixed
+	 */
+	function env(string $key, mixed $default = null): mixed
+	{
+		if (Environment::isEmpty()) {
+			Environment::load('.env');
+		}
+
+		$value = Environment::get($key, $default);
+
+		// Return default if not found
+		if ($value === null) {
+			return $default;
+		}
+
+		// Normalize common literal values
+		return $value;
+	}
+
+	/**
+	 * Retrieves the value of a defined PHP constant by name.
+	 *
+	 * This helper checks whether a constant with the given key is defined.
+	 * If the constant exists, its value is returned. Otherwise, the specified
+	 * default value is returned instead.
+	 *
+	 * Example:
+	 * ```php
+	 * define('APP_VERSION', '1.0.0');
+	 * echo get_constant('APP_VERSION'); // Outputs: 1.0.0
+	 * echo get_constant('NON_EXISTENT', 'N/A'); // Outputs: N/A
+	 * ```
+	 *
+	 * @param string $key      The name of the constant to retrieve.
+	 * @param mixed  $default  The fallback value to return if the constant is not defined.
+	 *
+	 * @return mixed The value of the defined constant, or the default if not defined.
+	 */
+	function get_constant(string $key, mixed $default = null): mixed {
+		if (defined($key)) {
+			return constant($key);
+		}
+
+		return $default;
+	}
+
+	/**
+	 * Helper function to quickly get an instance of Url.
+	 *
+	 * Usage:
+	 *   url()->to('dashboard');
+	 *   url()->route('home', ['id' => 1]);
+	 *
+	 * @return Url
+	 */
+	function url(): Url
+	{
+		return new Url();
+	}

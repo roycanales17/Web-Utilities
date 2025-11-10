@@ -12,7 +12,7 @@
 		{
 			ob_start();
 			if (!intval(ini_get('display_errors')) && file_exists($this->errorPath)) {
-				echo(response(view($this->errorPath, ['email' => config('APP_EMAIL')]))->html());
+				echo(response(view($this->errorPath, ['email' => env('APP_EMAIL', 'support@test.com')]))->html());
 				return ob_get_clean();
 			}
 

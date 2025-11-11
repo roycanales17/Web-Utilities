@@ -20,6 +20,7 @@
 		 */
 		public static function load(string $name): void
 		{
+			$name = ucfirst($name);
 			if (isset(self::$config[$name])) {
 				return;
 			}

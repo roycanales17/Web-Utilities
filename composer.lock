@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4726c86bd6d39c5ce99242b679724d88",
+    "content-hash": "4253ce6af458560d503367f15b9c398e",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1090,16 +1090,16 @@
         },
         {
             "name": "roy404/routes",
-            "version": "4.3.2",
+            "version": "4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-Routes.git",
-                "reference": "91268c5f853aeeb3dd548288fd355740a769c1c9"
+                "reference": "7225f55361f3c7bcce73796969985e4ffd4ec581"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-Routes/zipball/91268c5f853aeeb3dd548288fd355740a769c1c9",
-                "reference": "91268c5f853aeeb3dd548288fd355740a769c1c9",
+                "url": "https://api.github.com/repos/roycanales17/PHP-Routes/zipball/7225f55361f3c7bcce73796969985e4ffd4ec581",
+                "reference": "7225f55361f3c7bcce73796969985e4ffd4ec581",
                 "shasum": ""
             },
             "require": {
@@ -1132,9 +1132,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-Routes/issues",
-                "source": "https://github.com/roycanales17/PHP-Routes/tree/v4.3.2"
+                "source": "https://github.com/roycanales17/PHP-Routes/tree/v4.3.5"
             },
-            "time": "2025-11-03T13:17:50+00:00"
+            "time": "2025-11-11T05:01:45+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",

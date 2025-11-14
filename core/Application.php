@@ -100,28 +100,33 @@
 
 				foreach ([false, true] as $validate) {
 					foreach ($conf['routes'] ?? [] as $route) {
-						if ($cli && $validate) continue;
+						if ($cli && $validate) {
+							continue;
+						}
+
+						$routeFiles = $route['routes'] ?? ['web.php'];
+						$routeFilesStr = implode(', ', $routeFiles);
+
+						if ($validate) {
+							console_log("Validating route files: {$routeFilesStr}", "info");
+						}
 
 						$routeObject = Route::configure(
 							root: base_path('/routes'),
-							routes: $route['routes'] ?? ['web.php'],
+							routes: $routeFiles,
 							prefix: $route['prefix'] ?? '',
 							domain: $route['domain'] ?? env('APP_URL', 'localhost'),
 							middleware: $route['middleware'] ?? [],
 							validate: $validate
 						);
 
-						console_log("Route configured: " . ($route['prefix'] ?? 'no prefix'), "debug");
-
 						if (!$cli) {
 							$resolved = Request::header('X-STREAM-WIRE')
-								? $routeObject->captured(function ($content) {
-									echo $content;
-								})
-								: $routeObject->captured($route['captured']);
+								? $routeObject->captured(fn($content) => print($content))
+								: $routeObject->captured($route['captured'] ?? null);
 
 							if ($resolved) {
-								console_log("Route resolved successfully", "success");
+								console_log("Route resolved successfully: {$routeFilesStr}", "success");
 								break 2;
 							}
 						}

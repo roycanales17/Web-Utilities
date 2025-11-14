@@ -21,6 +21,7 @@
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Bootstrapper\Routes;
 	use App\Bootstrap\Helper\Performance;
+	use App\Bootstrap\Bootstrapper\OBEnd;
 	use App\Bootstrap\Bootstrapper\Cache;
 	use App\Bootstrap\Bootstrapper\Mail;
 	use Exception;
@@ -83,11 +84,7 @@
 				$this->load(Routes::class);
 
 			} catch (Exception|Throwable $e) {
-				if (!get_constant('CLI_MODE', false) && get_constant('DEVELOPMENT', true)) {
-					while (ob_get_level() > 0) {
-						ob_end_clean();
-					}
-				}
+				$this->load(OBEnd::class);
 
 				if (!$this->runtimeHandler) {
 					$this->runtimeHandler = new RuntimeException();

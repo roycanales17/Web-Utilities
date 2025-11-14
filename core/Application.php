@@ -36,11 +36,25 @@
 		private Performance $performance;
 		private ?RuntimeException $runtimeHandler = null;
 
-		public static function boot(): self {
+		public static function boot(string $envPath): self {
 			if (!isset(self::$app)) {
-				self::$app = new self();
+				self::$app = new self($envPath);
 			}
 			return self::$app;
+		}
+
+		private function __construct(string $envPath) {
+			switch (true) {
+				case empty(trim($envPath)):
+					$this->throwError('Environment file is required');
+					break;
+
+				case !file_exists($envPath):
+					$this->throwError('Environment file does not exist');
+					break;
+			}
+
+			$this->envPath = $envPath;
 		}
 
 		public function run(Closure|null $callback = null): void {
@@ -95,22 +109,6 @@
 
 			$instance = new $class($params);
 			return $instance->handler();
-		}
-
-		public function withEnvironment(string $envPath): self
-		{
-			switch (true) {
-				case empty(trim($envPath)):
-					$this->throwError('Environment file is required');
-					break;
-
-				case !file_exists($envPath):
-					$this->throwError('Environment file does not exist');
-					break;
-			}
-
-			$this->envPath = $envPath;
-			return $this;
 		}
 
 		public function withExceptions(Closure $callback): self

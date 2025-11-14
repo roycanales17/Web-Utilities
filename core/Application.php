@@ -35,7 +35,6 @@
 		}
 
 		public function run(Closure|null $callback = null): void {
-			// CLI Checker
 			$cli = php_sapi_name() === 'cli';
 
 			try {
@@ -48,14 +47,20 @@
 				}
 
 				$this->performance = new Performance(true);
+				console_log('Performance timer started', 'debug');
+
 				if ($this->isBufferedError()) {
+					console_log('Buffered error detected: ' . $this->getErrorMessage(), 'error');
 					throw new AppException($this->getErrorMessage());
 				}
 
 				Request::capture();
 				Environment::load($this->envPath);
+				console_log('Environment loaded from ' . $this->envPath, 'success');
 
 				$this->setupConfig();
+				console_log('Configuration loaded', 'success');
+
 				$this->setGlobalDefines();
 				$this->setDevelopment();
 				$this->setDatabaseConfig();
@@ -65,26 +70,14 @@
 				$this->setScheduler();
 				$this->setStreamAuthentication(run: true);
 
-				// Set storage path default
 				Storage::configure(base_path('/storage'));
+				console_log('Storage configured at /storage');
 
-				// Validate/Configure CSRF token
 				if (!$cli) {
 					define('CSRF_TOKEN', csrf_token());
 					validate_token();
+					console_log('CSRF token validated');
 				}
-
-				// Configurations
-				$conf = $this->getConfig();
-
-				// Configure cache
-				if ($cache = $conf['cache']['driver'] ?? '') {
-					$cache_attr = $conf['cache'][$cache];
-					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
-				}
-
-				// This display the content page
-				if ($callback) $callback($conf);
 
 				// Configure Routes
 				foreach ([false, true] as $validate) {
@@ -116,22 +109,8 @@
 					}
 				}
 
-				if (!$cli && !($resolved ?? false)) {
-					if (file_exists(base_path($emptyPagePath = "/views/errors/404.blade.php"))) {
-						echo view('errors/404');
-					} else {
-						throw new Exception("Missing 404 page. Please create the file at: {$emptyPagePath}");
-					}
-					ob_end_flush();
-				}
-
 			} catch (Exception|Throwable $e) {
-				if (!$cli && get_constant('DEVELOPMENT', true)) {
-					while (ob_get_level() > 0) {
-						ob_end_clean();
-					}
-				}
-
+				console_log('Exception caught: ' . $e->getMessage(), 'error');
 				if (!$this->runtimeHandler) {
 					$this->runtimeHandler = new RuntimeException();
 				}
@@ -139,8 +118,10 @@
 				$this->runtimeHandler->handle($e);
 			} finally {
 				$this->performance->end();
+				console_log('Performance timer ended', 'debug');
+
 				if (request()->query('SHOW_PERFORMANCE') === true) {
-					print_r($this->performance->generateSummary());
+					console_log($this->performance->generateSummary());
 				}
 			}
 		}

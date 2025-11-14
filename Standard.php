@@ -570,6 +570,6 @@
 			);
 		}
 
-		$log = "{ℹ️} [{$datetime}] {$message}";
+		$log = "ℹ️ [{$datetime}] {$message}";
 		file_put_contents('php://stdout', $log . PHP_EOL);
 	}

@@ -27,14 +27,14 @@
 
 			// Log to console
 			console_log("\n====================\n**Application Request**\n====================");
-			console_log("Full URL: %s", [$fullUrl]);
-			console_log("Method: %s", [$method]);
-			console_log("Referrer Domain: %s", [$referrerDomain]);
 			console_log("User Agent: %s", [$userAgent]);
+			console_log("Full URL: %s", [$fullUrl]);
+			console_log("Referrer Domain: %s", [$referrerDomain]);
+			console_log("Method: %s", [$method]);
 			console_log("IP: %s", [$ip]);
 			console_log("Client Port: %d", [Server::ClientPort()]);
 			console_log("Is Ajax: %s", [Server::isAjaxRequest() ? 'Yes' : 'No']);
 			console_log("Request ID: %s", [Server::RequestId()]);
-			console_log("====================\n**Starting Application**\n====================");
+			console_log("\n====================\n**Starting Application**\n====================");
 		}
 	}

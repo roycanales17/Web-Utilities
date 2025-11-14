@@ -21,12 +21,6 @@
 					}
 
 					$routeFiles = $route['routes'] ?? ['web.php'];
-//					$routeFilesStr = implode(', ', $routeFiles);
-//
-//					if ($validate) {
-//						console_log("Validating route files: {$routeFilesStr}");
-//					}
-
 					$routeObject = Route::configure(
 						root: base_path('/routes'),
 						routes: $routeFiles,
@@ -42,6 +36,7 @@
 							: $routeObject->captured($route['captured'] ?? null);
 
 						if ($resolved) {
+							console_log("Route resolved!");
 							break 2;
 						}
 					}
@@ -54,6 +49,8 @@
 				} else {
 					throw new AppException("Missing 404 page. Please create the file at: {$emptyPagePath}");
 				}
+
+				console_log("Route not found");
 				ob_end_flush();
 			}
 		}

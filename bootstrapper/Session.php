@@ -18,6 +18,7 @@
 			if (!$this->isCli()) {
 				BaseSession::configure($session);
 				BaseSession::start();
+				console_log("Session: running");
 			}
 		}
 	}

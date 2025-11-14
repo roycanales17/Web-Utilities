@@ -8,6 +8,7 @@
 	final class Storage extends Bootloader
 	{
 		public function handler(): void {
-			BaseStorage::configure(base_path('/storage'));
+			BaseStorage::configure($path = base_path('/storage'));
+			console_log("Storage: %s", [$path]);
 		}
 	}

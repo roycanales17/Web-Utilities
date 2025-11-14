@@ -9,6 +9,7 @@
 	use App\Bootstrap\Bootstrapper\Environment;
 	use App\Bootstrap\Handler\RuntimeException;
 	use App\Bootstrap\Exceptions\AppException;
+	use App\Bootstrap\Bootstrapper\StartupLog;
 	use App\Bootstrap\Bootstrapper\Scheduler;
 	use App\Bootstrap\Bootstrapper\Callback;
 	use App\Bootstrap\Bootstrapper\Constant;
@@ -65,7 +66,7 @@
 				if ($this->isBufferedError()) {
 					throw new AppException($this->getErrorMessage());
 				}
-
+				$this->load(StartupLog::class);
 				$this->load(Constant::class);
 				$this->load(OBStart::class);
 				$this->load(Requests::class);
@@ -94,9 +95,14 @@
 				$this->runtimeHandler->handle($e);
 			} finally {
 				$this->performance->end();
+				$summary = $this->performance->generateSummary();
+
 				if (request()->query('SHOW_PERFORMANCE') === true) {
-					print_r($this->performance->generateSummary());
+					print_r($summary);
 				}
+
+				$seconds = $summary['executionTime'];
+				console_log("Execution time: %.6f seconds", [$seconds]);
 			}
 		}
 

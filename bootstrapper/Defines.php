@@ -11,6 +11,7 @@
 
 			if (file_exists($path)) {
 				include $path;
+				console_log("Defines: %s", [$path]);
 			}
 		}
 	}

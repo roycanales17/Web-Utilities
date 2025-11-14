@@ -15,5 +15,6 @@
 			}
 
 			BaseEnvironment::load($path);
+			console_log("Environment: %s", [$path]);
 		}
 	}

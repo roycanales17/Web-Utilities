@@ -20,7 +20,10 @@
 					];
 				}
 
+				console_log("Mailing: %s", [$mail['host']]);
 				BaseMail::configure($mail['host'], $mail['port'], $mail['encryption'], $mail['smtp'], $credentials);
+			} else {
+				console_log("Mailing is disabled");
 			}
 		}
 	}

@@ -15,6 +15,7 @@
 					$path = trim($path, '/');
 					$path = base_path("/$path");
 					if (file_exists($path)) {
+						console_log("Preload File: %s", [$path]);
 						require_once $path;
 					}
 				}

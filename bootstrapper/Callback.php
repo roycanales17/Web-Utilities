@@ -10,6 +10,7 @@
 			$callback = $this->argument('callback');
 
 			if ($callback) {
+				console_log("Running callback...");
 				$callback();
 			}
 		}

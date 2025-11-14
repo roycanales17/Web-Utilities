@@ -10,6 +10,7 @@
 			if (!$this->isCli()) {
 				define('CSRF_TOKEN', csrf_token());
 				validate_token();
+				console_log("CSRF token: ready");
 			}
 		}
 	}

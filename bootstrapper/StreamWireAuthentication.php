@@ -20,6 +20,7 @@
 						Stream::authentication($action);
 					}
 				}
+				console_log("Stream wire authentication: ready");
 			}
 		}
 

@@ -14,6 +14,7 @@
 			if ($cache = $conf['cache']['driver'] ?? '') {
 				$cache_attr = $conf['cache'][$cache];
 				BaseCache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
+				console_log("Cache driver: %s", [$cache_attr['driver']->value ?? '']);
 			}
 		}
 	}

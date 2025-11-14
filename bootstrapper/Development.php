@@ -11,5 +11,6 @@
 
 			error_reporting($status);
 			ini_set('display_errors', $status);
+			console_log("Development Mode: %s", [intval($status)]);
 		}
 	}

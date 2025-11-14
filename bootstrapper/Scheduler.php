@@ -28,6 +28,7 @@
 			$cron = base_path($path);
 
 			if (file_exists($cron)) {
+				console_log("Route Scheduler: %s", [$cron]);
 				Schedule::setPath($cron);
 			}
 		}

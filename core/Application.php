@@ -89,8 +89,9 @@
 
 				if ($cache = $conf['cache']['driver'] ?? '') {
 					$cache_attr = $conf['cache'][$cache];
+					$driver = $cache_attr['driver']->value;
 					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
-					console_log("Cache configured using driver: {$cache_attr['driver']}", "info");
+					console_log("Cache configured using driver: {$driver}", "info");
 				}
 
 				if ($callback) {

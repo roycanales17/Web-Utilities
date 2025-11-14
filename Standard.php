@@ -545,7 +545,7 @@
 		}
 
 		$icons = [
-			'success' => '✅',
+			'success' => '✅ ',
 			'debug' => '🐞',
 			'info' => 'ℹ️',
 			'warning' => '⚠️',

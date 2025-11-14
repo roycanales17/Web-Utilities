@@ -25,7 +25,7 @@
 				return;
 			}
 
-			$file = base_path("app/$name.php");
+			$file = base_path("config/$name.php");
 
 			if (!file_exists($file)) {
 				self::$config[$name] = [];

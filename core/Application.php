@@ -24,6 +24,7 @@
 	use App\Bootstrap\Bootstrapper\OBEnd;
 	use App\Bootstrap\Bootstrapper\Cache;
 	use App\Bootstrap\Bootstrapper\Mail;
+	use App\Utilities\Handler\Bootloader;
 	use Exception;
 	use Throwable;
 	use Closure;
@@ -99,13 +100,17 @@
 			}
 		}
 
-		private function load(string $class, array $params = []): mixed {
+		private function load(string $class, array $params = []): void {
 			if (!class_exists($class)) {
 				throw new AppException('Class "' . $class . '" not found');
 			}
 
+			if (!is_subclass_of($class, Bootloader::class)) {
+				throw new AppException("Class '$class' must extend Bootloader");
+			}
+
 			$instance = new $class($params);
-			return $instance->handler();
+			$instance->handler();
 		}
 
 		public function withExceptions(Closure $callback): self

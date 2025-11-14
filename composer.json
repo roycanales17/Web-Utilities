@@ -1,6 +1,6 @@
 {
   "name": "roy404/utilities",
-  "version": "8.5.5",
+  "version": "8.5.6",
   "description": "A comprehensive collection of PHP utilities including Carbon, Logger, Storage, RateLimiter, Cache, and Session Handler, and more designed to enhance productivity and simplify development.",
   "keywords": [
     "php",

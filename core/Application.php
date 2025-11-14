@@ -27,7 +27,7 @@
 		private ?RuntimeException $runtimeHandler = null;
 
 		public static function boot(): self {
-			console_log("Booting application", "info");
+			console_log("Booting application");
 			if (!isset(self::$app)) {
 				self::$app = new self();
 				console_log("Application instance created", "success");
@@ -39,7 +39,7 @@
 
 		public function run(Closure|null $callback = null): void {
 			$cli = php_sapi_name() === 'cli';
-			console_log("Running application in " . ($cli ? "CLI" : "Web") . " mode", "info");
+			console_log("Running application in " . ($cli ? "CLI" : "Web") . " mode");
 
 			try {
 				if (!$cli) {
@@ -62,7 +62,7 @@
 				console_log("Request captured", "debug");
 
 				Environment::load($this->envPath);
-				console_log("Environment loaded from {$this->envPath}", "info");
+				console_log("Environment loaded from {$this->envPath}");
 
 				$this->setupConfig();
 				$this->setGlobalDefines();
@@ -89,13 +89,12 @@
 
 				if ($cache = $conf['cache']['driver'] ?? '') {
 					$cache_attr = $conf['cache'][$cache];
-					$driver = $cache_attr['driver']->value;
+					$driver = $cache_attr['driver']->value ?? '';
 					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
-					console_log("Cache configured using driver: {$driver}", "info");
+					console_log("Cache configured using driver: {$driver}");
 				}
 
 				if ($callback) {
-					console_log("Executing run callback", "debug");
 					$callback($conf);
 				}
 
@@ -109,7 +108,7 @@
 						$routeFilesStr = implode(', ', $routeFiles);
 
 						if ($validate) {
-							console_log("Validating route files: {$routeFilesStr}", "info");
+							console_log("Validating route files: {$routeFilesStr}");
 						}
 
 						$routeObject = Route::configure(
@@ -161,11 +160,10 @@
 				$this->runtimeHandler->handle($e);
 			} finally {
 				$this->performance->end();
-				console_log("Performance timer ended", "debug");
+				console_log("Performance summary printed: \n". print_r( $this->performance->generateSummary(), true ));
 
 				if (request()->query('SHOW_PERFORMANCE') === true) {
 					print_r($this->performance->generateSummary());
-					console_log("Performance summary printed", "info");
 				}
 			}
 		}
@@ -183,14 +181,14 @@
 			}
 
 			$this->envPath = $envPath;
-			console_log("Environment path set to {$envPath}", "info");
+			console_log("Environment path set to {$envPath}");
 			return $this;
 		}
 
 		public function withStreamAuthentication(array $action): self
 		{
 			$this->setStreamAuthentication($action);
-			console_log("Stream authentication configured", "info");
+			console_log("Stream authentication configured");
 			return $this;
 		}
 
@@ -207,7 +205,7 @@
 			}
 
 			$this->setConfiguration($configPath);
-			console_log("Configuration path set to {$configPath}", "info");
+			console_log("Configuration path set to {$configPath}");
 			return $this;
 		}
 

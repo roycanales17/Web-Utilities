@@ -528,18 +528,15 @@
 	/**
 	 * Logs a message to stdout in a structured, aligned format.
 	 *
-	 * This function is intended for CLI or Docker logs. It does not display anything
-	 * in a web browser. Multi-line messages (arrays or objects) are properly aligned.
-	 *
 	 * @param mixed  $message The message to log. Can be a string, array, or object.
 	 * @param string $type    The log type/severity. One of: 'success', 'debug', 'info', 'warning', 'error'. Default is 'info'.
 	 *
 	 * @return void
 	 */
-	function console_log(mixed $message, string $type = 'info'): void {
+	function console_log(mixed $message, string $type = 'info'): void
+	{
 		$datetime = date('Y-m-d H:i:s');
-		$method   = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
-
+		$method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
 		$allowed = ['success', 'debug', 'info', 'warning', 'error'];
 		$type = strtolower($type);
 
@@ -549,10 +546,10 @@
 
 		$icons = [
 			'success' => '✅',
-			'debug'   => '🐞',
-			'info'    => 'ℹ️',
+			'debug' => '🐞',
+			'info' => 'ℹ️',
 			'warning' => '⚠️',
-			'error'   => '❌',
+			'error' => '❌'
 		];
 
 		$icon = $icons[$type];
@@ -560,20 +557,6 @@
 			$message = print_r($message, true);
 		}
 
-		$lines = explode("\n", trim($message));
-		$methodWidth = 6;
-		$typeWidth   = 7;
-
-		foreach ($lines as $i => $line) {
-			$prefix = sprintf(
-				"%s [%s] [%-{$methodWidth}s] [%-{$typeWidth}s] ",
-				$icon,
-				$datetime,
-				$method,
-				strtoupper($type)
-			);
-
-			$logLine = ($i === 0) ? $prefix . $line : str_repeat(' ', strlen($prefix)) . $line;
-			file_put_contents('php://stdout', $logLine . PHP_EOL);
-		}
+		$log = "{$icon} [{$datetime}] [{$method}] {$message}";
+		file_put_contents('php://stdout', $log . PHP_EOL);
 	}

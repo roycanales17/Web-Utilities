@@ -13,6 +13,7 @@
       "App\\Bootstrap\\Helper\\": "core/helper",
       "App\\Utilities\\Handler\\": "utilities/handler",
       "App\\Utilities\\Blueprints\\": "utilities/blueprints",
+      "App\\Bootstrap\\Bootstrapper": "bootstrapper",
       "App\\Utilities\\": "utilities",
       "App\\Bootstrap\\": "core",
       "App\\Http\\": "http"

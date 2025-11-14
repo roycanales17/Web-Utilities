@@ -2,16 +2,27 @@
 	declare(strict_types=1);
 	namespace App\Bootstrap;
 
-	use App\Bootstrap\Exceptions\AppException;
+	use App\Bootstrap\Bootstrapper\StreamWireAuthentication;
+	use App\Bootstrap\Bootstrapper\ValidateToken;
+	use App\Bootstrap\Bootstrapper\PreloadFiles;
+	use App\Bootstrap\Bootstrapper\Development;
+	use App\Bootstrap\Bootstrapper\Environment;
 	use App\Bootstrap\Handler\RuntimeException;
+	use App\Bootstrap\Exceptions\AppException;
+	use App\Bootstrap\Bootstrapper\Scheduler;
+	use App\Bootstrap\Bootstrapper\Callback;
+	use App\Bootstrap\Bootstrapper\Constant;
+	use App\Bootstrap\Bootstrapper\Database;
+	use App\Bootstrap\Bootstrapper\Requests;
+	use App\Bootstrap\Bootstrapper\OBStart;
+	use App\Bootstrap\Bootstrapper\Defines;
+	use App\Bootstrap\Bootstrapper\Session;
+	use App\Bootstrap\Bootstrapper\Storage;
 	use App\Bootstrap\Helper\BufferedError;
-	use App\Bootstrap\Helper\Configuration;
+	use App\Bootstrap\Bootstrapper\Routes;
 	use App\Bootstrap\Helper\Performance;
-	use App\Utilities\Environment;
-	use App\Utilities\Storage;
-	use App\Utilities\Cache;
-	use App\Headers\Request;
-	use App\Routes\Route;
+	use App\Bootstrap\Bootstrapper\Cache;
+	use App\Bootstrap\Bootstrapper\Mail;
 	use Exception;
 	use Throwable;
 	use Closure;
@@ -19,7 +30,6 @@
 	final class Application
 	{
 		use BufferedError;
-		use Configuration;
 
 		private static ?self $app = null;
 		private string $envPath = '';
@@ -27,126 +37,39 @@
 		private ?RuntimeException $runtimeHandler = null;
 
 		public static function boot(): self {
-			console_log("Booting application");
 			if (!isset(self::$app)) {
 				self::$app = new self();
-				console_log("Application instance created", "success");
-			} else {
-				console_log("Application instance already exists", "debug");
 			}
 			return self::$app;
 		}
 
 		public function run(Closure|null $callback = null): void {
-			$cli = php_sapi_name() === 'cli';
-			console_log("Running application in " . ($cli ? "CLI" : "Web") . " mode");
-
 			try {
-				if (!$cli) {
-					while (ob_get_level() > 0) {
-						ob_end_clean();
-					}
-					ob_start();
-					console_log("Output buffering started", "debug");
-				}
-
 				$this->performance = new Performance(true);
-				console_log("Performance timer started", "debug");
-
 				if ($this->isBufferedError()) {
-					console_log("Buffered error detected", "error");
 					throw new AppException($this->getErrorMessage());
 				}
 
-				Request::capture();
-				console_log("Request captured", "debug");
-
-				Environment::load($this->envPath);
-				console_log("Environment loaded from {$this->envPath}");
-
-				$this->setupConfig();
-				$this->setGlobalDefines();
-				$this->setDevelopment();
-				$this->setDatabaseConfig();
-				$this->setMailConfig();
-				$this->setSessionConfig();
-				$this->setPreloadFiles();
-				$this->setScheduler();
-				$this->setStreamAuthentication(run: true);
-				console_log("Core configurations initialized", "success");
-
-				Storage::configure(base_path('/storage'));
-				console_log("Storage configured at /storage", "debug");
-
-				if (!$cli) {
-					define('CSRF_TOKEN', csrf_token());
-					validate_token();
-					console_log("CSRF token defined and validated", "debug");
-				}
-
-				$conf = $this->getConfig();
-				console_log("Application configuration loaded", "debug");
-
-				if ($cache = $conf['cache']['driver'] ?? '') {
-					$cache_attr = $conf['cache'][$cache];
-					$driver = $cache_attr['driver']->value ?? '';
-					Cache::configure($cache_attr['driver'], $cache_attr['server'], $cache_attr['port']);
-					console_log("Cache configured using driver: {$driver}");
-				}
-
-				if ($callback) {
-					$callback($conf);
-				}
-
-				foreach ([false, true] as $validate) {
-					foreach ($conf['routes'] ?? [] as $route) {
-						if ($cli && $validate) {
-							continue;
-						}
-
-						$routeFiles = $route['routes'] ?? ['web.php'];
-						$routeFilesStr = implode(', ', $routeFiles);
-
-						if ($validate) {
-							console_log("Validating route files: {$routeFilesStr}");
-						}
-
-						$routeObject = Route::configure(
-							root: base_path('/routes'),
-							routes: $routeFiles,
-							prefix: $route['prefix'] ?? '',
-							domain: $route['domain'] ?? env('APP_URL', 'localhost'),
-							middleware: $route['middleware'] ?? [],
-							validate: $validate
-						);
-
-						if (!$cli) {
-							$resolved = Request::header('X-STREAM-WIRE')
-								? $routeObject->captured(fn($content) => print($content))
-								: $routeObject->captured($route['captured'] ?? null);
-
-							if ($resolved) {
-								console_log("Route resolved successfully: {$routeFilesStr}", "success");
-								break 2;
-							}
-						}
-					}
-				}
-
-				if (!$cli && !($resolved ?? false)) {
-					if (file_exists(base_path($emptyPagePath = "/views/errors/404.blade.php"))) {
-						echo view('errors/404');
-						console_log("404 page displayed", "warning");
-					} else {
-						throw new Exception("Missing 404 page. Please create the file at: {$emptyPagePath}");
-					}
-					ob_end_flush();
-				}
+				$this->load(Constant::class);
+				$this->load(OBStart::class);
+				$this->load(Requests::class);
+				$this->load(Environment::class, ['path' => $this->envPath]);
+				$this->load(Defines::class);
+				$this->load(Development::class);
+				$this->load(Database::class);
+				$this->load(Mail::class);
+				$this->load(Session::class);
+				$this->load(PreloadFiles::class);
+				$this->load(Scheduler::class);
+				$this->load(StreamWireAuthentication::class);
+				$this->load(Storage::class);
+				$this->load(ValidateToken::class);
+				$this->load(Cache::class);
+				$this->load(Callback::class, ['callback' => $callback]);
+				$this->load(Routes::class);
 
 			} catch (Exception|Throwable $e) {
-				console_log("Exception caught: {$e->getMessage()}", "error");
-
-				if (!$cli && get_constant('DEVELOPMENT', true)) {
+				if (!get_constant('CLI_MODE', false) && get_constant('DEVELOPMENT', true)) {
 					while (ob_get_level() > 0) {
 						ob_end_clean();
 					}
@@ -154,18 +77,24 @@
 
 				if (!$this->runtimeHandler) {
 					$this->runtimeHandler = new RuntimeException();
-					console_log("RuntimeException handler created", "debug");
 				}
 
 				$this->runtimeHandler->handle($e);
 			} finally {
 				$this->performance->end();
-				console_log("Performance summary printed: \n". print_r( $this->performance->generateSummary(), true ));
-
 				if (request()->query('SHOW_PERFORMANCE') === true) {
 					print_r($this->performance->generateSummary());
 				}
 			}
+		}
+
+		private function load(string $class, array $params = []): mixed {
+			if (!class_exists($class)) {
+				throw new AppException('Class "' . $class . '" not found');
+			}
+
+			$instance = new $class($params);
+			return $instance->handler();
 		}
 
 		public function withEnvironment(string $envPath): self
@@ -181,38 +110,12 @@
 			}
 
 			$this->envPath = $envPath;
-			console_log("Environment path set to {$envPath}");
-			return $this;
-		}
-
-		public function withStreamAuthentication(array $action): self
-		{
-			$this->setStreamAuthentication($action);
-			console_log("Stream authentication configured");
-			return $this;
-		}
-
-		public function withConfiguration(string $configPath): self
-		{
-			switch (true) {
-				case (empty(trim($configPath))):
-					$this->throwError('Configuration file is required');
-					break;
-
-				case !file_exists($configPath):
-					$this->throwError('Configuration file does not exist');
-					break;
-			}
-
-			$this->setConfiguration($configPath);
-			console_log("Configuration path set to {$configPath}");
 			return $this;
 		}
 
 		public function withExceptions(Closure $callback): self
 		{
 			$callback($this->runtimeHandler = new RuntimeException());
-			console_log("Exception handler configured via callback", "debug");
 			return $this;
 		}
 

@@ -526,37 +526,50 @@
 	}
 
 	/**
-	 * Logs a message to stdout in a structured, aligned format.
+	 * Writes a formatted message to STDOUT with optional sprintf-style replacements.
 	 *
-	 * @param mixed  $message The message to log. Can be a string, array, or object.
-	 * @param string $type    The log type/severity. One of: 'success', 'debug', 'info', 'warning', 'error'. Default is 'info'.
+	 * Features:
+	 * - Accepts mixed message types (string, array, object, etc.)
+	 * - Converts arrays and objects to readable strings
+	 * - Supports vsprintf() formatting when $values are provided
+	 * - Supports bold text using Markdown syntax: **text**
+	 * - Automatically timestamps each log entry
+	 * - Writes output to php://stdout for CLI and Docker compatibility
+	 *
+	 * Bold Syntax:
+	 *     **this will be bold**
+	 *
+	 * Example:
+	 *     console_log("Hello **%s**!", ["World"]);
+	 *     // Output: Hello (bold)World(bold)
+	 *
+	 * @param mixed $message  The message to log. Strings can include **bold** markers.
+	 * @param array $values   Optional values for vsprintf formatting.
 	 *
 	 * @return void
 	 */
-	function console_log(mixed $message, string $type = 'info'): void
+	function console_log(mixed $message, array $values = []): void
 	{
 		$datetime = date('Y-m-d H:i:s');
-		$method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
-		$allowed = ['success', 'debug', 'info', 'warning', 'error'];
-		$type = strtolower($type);
+		$bold = "\033[1m";
+		$reset = "\033[0m";
 
-		if (!in_array($type, $allowed, true)) {
-			$type = 'debug';
-		}
-
-		$icons = [
-			'success' => '✅ ',
-			'debug' => '🐞',
-			'info' => 'ℹ️',
-			'warning' => '⚠️',
-			'error' => '❌'
-		];
-
-		$icon = $icons[$type];
 		if (is_array($message) || is_object($message)) {
 			$message = print_r($message, true);
 		}
 
-		$log = "{$icon} [{$datetime}] [{$method}] {$message}";
+		if (is_string($message) && !empty($values)) {
+			$message = vsprintf($message, $values);
+		}
+
+		if (is_string($message)) {
+			$message = preg_replace(
+				'/\*\*(.*?)\*\*/',
+				$bold . '$1' . $reset,
+				$message
+			);
+		}
+
+		$log = "{ℹ️} [{$datetime}] {$message}";
 		file_put_contents('php://stdout', $log . PHP_EOL);
 	}

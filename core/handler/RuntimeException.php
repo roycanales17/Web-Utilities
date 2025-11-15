@@ -59,6 +59,8 @@
 		 * Run the report logic if applicable.
 		 */
 		public function handle(Throwable $e): void {
+			http_response_code(500);
+
 			$class = get_class($e);
 			$ticker = strtoupper(dechex(crc32(uniqid('', true))));
 			$ticker = substr($ticker, 0, 8);

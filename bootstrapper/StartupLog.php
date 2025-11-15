@@ -21,6 +21,9 @@
 			// Client IP
 			$ip = Server::IPAddress();
 
+			// Content Type
+			$contentType = Server::ContentType();
+
 			// Referrer domain (if exists)
 			$referrer = Server::Referer();
 			$referrerDomain = $referrer !== 'No Referer' ? parse_url($referrer, PHP_URL_HOST) : 'N/A';
@@ -30,11 +33,9 @@
 			console_log("User Agent: %s", [$userAgent]);
 			console_log("Full URL: %s", [$fullUrl]);
 			console_log("Referrer Domain: %s", [$referrerDomain]);
+			console_log("Content Type: %s", [$contentType]);
 			console_log("Method: %s", [$method]);
 			console_log("IP: %s", [$ip]);
-			console_log("Client Port: %d", [Server::ClientPort()]);
-			console_log("Is Ajax: %s", [Server::isAjaxRequest() ? 'Yes' : 'No']);
-			console_log("Request ID: %s", [Server::RequestId()]);
 			console_log("\n\n\n=======================\n> **Starting Application** <\n=======================");
 		}
 	}

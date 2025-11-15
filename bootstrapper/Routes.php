@@ -3,14 +3,17 @@
 	namespace App\Bootstrap\Bootstrapper;
 
 	use App\Bootstrap\Exceptions\AppException;
-	use App\Headers\Request;
-	use App\Routes\Route;
-	use App\Utilities\Config;
 	use App\Utilities\Handler\Bootloader;
+	use App\Utilities\Config;
+	use App\Routes\Route;
 	use Exception;
 
 	final class Routes extends Bootloader
 	{
+		/**
+		 * @throws AppException
+		 * @throws Exception
+		 */
 		public function handler(): void {
 			$routes = Config::get('Routes');
 
@@ -31,10 +34,7 @@
 					);
 
 					if (!$this->isCli()) {
-						$resolved = Request::header('X-STREAM-WIRE')
-							? $routeObject->captured(fn($content) => print($content))
-							: $routeObject->captured($route['captured'] ?? null);
-
+						$resolved = $routeObject->captured(fn($content) => print($content));
 						if ($resolved) {
 							console_log("Route resolved!");
 							break 2;

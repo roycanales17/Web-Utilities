@@ -3,6 +3,7 @@
 	namespace App\Bootstrap;
 
 	use App\Bootstrap\Bootstrapper\StreamWireAuthentication;
+	use App\Bootstrap\Bootstrapper\TerminationLog;
 	use App\Bootstrap\Bootstrapper\ValidateToken;
 	use App\Bootstrap\Bootstrapper\PreloadFiles;
 	use App\Bootstrap\Bootstrapper\Development;
@@ -101,8 +102,7 @@
 					print_r($summary);
 				}
 
-				$seconds = $summary['executionTime'];
-				console_log("Execution time: %.6f seconds", [$seconds]);
+				$this->load(TerminationLog::class, ['executionTime' => $summary['executionTime']]);
 			}
 		}
 

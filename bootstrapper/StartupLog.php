@@ -26,7 +26,7 @@
 			$referrerDomain = $referrer !== 'No Referer' ? parse_url($referrer, PHP_URL_HOST) : 'N/A';
 
 			// Log to console
-			console_log("\n====================\n**Application Request**\n====================");
+			console_log("\n\n\n\n\n=======================\n> **Application Request** <\n=======================");
 			console_log("User Agent: %s", [$userAgent]);
 			console_log("Full URL: %s", [$fullUrl]);
 			console_log("Referrer Domain: %s", [$referrerDomain]);
@@ -35,6 +35,6 @@
 			console_log("Client Port: %d", [Server::ClientPort()]);
 			console_log("Is Ajax: %s", [Server::isAjaxRequest() ? 'Yes' : 'No']);
 			console_log("Request ID: %s", [Server::RequestId()]);
-			console_log("\n====================\n**Starting Application**\n====================");
+			console_log("\n\n\n=======================\n> **Starting Application** <\n=======================");
 		}
 	}

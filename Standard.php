@@ -200,6 +200,8 @@
 
 			if ($requestToken !== $token) {
 				$message = get_constant('DEVELOPMENT', true) ? 'Invalid token' : 'Bad Request';
+
+				console_log("CSRF token: %s", [$message]);
 				exit(response(['message' => $message], 400)->json());
 			}
 		}

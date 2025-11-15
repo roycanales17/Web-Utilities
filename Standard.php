@@ -550,6 +550,10 @@
 	 */
 	function console_log(mixed $message, array $values = []): void
 	{
+		if (get_constant('CLI_MODE', false)) {
+			return;
+		}
+
 		$datetime = date('Y-m-d H:i:s');
 		$bold = "\033[1m";
 		$reset = "\033[0m";

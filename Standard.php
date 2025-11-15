@@ -550,7 +550,7 @@
 	 */
 	function console_log(mixed $message, array $values = []): void
 	{
-		if (get_constant('CLI_MODE', false)) {
+		if (php_sapi_name() === 'cli') {
 			return;
 		}
 

@@ -14,16 +14,55 @@
 	final class Server
 	{
 		/**
+		 * Returns all request headers (cached).
+		 *
+		 * @return array
+		 */
+		private static function headers(): array
+		{
+			static $headers = null;
+
+			if ($headers === null) {
+				$headers = getallheaders() ?: [];
+			}
+
+			return $headers;
+		}
+
+		/**
+		 * Returns a single header value (case-insensitive).
+		 *
+		 * @param string $name
+		 * @return string|null
+		 */
+		private static function header(string $name): ?string
+		{
+			$headers = self::headers();
+			$name = strtolower($name);
+
+			foreach ($headers as $key => $value) {
+				if (strtolower($key) === $name) {
+					return $value;
+				}
+			}
+
+			return null;
+		}
+
+		/**
 		 * Gets the client's IP address, checking common proxy headers.
 		 *
 		 * @return string The client IP address or "Unknown IP" if not available or invalid.
 		 */
 		public static function IPAddress(): string
 		{
-			if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-				$ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-			} elseif (!empty($_SERVER['HTTP_X_REAL_IP'])) {
-				$ip = $_SERVER['HTTP_X_REAL_IP'];
+			$forwarded = self::header('X-Forwarded-For');
+			$real      = self::header('X-Real-IP');
+
+			if (!empty($forwarded)) {
+				$ip = explode(',', $forwarded)[0];
+			} elseif (!empty($real)) {
+				$ip = $real;
 			} else {
 				$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 			}
@@ -38,7 +77,7 @@
 		 */
 		public static function UserAgent(): string
 		{
-			return $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown User Agent';
+			return self::header('User-Agent') ?? 'Unknown User Agent';
 		}
 
 		/**
@@ -48,7 +87,7 @@
 		 */
 		public static function HostName(): string
 		{
-			return $_SERVER['HTTP_HOST'] ?? 'Unknown Host';
+			return self::header('Host') ?? 'Unknown Host';
 		}
 
 		/**
@@ -78,7 +117,7 @@
 		 */
 		public static function Referer(): string
 		{
-			return $_SERVER['HTTP_REFERER'] ?? 'No Referer';
+			return self::header('Referer') ?? 'No Referer';
 		}
 
 		/**
@@ -98,7 +137,9 @@
 		 */
 		public static function IsSecureConnection(): bool
 		{
-			return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+			return
+				(self::header('X-Forwarded-Proto') === 'https') ||
+				(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
 				(($_SERVER['SERVER_PORT'] ?? null) == 443);
 		}
 
@@ -143,10 +184,9 @@
 		 */
 		public static function isAjaxRequest(): bool
 		{
-			if (
-				!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-				strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-			) {
+			$requestedWith = self::header('X-Requested-With');
+
+			if (!empty($requestedWith) && strtolower($requestedWith) === 'xmlhttprequest') {
 				return true;
 			}
 
@@ -164,7 +204,7 @@
 		 */
 		public static function ContentType(): string
 		{
-			return $_SERVER['CONTENT_TYPE'] ?? 'Unknown Content-Type';
+			return self::header('Content-Type') ?? 'text/html';
 		}
 
 		/**
@@ -174,7 +214,7 @@
 		 */
 		public static function Accept(): string
 		{
-			return $_SERVER['HTTP_ACCEPT'] ?? 'Unknown Accept';
+			return self::header('Accept') ?? 'Unknown Accept';
 		}
 
 		/**
@@ -195,7 +235,7 @@
 		 */
 		public static function RequestId(): string
 		{
-			return $_SERVER['HTTP_X_REQUEST_ID'] ?? bin2hex(random_bytes(8));
+			return self::header('X-Request-ID') ?? bin2hex(random_bytes(8));
 		}
 
 		/**
@@ -208,21 +248,12 @@
 		 */
 		public static function makeURL(string $path, array $params = []): string
 		{
-			// Normalize path
-			$path = '/' . ltrim($path, '/');
-			$query = !empty($params) ? '?' . http_build_query($params) : '';
+			$path  = '/' . ltrim($path, '/');
+			$query = $params ? '?' . http_build_query($params) : '';
 
-			// Detect scheme (https/http)
 			$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
+			$host   = self::HostName();
 
-			// Detect host + port directly from current request
-			$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-			$host = trim($host);
-
-			// Normalize: remove duplicate slashes or trailing slash
-			$base = rtrim($scheme . $host, '/');
-
-			// Return full URL
-			return $base . $path . $query;
+			return rtrim($scheme . $host, '/') . $path . $query;
 		}
 	}

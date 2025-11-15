@@ -80,9 +80,9 @@
 			}
 
 			// Print Console
+			console_log("\n\n\n=============\n> **Exception** <\n=============");
 			console_log("Error Ticker: %s", [$ticker]);
-			console_log("Error Message: %s", [$e->getMessage()]);
-			console_log("Error Code: %s", [$e->getCode()]);
+			console_log("Error Message: %s", [strip_tags($e->getMessage())]);
 			console_log("Error File: %s", [$e->getFile()]);
 			console_log("Error Line: %s", [$e->getLine()]);
 

@@ -26,11 +26,11 @@
 			// Memory usage
 			$memoryUsage = round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB';
 
-			console_log("\n\n\n=======================\n> **Application Terminated** <\n=======================");
+			console_log("\n\n\n==========================\n> **Application Terminated** <\n==========================");
 			console_log("Status Code: %s", [$statusCode]);
 			console_log("Content-Type: %s", [$contentType]);
 			console_log("Execution time: %.6f seconds", [$executionTime]);
 			console_log("Peak Memory: %s", [$memoryUsage]);
-			console_log("\n\n\n=======================\n> **End of Request** <\n=======================");
+			console_log("\n\n\n==================\n> **End of Request** <\n==================");
 		}
 	}

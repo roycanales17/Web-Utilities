@@ -36,6 +36,6 @@
 			console_log("Content Type: %s", [$contentType]);
 			console_log("Method: %s", [$method]);
 			console_log("IP: %s", [$ip]);
-			console_log("\n\n\n=======================\n> **Starting Application** <\n=======================");
+			console_log("\n\n\n========================\n> **Starting Application** <\n========================");
 		}
 	}

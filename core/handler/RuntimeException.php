@@ -60,8 +60,6 @@
 		 */
 		public function handle(Throwable $e): void {
 			$class = get_class($e);
-			$cli = PHP_SAPI === 'cli';
-
 			$ticker = strtoupper(dechex(crc32(uniqid('', true))));
 			$ticker = substr($ticker, 0, 8);
 
@@ -81,6 +79,13 @@
 				self::$reportedHashes[] = $hash;
 			}
 
+			// Print Console
+			console_log("Error Ticker: %s", [$ticker]);
+			console_log("Error Message: %s", [$e->getMessage()]);
+			console_log("Error Code: %s", [$e->getCode()]);
+			console_log("Error File: %s", [$e->getFile()]);
+			console_log("Error Line: %s", [$e->getLine()]);
+
 			// Dispatch to registered handler if available
 			foreach ($this->reportCallbacks as $type => $callback) {
 				if ($e instanceof $type) {
@@ -99,7 +104,7 @@
 			$logger = new Logger('error.log');
 
 			$context = [];
-			if (!$cli) {
+			if (!get_constant('CLI_MODE', false)) {
 
 				// Send via email
 				if (class_exists('\Handler\Mails\ErrorReportMail')) {
@@ -163,7 +168,7 @@
 					'Previous Exception:'  => ($e->getPrevious() ? $e->getPrevious()->getMessage() : 'None'),
 				];
 
-				if ($cli) {
+				if (get_constant('CLI_MODE', false)) {
 					echo "\n\033[41;37m " . $class . " \033[0m\n\n";
 					foreach ($table as $label => $value) {
 						echo "\033[33m$label\033[0m $value\n";

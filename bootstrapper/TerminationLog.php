@@ -31,6 +31,5 @@
 			console_log("Content-Type: %s", [$contentType]);
 			console_log("Execution time: %.6f seconds", [$executionTime]);
 			console_log("Peak Memory: %s", [$memoryUsage]);
-			console_log("\n\n\n==================\n> **End of Request** <\n==================");
 		}
 	}

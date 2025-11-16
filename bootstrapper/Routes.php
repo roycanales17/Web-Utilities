@@ -21,7 +21,8 @@
 			if (!$this->isCli()) {
 				$routeObject = Route::configure(
 					root: $this->getRealPath('/resources/routes'),
-					routes: ['DefaultRoutes.php']
+					routes: ['DefaultRoutes.php'],
+					validate: true
 				);
 
 				$resolved = $routeObject->captured(fn($content) => print($content));

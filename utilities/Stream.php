@@ -285,7 +285,7 @@
 			}
 
 			if (!method_exists($class, $method)) {
-				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.");
+				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.", 400);
 			}
 
 			$paramsValue = [];
@@ -307,7 +307,7 @@
 			try {
 				$class->{$method}(...$paramsValue);
 			} catch (Exception $e) {
-				throw new StreamException($e->getMessage(), 400);
+				throw new StreamException($e->getMessage(), 500);
 			}
 		}
 	}

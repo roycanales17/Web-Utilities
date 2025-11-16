@@ -190,7 +190,7 @@
 				return true;
 			}
 
-			if (Request::header('X-STREAM-WIRE')) {
+			if (Request::header('X-STREAM-WIRE') || ($_SERVER['HTTP_X_STREAM_WIRE'] ?? null)) {
 				return true;
 			}
 

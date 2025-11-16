@@ -4,7 +4,7 @@
 
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\Blade;
-	use App\Utilities\Config;
+	use App\Headers\Redirect;
 	use ReflectionProperty;
 	use ReflectionClass;
 	use Exception;
@@ -54,7 +54,7 @@
 		private function preloader($component, $startedTime): string
 		{
 			if (!method_exists($this, 'loader'))
-				throw new Exception('Loader function is required.');
+				throw new Exception('Loader function is required.', 500);
 
 			$html = $this->replaceHTML($this->loader(), $component);
 			$dataAttributes = $this->getAttributes($component, $startedTime);
@@ -265,16 +265,125 @@ HTML;
 		/**
 		 * Performs an Ajax-based redirection.
 		 *
-		 * @param string $url
-		 * @param int $code
-		 * @param array $headers
-		 * @return void
+		 * This helper wraps redirect() but forces an AJAX-compatible
+		 * response by attaching headers such as `X-AJAX-REDIRECT`.
+		 * If `$return` is true, the Redirect instance is returned so additional
+		 * data (errors, messages, inputs) can be appended using `with()`.
+		 *
+		 * @param string $url          Destination URL.
+		 * @param int    $code         HTTP status code for the redirect.
+		 * @param array  $headers      Extra headers to append to the response.
+		 * @param bool   $return       When true, returns the Redirect object.
+		 *
+		 * @return Redirect|null       Returns Redirect when `$return = true`, otherwise null.
 		 */
-		public function redirect(string $url, int $code = 200, array $headers = []): void {
-			redirect($url, $code, array_merge([
-				'Content-Type' => 'application/json',
+		protected function redirect(string $url, int $code = 200, array $headers = [], bool $return = false): null|Redirect {
+			$redirect = redirect($url, $code, array_merge([
+				'Content-Type'    => 'application/json',
 				'X-AJAX-REDIRECT' => '1',
 			], $headers));
+
+			if ($return) {
+				return $redirect;
+			}
+
+			unset($redirect);
+			return null;
+		}
+
+		/**
+		 * Redirects with validation errors for AJAX responses.
+		 *
+		 * Attaches each error using the key format `error:{field}`.
+		 * Also attaches old input values if provided.
+		 *
+		 * @param string $url          Destination URL.
+		 * @param array  $errors       Associative array of validation errors.
+		 * @param array  $inputs       Old input values to retain.
+		 *
+		 * @return void
+		 */
+		protected function redirectErrors(string $url, array $errors, array $inputs = []): void {
+			$redirect = $this->redirect($url, 400, return: true);
+
+			foreach ($errors as $key => $msg) {
+				$redirect->with("error:$key", $msg);
+			}
+
+			foreach ($inputs as $key => $value) {
+				$redirect->with("input:$key", $value);
+			}
+
+			unset($redirect);
+		}
+
+		/**
+		 * Redirects with a success message for AJAX responses.
+		 *
+		 * Attaches the success message using the key `message:success`.
+		 * Also forwards old input values if provided.
+		 *
+		 * @param string $url          Destination URL.
+		 * @param string $message      Success message to store in session.
+		 * @param array  $inputs       Old input values to retain.
+		 *
+		 * @return void
+		 */
+		protected function redirectSuccess(string $url, string $message, array $inputs = []): void {
+			$redirect = $this->redirect($url, 200, return: true);
+			$redirect->with("message:success", $message);
+
+			foreach ($inputs as $key => $value) {
+				$redirect->with("input:$key", $value);
+			}
+
+			unset($redirect);
+		}
+
+		/**
+		 * Redirects with a failure/error message for AJAX responses.
+		 *
+		 * Attaches the failure message using the key `message:error`.
+		 * Also forwards input values if provided.
+		 *
+		 * @param string $url          Destination URL.
+		 * @param string $message      Failure/error message to store in session.
+		 * @param array  $inputs       Old input values to retain.
+		 *
+		 * @return void
+		 */
+		protected function redirectFail(string $url, string $message, array $inputs = []): void {
+			$redirect = $this->redirect($url, 400, return: true);
+			$redirect->with("message:error", $message);
+
+			foreach ($inputs as $key => $value) {
+				$redirect->with("input:$key", $value);
+			}
+
+			unset($redirect);
+		}
+
+		/**
+		 * Redirects with a warning message for AJAX responses.
+		 *
+		 * Attaches the warning message using the key `message:warning`.
+		 * Also forwards input values if provided.
+		 *
+		 * @param string $url          Destination URL.
+		 * @param string $message      Warning message to store in session.
+		 * @param array  $inputs       Old input values to retain.
+		 *
+		 * @return void
+		 */
+		protected function redirectWarning(string $url, string $message, array $inputs = []): void {
+			$redirect = $this->redirect($url, 200, return: true);
+			$redirect->with("message:warning", $message);
+
+			foreach ($inputs as $key => $value) {
+				$redirect->with("input:$key", $value);
+			}
+
+			unset($redirect);
 		}
 
 		/**
@@ -289,7 +398,7 @@ HTML;
 		public function parse(string $identifier = '', float $startedTime = 0, bool $preloader = false, bool $directSkeleton = true, array $trace = []): string|array
 		{
 			if (!$preloader && !method_exists($this, 'render'))
-				throw new Exception("Render function is required.");
+				throw new Exception("Render function is required.", 500);
 
 			// Prepare data attributes for the component.
 			$component = $identifier ?: base64_encode($this->componentIdentifier);
@@ -308,7 +417,7 @@ HTML;
 				];
 			} else {
 				if (!method_exists($this, 'render'))
-					throw new Exception("Render function is required.");
+					throw new Exception("Render function is required.", 500);
 
 				$render = $this->render();
 			}
@@ -555,10 +664,10 @@ HTML;
 					if ($class && class_exists($class)) {
 
 						if (self::class === $class)
-							throw new Exception("Class `{$class}` is not allowed from extender.");
+							throw new Exception("Class `{$class}` is not allowed from extender.", 500);
 
 						if (!method_exists($class, $method))
-							throw new Exception("Class `{$method}` is not allowed from extender.");
+							throw new Exception("Class `{$method}` is not allowed from extender.", 500);
 
 						$componentDNA = '';
 						if (method_exists($class, 'identifier')) {
@@ -575,7 +684,7 @@ HTML;
 						return [];
 					}
 
-					throw new Exception("Stream Response: Class {$class} does not exist.");
+					throw new Exception("Stream Response: Class {$class} does not exist.", 500);
 				};
 
 				if (!$isSingleAction) {

@@ -1,13 +1,14 @@
 <?php
 
+	use App\Http\Auth;
+	use App\Utilities\Url;
 	use App\Headers\Request;
 	use App\Console\Terminal;
 	use App\Utilities\Config;
-	use App\Utilities\Environment;
 	use App\Utilities\Server;
 	use App\Utilities\Session;
-	use App\Utilities\Url;
 	use App\View\Compilers\Blade;
+	use App\Utilities\Environment;
 	use App\View\Compilers\Component;
 	use App\Utilities\Handler\StreamHandler;
 	use App\Bootstrap\Exceptions\StreamException;
@@ -578,4 +579,14 @@
 
 		$log = "ℹ️ [{$datetime}] {$message}";
 		file_put_contents('php://stdout', $log . PHP_EOL);
+	}
+
+	/**
+	 * Check if a user is currently authenticated.
+	 * This is a simple wrapper for `App\Http\Auth::check()`.
+	 *
+	 * @return bool True if the user is logged in, false otherwise.
+	 */
+	function auth(): bool {
+		return Auth::check();
 	}

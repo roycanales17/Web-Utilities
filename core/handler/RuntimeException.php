@@ -2,7 +2,6 @@
 
 	namespace App\Bootstrap\Handler;
 
-	use App\Utilities\Config;
 	use App\Utilities\Logger;
 	use App\Utilities\Server;
 	use App\Utilities\Mail;
@@ -59,7 +58,7 @@
 		 * Run the report logic if applicable.
 		 */
 		public function handle(Throwable $e): void {
-			http_response_code(500);
+			http_response_code($e->getCode() ?: 500);
 
 			$class = get_class($e);
 			$ticker = strtoupper(dechex(crc32(uniqid('', true))));

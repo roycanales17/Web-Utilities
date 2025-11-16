@@ -30,7 +30,7 @@
 				$method = $authentication[1] ?? null;
 
 				if (!class_exists($class) || !method_exists($class, $method))
-					throw new StreamException("Invalid authentication method '{$class}::{$method}'.");
+					throw new StreamException("Invalid authentication method '{$class}::{$method}'.", 500);
 
 				self::$authentication = $authentication;
 			}
@@ -244,19 +244,19 @@
 		public static function verifyComponent(Component $component): bool
 		{
 			if (!is_subclass_of($component, Component::class)) {
-				throw new StreamException("Component '".get_class($component)."' does not implement " . Component::class);
+				throw new StreamException("Component '".get_class($component)."' does not implement " . Component::class, 500);
 			}
 
 			// Check for Authenticatable trait
 			if (in_array(Authenticatable::class, class_uses($component))) {
 				if (empty(self::$authentication)) {
-					throw new StreamException("Component uses Authenticatable trait but no authentication callback is configured.");
+					throw new StreamException("Component uses Authenticatable trait but no authentication callback is configured.", 500);
 				}
 
 				[$class, $method, $authArgs] = self::$authentication + [null, null, []];
 
 				if (!is_callable([$class, $method])) {
-					throw new StreamException("Invalid authentication callback: {$class}::{$method} is not callable.");
+					throw new StreamException("Invalid authentication callback: {$class}::{$method} is not callable.", 500);
 				}
 
 				if (!call_user_func_array([$class, $method], $authArgs)) {
@@ -281,11 +281,11 @@
 			$method = $action[1] ?? null;
 
 			if (!$class || !$method) {
-				throw new StreamException('Class and method must be provided', 400);
+				throw new StreamException('Class and method must be provided', 500);
 			}
 
 			if (!method_exists($class, $method)) {
-				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.", 400);
+				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.", 500);
 			}
 
 			$paramsValue = [];

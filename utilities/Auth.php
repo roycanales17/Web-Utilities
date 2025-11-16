@@ -28,13 +28,13 @@
 	 * @method static bool authorize(array|null $user) Validate user object and store session/cache
 	 * @method static array|null register(string $name, string $email, string $password, string $role = '') Register a new user
 	 * @method static bool login(string $email, string $password, bool $remember = false) Log in a user
-	 * @method static void logout(bool $regenerate_session = false) Log out the user
+	 * @method static void logout(bool $regenerate_session = false, bool $allSessions = false) Log out the user (optionally all sessions)
 	 * @method static bool resetPassword(string $token, string $newPassword) Reset password using a token
 	 *
 	 * @method static string issueApiToken(int $userId, int $expiresInSeconds = 0) Issue a new API token
-	 * @method static void revokeApiToken(int $userId) Delete a user's API token
-	 * @method static string rotateApiToken(int $userId, int $expiresInSeconds = 0) Regenerate a fresh API token
-	 * @method static array|null validateApiToken(string $token) Validate API token & return user if valid
+	 * @method static void revokeApiToken(int $userId) Revoke/delete a user's API token
+	 * @method static string rotateApiToken(int $userId, int $expiresInSeconds = 0) Generate a new API token
+	 * @method static array|null validateApiToken(string $token) Validate API token and return user if valid
 	 * @method static string|null currentApiToken() Get API token from current request (if present)
 	 */
 	final class Auth extends Authentication

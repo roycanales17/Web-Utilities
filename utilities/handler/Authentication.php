@@ -2,6 +2,7 @@
 
 	namespace App\Utilities\Handler;
 
+	use App\Databases\Database;
 	use App\Headers\Request;
 	use App\Utilities\Session;
 	use Http\Model\Users;
@@ -211,25 +212,44 @@
 		 * Logs out the user.
 		 *
 		 * @param bool $regenerate_session
+		 * @param bool $allSessions
 		 * @return void
 		 */
-		protected static function logout(bool $regenerate_session = false): void
+		protected static function logout(bool $regenerate_session = false, bool $allSessions = false): void
 		{
-			if (self::id()) {
-				Users::where('id', self::id())
+			$currentId = self::id();
+
+			if ($currentId) {
+				// Clear tokens for the user
+				Users::where('id', $currentId)
 					->set('remember_token', null)
 					->set('api_token', null)
 					->set('api_token_expires', null)
 					->update();
+
+				// Remove sessions
+				if ($allSessions) {
+					Database::table('sessions')->where('user_id', $currentId)->delete();
+				} else {
+					// Only remove current session row if session exists
+					if (Session::started() && session_id()) {
+						Database::table('sessions')->where('id', session_id())->delete();
+					}
+				}
 			}
 
+			// Clear cached user
 			self::$user = null;
 
+			// Remove user from PHP session
 			Session::remove('user_id');
+
+			// Delete remember-me cookie
 			deleteCookie('remember_token');
 
+			// Regenerate session ID for security
 			if ($regenerate_session) {
-				Session::regenerate();
+				Session::regenerate(true); // true to delete old session data
 			}
 		}
 

@@ -2,11 +2,13 @@
 
 	namespace App\Utilities\Handler;
 
+	use App\Bootstrap\Exceptions\AppException;
 	use App\Databases\Database;
 	use App\Headers\Request;
 	use App\Utilities\Server;
 	use App\Utilities\Session;
-	use Http\Model\Users;
+	use Handler\Model\Users;
+	use DateTime;
 
 	abstract class Authentication
 	{
@@ -40,6 +42,10 @@
 			// Already authenticated / cached
 			if (self::$user) {
 				return self::$user;
+			}
+
+			if (!class_exists(Users::class)) {
+				throw new AppException("User class missing");
 			}
 
 			$data = null;
@@ -147,6 +153,7 @@
 			Session::set('user_agent', Server::UserAgent());
 			Session::set('ip_address', Server::IPAddress());
 			Session::set('login_time', time());
+
 			return true;
 		}
 
@@ -166,6 +173,7 @@
 			}
 
 			$hash = password_hash($password, env('PASSWORD_ALGO', PASSWORD_BCRYPT));
+
 			$userId = Users::create(array_merge([
 				'name'      => $name,
 				'email'     => $email,
@@ -239,7 +247,6 @@
 				if ($allSessions) {
 					Database::table('sessions')->where('user_id', $currentId)->delete();
 				} else {
-					// Only remove current session row if session exists
 					if (Session::started() && session_id()) {
 						Database::table('sessions')->where('id', session_id())->delete();
 					}
@@ -255,11 +262,9 @@
 			// Delete remember-me cookie
 			deleteCookie('remember_token');
 
-			// Regenerate session ID for security
+			// Regenerate session ID
 			if ($regenerate_session) {
-
-				// true to delete old session data
-				Session::regenerate();
+				Session::regenerate(true);
 			}
 		}
 
@@ -276,8 +281,10 @@
 				return false;
 			}
 
+			$hashed = hash('sha256', $token);
+
 			$userId = Users::select('id')
-				->where('reset_token', $token)
+				->where('reset_token', $hashed)
 				->whereRaw('reset_expires > NOW()')
 				->field();
 
@@ -286,6 +293,7 @@
 			}
 
 			$hash = password_hash($newPassword, env('PASSWORD_ALGO', PASSWORD_BCRYPT));
+
 			Users::where('id', $userId)
 				->set('password', $hash)
 				->set('reset_token', null)
@@ -293,6 +301,42 @@
 				->update();
 
 			return true;
+		}
+
+		/**
+		 * Generates a secure password reset token.
+		 */
+		protected static function createPasswordResetToken(string $email, int $expiration = 3600): string|false
+		{
+			if (!$email) {
+				return false;
+			}
+
+			$user = Users::where('email', $email)->row();
+			if (!$user) {
+				return false;
+			}
+
+			// Invalidate previous tokens
+			Users::where('id', $user['id'])
+				->set('reset_token', null)
+				->set('reset_expires', null)
+				->update();
+
+			// Generate raw token
+			$rawToken = bin2hex(random_bytes(32));
+
+			// Hash before storing
+			$hashed = hash('sha256', $rawToken);
+
+			$expires = (new DateTime("+{$expiration} seconds"))->format('Y-m-d H:i:s');
+
+			Users::where('id', $user['id'])
+				->set('reset_token', $hashed)
+				->set('reset_expires', $expires)
+				->update();
+
+			return $rawToken;
 		}
 
 		/**
@@ -305,6 +349,7 @@
 		protected static function issueApiToken(int $userId, int $expiresInSeconds = 0): string
 		{
 			$token = bin2hex(random_bytes(40));
+
 			$table = Users::where('id', $userId)->set('api_token', $token);
 
 			if ($expiresInSeconds > 0) {
@@ -312,6 +357,7 @@
 			}
 
 			$table->update();
+
 			return $token;
 		}
 
@@ -360,10 +406,7 @@
 				return null;
 			}
 
-			// Check expiration
 			if (!empty($user['api_token_expires']) && strtotime($user['api_token_expires']) < time()) {
-
-				// Auto-revoke expired token
 				Users::where('id', $user['id'])
 					->set('api_token', null)
 					->set('api_token_expires', null)

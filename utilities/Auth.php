@@ -9,33 +9,53 @@
 	 * Class Auth
 	 *
 	 * Centralized authentication and authorization handler.
-	 * Supports:
-	 *  - Session-based login
-	 *  - Remember-me token auto-login
-	 *  - API Bearer token authentication
-	 *  - Token issuing, rotation, expiration, revocation
-	 *  - Registration, password reset
-	 *  - Role + permission checking
+	 *
+	 * Features:
+	 * - Session-based authentication
+	 * - Remember-me persistent login
+	 * - Bearer API token authentication
+	 * - Token issuing, rotation, expiration, and revocation
+	 * - User registration
+	 * - Password reset flow (token generation + reset)
+	 * - Role and permission checking
+	 *
+	 * This class exposes static methods via PHPDoc @method,
+	 * enabling IDE autocompletion while delegating internally
+	 * to the Authentication parent class using __callStatic().
 	 *
 	 * @package App\Utilities\Handler
 	 *
-	 * @method static array|null user() Retrieve authenticated user data
-	 * @method static bool check() Check whether a user is logged in
-	 * @method static int|null id() Get logged-in user's ID
-	 * @method static string|null role() Get logged-in user's role
-	 * @method static bool can(string $permission) Check if user has a specific permission
+	 * ----------------------------------------------------------------------
+	 * Authentication State
+	 * ----------------------------------------------------------------------
+	 * @method static array|null  user()                        Retrieve authenticated user data, or null
+	 * @method static bool        check()                       Determine whether a user is authenticated
+	 * @method static int|null    id()                          Get authenticated user's ID
+	 * @method static string|null role()                        Get authenticated user's role string
+	 * @method static bool        can(string $permission)       Check whether user has a specific permission
 	 *
-	 * @method static bool authorize(array|null $user) Validate user object and store session/cache
-	 * @method static array|null register(string $name, string $email, string $password, string $role = '') Register a new user
-	 * @method static bool login(string $email, string $password, bool $remember = false) Log in a user
-	 * @method static void logout(bool $allSessions = false, bool $regenerate_session = true) Log out the user (optionally all sessions)
-	 * @method static bool resetPassword(string $token, string $newPassword) Reset password using a token
+	 * ----------------------------------------------------------------------
+	 * Core Login / Registration
+	 * ----------------------------------------------------------------------
+	 * @method static bool        authorize(array|null $user)                                   Validate user object and establish session
+	 * @method static array|null  register(string $name, string $email, string $password, string $role = '')  Register and return new user
+	 * @method static bool        login(string $email, string $password, bool $remember = false) Log in user
+	 * @method static void        logout(bool $allSessions = false, bool $regenerate_session = true) Log out user (optionally all sessions)
 	 *
-	 * @method static string issueApiToken(int $userId, int $expiresInSeconds = 0) Issue a new API token
-	 * @method static void revokeApiToken(int $userId) Revoke/delete a user's API token
-	 * @method static string rotateApiToken(int $userId, int $expiresInSeconds = 0) Generate a new API token
-	 * @method static array|null validateApiToken(string $token) Validate API token and return user if valid
-	 * @method static string|null currentApiToken() Get API token from current request (if present)
+	 * ----------------------------------------------------------------------
+	 * Password Reset
+	 * ----------------------------------------------------------------------
+	 * @method static bool         resetPassword(string $token, string $newPassword)             Reset password using token
+	 * @method static string|false createPasswordResetToken(string $email, int $expiration = 3600) Create + store a reset token
+	 *
+	 * ----------------------------------------------------------------------
+	 * API Token Authentication
+	 * ----------------------------------------------------------------------
+	 * @method static string       issueApiToken(int $userId, int $expiresInSeconds = 0)         Issue new API token
+	 * @method static void         revokeApiToken(int $userId)                                   Revoke/delete API token
+	 * @method static string       rotateApiToken(int $userId, int $expiresInSeconds = 0)        Generate a new API token
+	 * @method static array|null   validateApiToken(string $token)                               Validate token and return user
+	 * @method static string|null  currentApiToken()                                              Get Bearer token from request
 	 */
 	final class Auth extends Authentication
 	{

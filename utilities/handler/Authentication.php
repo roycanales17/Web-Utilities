@@ -219,11 +219,11 @@
 		/**
 		 * Logs out the user.
 		 *
-		 * @param bool $regenerate_session
 		 * @param bool $allSessions
+		 * @param bool $regenerate_session
 		 * @return void
 		 */
-		protected static function logout(bool $regenerate_session = false, bool $allSessions = false): void
+		protected static function logout(bool $allSessions = false, bool $regenerate_session = true): void
 		{
 			$currentId = self::id();
 
@@ -257,7 +257,9 @@
 
 			// Regenerate session ID for security
 			if ($regenerate_session) {
-				Session::regenerate(true); // true to delete old session data
+
+				// true to delete old session data
+				Session::regenerate();
 			}
 		}
 

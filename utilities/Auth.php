@@ -28,7 +28,7 @@
 	 * @method static bool authorize(array|null $user) Validate user object and store session/cache
 	 * @method static array|null register(string $name, string $email, string $password, string $role = '') Register a new user
 	 * @method static bool login(string $email, string $password, bool $remember = false) Log in a user
-	 * @method static void logout(bool $regenerate_session = false, bool $allSessions = false) Log out the user (optionally all sessions)
+	 * @method static void logout(bool $allSessions = false, bool $regenerate_session = true) Log out the user (optionally all sessions)
 	 * @method static bool resetPassword(string $token, string $newPassword) Reset password using a token
 	 *
 	 * @method static string issueApiToken(int $userId, int $expiresInSeconds = 0) Issue a new API token

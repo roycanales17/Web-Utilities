@@ -4,6 +4,7 @@
 
 	use App\Databases\Database;
 	use App\Headers\Request;
+	use App\Utilities\Server;
 	use App\Utilities\Session;
 	use Http\Model\Users;
 
@@ -136,9 +137,16 @@
 
 			self::$user = $user;
 
-			// Set session
+			// Set session user
 			Session::set('user_id', $user['id']);
 
+			// Regenerate session ID to prevent fixation
+			Session::regenerate(true);
+
+			// Optional: store fingerprint
+			Session::set('user_agent', Server::UserAgent());
+			Session::set('ip_address', Server::IPAddress());
+			Session::set('login_time', time());
 			return true;
 		}
 

@@ -55,6 +55,6 @@
 				return call_user_func_array([parent::class, $method], $arguments);
 			}
 
-			throw new AppException("Method $method does not exist in Auth or Authentication");
+			throw new AppException("Method $method does not exist in Auth or Authentication", 500);
 		}
 	}

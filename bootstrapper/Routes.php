@@ -17,6 +17,21 @@
 		public function handler(): void {
 			$routes = Config::get('Routes');
 
+			// Run first the default routes
+			if (!$this->isCli()) {
+				$routeObject = Route::configure(
+					root: $this->getRealPath('/resources/routes'),
+					routes: ['DefaultRoutes.php']
+				);
+
+				$resolved = $routeObject->captured(fn($content) => print($content));
+				if ($resolved) {
+					console_log("Route resolved!");
+					return;
+				}
+			}
+
+			// Then the application routes
 			foreach ([false, true] as $validate) {
 				foreach ($routes as $route) {
 					if ($this->isCli() && $validate) {
@@ -28,7 +43,7 @@
 						root: base_path('/routes'),
 						routes: $routeFiles,
 						prefix: $route['prefix'] ?? '',
-						domain: $route['domain'] ?? env('APP_URL', 'localhost'),
+						domain: $route['domain'] ?? '',
 						middleware: $route['middleware'] ?? [],
 						validate: $validate
 					);
@@ -43,6 +58,7 @@
 				}
 			}
 
+			// If no routes found
 			if (!$this->isCli() && !($resolved ?? false)) {
 				if (file_exists(base_path($emptyPagePath = "/views/errors/404.blade.php"))) {
 					echo view('errors/404');
@@ -53,5 +69,10 @@
 				console_log("Route not found");
 				ob_end_flush();
 			}
+		}
+
+		protected function getRealPath(string $path): string {
+			$path = trim($path, '/');
+			return realpath(__DIR__ . "/../$path");
 		}
 	}

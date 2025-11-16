@@ -84,15 +84,17 @@
 		protected function printNextSteps(string $path): void
 		{
 			echo PHP_EOL;
-			echo "\033[32m✅ Resources streamed successfully! Next steps:\033[0m" . PHP_EOL . PHP_EOL;
-			echo "  1. Add the following to your HTML:" . PHP_EOL;
-			echo "       <script src=\"/$path/streamdom/stream.js\"></script>" . PHP_EOL;
-			echo "       <link rel=\"stylesheet\" href=\"/$path/streamdom/stream.css\">" . PHP_EOL . PHP_EOL;
-			echo "  2. Or in your CSS:" . PHP_EOL;
-			echo "       @import \"/$path/streamdom/stream.css\";" . PHP_EOL . PHP_EOL;
-			echo "  3. Register the route in your app:" . PHP_EOL;
-			echo "       App\\Routes\\Route::post('/api/stream-wire/{identifier}', [App\\Utilities\\Stream::class, 'capture']);" . PHP_EOL . PHP_EOL;
-			echo "\033[32m✔️ All set! You're ready to stream DOM resources! 🚀\033[0m" . PHP_EOL . PHP_EOL;
+			echo "\033[42;30m═══════════════════════════════════════════════════════════════\033[0m" . PHP_EOL;
+			echo "\033[42;30m   ✅  RESOURCES STREAMED SUCCESSFULLY! NEXT STEPS              \033[0m" . PHP_EOL;
+			echo "\033[42;30m═══════════════════════════════════════════════════════════════\033[0m" . PHP_EOL . PHP_EOL;
+			echo " \033[1m1. Add the following to your HTML:\033[0m" . PHP_EOL;
+			echo "    \033[36m<script src=\"/$path/streamdom/stream.js\"></script>\033[0m" . PHP_EOL;
+			echo "    \033[36m<link rel=\"stylesheet\" href=\"/$path/streamdom/stream.css\">\033[0m" . PHP_EOL . PHP_EOL;
+			echo " \033[1m2. Or in your CSS:\033[0m" . PHP_EOL;
+			echo "    \033[36m@import \"/$path/streamdom/stream.css\";\033[0m" . PHP_EOL . PHP_EOL;
+			echo "\033[42;30m───────────────────────────────────────────────────────────────\033[0m" . PHP_EOL;
+			echo "\033[42;30m   ✔️  ALL SET! YOU'RE READY TO STREAM DOM RESOURCES! 🚀        \033[0m" . PHP_EOL;
+			echo "\033[42;30m───────────────────────────────────────────────────────────────\033[0m" . PHP_EOL . PHP_EOL;
 		}
 
 		protected function getRealPath(string $path): string

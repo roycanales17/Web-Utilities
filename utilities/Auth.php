@@ -1,6 +1,6 @@
 <?php
 
-	namespace App\Http;
+	namespace App\Utilities;
 
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Utilities\Handler\Authentication;

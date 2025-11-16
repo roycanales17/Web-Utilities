@@ -1,11 +1,11 @@
 <?php
 
-	use App\Http\Auth;
 	use App\Utilities\Url;
+	use App\Utilities\Auth;
 	use App\Headers\Request;
-	use App\Console\Terminal;
 	use App\Utilities\Config;
 	use App\Utilities\Server;
+	use App\Console\Terminal;
 	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Environment;

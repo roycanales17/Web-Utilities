@@ -18,7 +18,7 @@
 			if (!$this->isCli()) {
 				BaseSession::configure($session);
 				BaseSession::start();
-				console_log("Session: active");
+				console_log("Session: %s", [session_id()]);
 			} else {
 				console_log("Session: disabled");
 			}

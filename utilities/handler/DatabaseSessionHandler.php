@@ -32,28 +32,19 @@
 
 		public function write($id, $data): bool
 		{
-			$ip = Server::IPAddress();
 			$now = date('Y-m-d H:i:s');
+			$ip = Server::IPAddress();
+			$userAgent = Server::UserAgent();
 
-			$isExist = Database::table($this->table)->where('id', $id)->exists();
-
-			if ($isExist) {
-				Database::table($this->table)
-					->where('id', $id)
-					->set('data', $data)
-					->set('user_id', $_SESSION['user_id'] ?? null)
-					->set('ip_address', $ip)
-					->set('last_activity', $now)
-					->update();
-			} else {
-				Database::create($this->table, [
-					'id' => $id,
-					'data' => $data,
-					'user_id' => $_SESSION['user_id'] ?? null,
-					'ip_address' => $ip,
-					'last_activity' => $now
-				]);
-			}
+			Database::replace($this->table, [
+				'id' => $id,
+				'data' => $data,
+				'user_id' => $_SESSION['user_id'] ?? null,
+				'ip_address' => $ip,
+				'user_agent' => $userAgent,
+				'last_activity' => $now,
+				'created_at' => $now
+			]);
 
 			return true;
 		}

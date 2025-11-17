@@ -34,7 +34,7 @@
 		{
 			$now = date('Y-m-d H:i:s');
 			$ip = Server::IPAddress();
-			$userAgent = Server::UserAgent();
+			$userAgent = Server::userAgent();
 
 			Database::replace($this->table, [
 				'id' => $id,

@@ -2,8 +2,6 @@
 
 	namespace App\Utilities;
 
-	use App\Headers\Request;
-
 	/**
 	 * Class Server
 	 *
@@ -23,7 +21,25 @@
 			static $headers = null;
 
 			if ($headers === null) {
-				$headers = getallheaders() ?: [];
+				if (function_exists('getallheaders')) {
+					$headers = getallheaders();
+				} else {
+					$headers = [];
+					foreach ($_SERVER as $key => $value) {
+						if (strpos($key, 'HTTP_') === 0) {
+							$name = str_replace('_', '-', substr($key, 5));
+							$headers[$name] = $value;
+						}
+					}
+
+					// Content-Type and Content-Length are not prefixed with HTTP_
+					if (isset($_SERVER['CONTENT_TYPE'])) {
+						$headers['Content-Type'] = $_SERVER['CONTENT_TYPE'];
+					}
+					if (isset($_SERVER['CONTENT_LENGTH'])) {
+						$headers['Content-Length'] = $_SERVER['CONTENT_LENGTH'];
+					}
+				}
 			}
 
 			return $headers;
@@ -75,7 +91,7 @@
 		 *
 		 * @return string The User Agent or "Unknown User Agent" if not available.
 		 */
-		public static function UserAgent(): string
+		public static function userAgent(): string
 		{
 			return self::header('User-Agent') ?? 'Unknown User Agent';
 		}
@@ -85,7 +101,7 @@
 		 *
 		 * @return string The host name or "Unknown Host" if not available.
 		 */
-		public static function HostName(): string
+		public static function hostName(): string
 		{
 			return self::header('Host') ?? 'Unknown Host';
 		}
@@ -95,7 +111,7 @@
 		 *
 		 * @return string The request method or "Unknown Method" if not available.
 		 */
-		public static function RequestMethod(): string
+		public static function requestMethod(): string
 		{
 			return $_SERVER['REQUEST_METHOD'] ?? 'Unknown Method';
 		}
@@ -105,7 +121,7 @@
 		 *
 		 * @return string The request URI or "/" if not available.
 		 */
-		public static function RequestURI(): string
+		public static function requestURI(): string
 		{
 			return $_SERVER['REQUEST_URI'] ?? '/';
 		}
@@ -115,7 +131,7 @@
 		 *
 		 * @return string The referer URL or "No Referer" if not available.
 		 */
-		public static function Referer(): string
+		public static function referer(): string
 		{
 			return self::header('Referer') ?? 'No Referer';
 		}
@@ -125,7 +141,7 @@
 		 *
 		 * @return string The query string or an empty string if not available.
 		 */
-		public static function QueryString(): string
+		public static function queryString(): string
 		{
 			return $_SERVER['QUERY_STRING'] ?? '';
 		}
@@ -135,7 +151,7 @@
 		 *
 		 * @return bool True if the connection is HTTPS, false otherwise.
 		 */
-		public static function IsSecureConnection(): bool
+		public static function isSecureConnection(): bool
 		{
 			return
 				(self::header('X-Forwarded-Proto') === 'https') ||
@@ -148,7 +164,7 @@
 		 *
 		 * @return int The client port number or 0 if not available.
 		 */
-		public static function ClientPort(): int
+		public static function clientPort(): int
 		{
 			return (int) ($_SERVER['REMOTE_PORT'] ?? 0);
 		}
@@ -158,7 +174,7 @@
 		 *
 		 * @return string The server IP address or "Unknown Server IP" if not available.
 		 */
-		public static function ServerIPAddress(): string
+		public static function serverIPAddress(): string
 		{
 			return $_SERVER['SERVER_ADDR'] ?? 'Unknown Server IP';
 		}
@@ -168,7 +184,7 @@
 		 *
 		 * @return int The Unix timestamp of the request or current time if not available.
 		 */
-		public static function RequestTime(): int
+		public static function requestTime(): int
 		{
 			return $_SERVER['REQUEST_TIME'] ?? time();
 		}
@@ -184,17 +200,35 @@
 		 */
 		public static function isAjaxRequest(): bool
 		{
+			// 1. Standard AJAX header
 			$requestedWith = self::header('X-Requested-With');
 
 			if (!empty($requestedWith) && strtolower($requestedWith) === 'xmlhttprequest') {
 				return true;
 			}
 
-			if (Request::header('X-STREAM-WIRE') || ($_SERVER['HTTP_X_STREAM_WIRE'] ?? null)) {
+			// 2. Stream/Wire header (use header getter instead of $_SERVER)
+			if (self::header('X-STREAM-WIRE')) {
 				return true;
 			}
 
-			return isset($_POST['ajax']) || isset($_GET['ajax']);
+			// 3. JSON-based detection
+			$accept = strtolower(self::header('Accept') ?? '');
+			if (str_contains($accept, 'application/json') || str_contains($accept, 'json')) {
+				return true;
+			}
+
+			// 4. Query-based JSON request
+			if (isset($_GET['format']) && strtolower($_GET['format']) === 'json') {
+				return true;
+			}
+
+			// 5. URL ajax flag
+			if (isset($_POST['ajax']) || isset($_GET['ajax'])) {
+				return true;
+			}
+
+			return false;
 		}
 
 		/**
@@ -202,7 +236,7 @@
 		 *
 		 * @return string The content type or "Unknown Content-Type" if not available.
 		 */
-		public static function ContentType(): string
+		public static function contentType(): string
 		{
 			return self::header('Content-Type') ?? 'text/html';
 		}
@@ -212,7 +246,7 @@
 		 *
 		 * @return string The Accept header or "Unknown Accept" if not available.
 		 */
-		public static function Accept(): string
+		public static function accept(): string
 		{
 			return self::header('Accept') ?? 'Unknown Accept';
 		}
@@ -222,7 +256,7 @@
 		 *
 		 * @return string The protocol or "Unknown Protocol" if not available.
 		 */
-		public static function Protocol(): string
+		public static function protocol(): string
 		{
 			return $_SERVER['SERVER_PROTOCOL'] ?? 'Unknown Protocol';
 		}
@@ -233,7 +267,7 @@
 		 *
 		 * @return string The request ID.
 		 */
-		public static function RequestId(): string
+		public static function requestId(): string
 		{
 			return self::header('X-Request-ID') ?? bin2hex(random_bytes(8));
 		}
@@ -251,8 +285,8 @@
 			$path  = '/' . ltrim($path, '/');
 			$query = $params ? '?' . http_build_query($params) : '';
 
-			$scheme = self::IsSecureConnection() ? 'https://' : 'http://';
-			$host   = self::HostName();
+			$scheme = self::isSecureConnection() ? 'https://' : 'http://';
+			$host   = self::hostName();
 
 			return rtrim($scheme . $host, '/') . $path . $query;
 		}

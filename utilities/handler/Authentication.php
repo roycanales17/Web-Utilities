@@ -150,7 +150,7 @@
 			Session::regenerate(true);
 
 			// Optional: store fingerprint
-			Session::set('user_agent', Server::UserAgent());
+			Session::set('user_agent', Server::userAgent());
 			Session::set('ip_address', Server::IPAddress());
 			Session::set('login_time', time());
 

@@ -16,7 +16,7 @@
 			$method = Server::RequestMethod();
 
 			// User Agent
-			$userAgent = Server::UserAgent();
+			$userAgent = Server::userAgent();
 
 			// Client IP
 			$ip = Server::IPAddress();

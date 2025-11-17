@@ -634,11 +634,11 @@ This utility offers an abstraction layer over PHP’s `$_SERVER` global, ensurin
 use App\Utilities\Server;
 
 $ip         = Server::IPAddress();
-$userAgent  = Server::UserAgent();
-$method     = Server::RequestMethod();
-$isSecure   = Server::IsSecureConnection();
+$userAgent  = Server::userAgent();
+$method     = Server::requestMethod();
+$isSecure   = Server::isSecureConnection();
 $isAjax     = Server::isAjaxRequest();
-$requestId  = Server::RequestId();
+$requestId  = Server::requestId();
 
 echo "Client IP: {$ip}";
 echo "User Agent: {$userAgent}";
@@ -647,23 +647,23 @@ echo "User Agent: {$userAgent}";
 ### Available Methods
 
 | Method                 | Description                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------- |
+|------------------------| ---------------------------------------------------------------------------- |
 | `IPAddress()`          | Gets the client’s IP address, checking proxy headers like `X-Forwarded-For`. |
-| `UserAgent()`          | Retrieves the client’s User-Agent string.                                    |
-| `HostName()`           | Returns the requested host name (domain).                                    |
-| `RequestMethod()`      | Gets the HTTP request method (`GET`, `POST`, etc.).                          |
-| `RequestURI()`         | Gets the full request URI path.                                              |
-| `Referer()`            | Returns the HTTP referer or `"No Referer"` if unavailable.                   |
-| `QueryString()`        | Retrieves the request’s query string parameters.                             |
-| `IsSecureConnection()` | Checks if the connection uses HTTPS.                                         |
-| `ClientPort()`         | Gets the client’s port number.                                               |
-| `ServerIPAddress()`    | Retrieves the server’s IP address.                                           |
-| `RequestTime()`        | Returns the timestamp of the request.                                        |
+| `userAgent()`          | Retrieves the client’s User-Agent string.                                    |
+| `hostName()`           | Returns the requested host name (domain).                                    |
+| `requestMethod()`      | Gets the HTTP request method (`GET`, `POST`, etc.).                          |
+| `requestURI()`         | Gets the full request URI path.                                              |
+| `referer()`            | Returns the HTTP referer or `"No Referer"` if unavailable.                   |
+| `queryString()`        | Retrieves the request’s query string parameters.                             |
+| `isSecureConnection()` | Checks if the connection uses HTTPS.                                         |
+| `clientPort()`         | Gets the client’s port number.                                               |
+| `serverIPAddress()`    | Retrieves the server’s IP address.                                           |
+| `requestTime()`        | Returns the timestamp of the request.                                        |
 | `isAjaxRequest()`      | Detects if the current request was made via AJAX.                            |
-| `ContentType()`        | Gets the request’s `Content-Type` header.                                    |
-| `Accept()`             | Retrieves the `Accept` header value.                                         |
-| `Protocol()`           | Returns the HTTP protocol version (`HTTP/1.1`, `HTTP/2`, etc.).              |
-| `RequestId()`          | Gets the `X-Request-ID` header or generates one if missing.                  |
+| `contentType()`        | Gets the request’s `Content-Type` header.                                    |
+| `accept()`             | Retrieves the `Accept` header value.                                         |
+| `protocol()`           | Returns the HTTP protocol version (`HTTP/1.1`, `HTTP/2`, etc.).              |
+| `requestId()`          | Gets the `X-Request-ID` header or generates one if missing.                  |
 
 ---
 

@@ -9,7 +9,6 @@
   "autoload": {
     "psr-4": {
       "App\\Bootstrap\\Exceptions\\": "exceptions",
-      "App\\Bootstrap\\Handler\\": "core/handler",
       "App\\Bootstrap\\Helper\\": "core/helper",
       "App\\Utilities\\Handler\\": "utilities/handler",
       "App\\Utilities\\Blueprints\\": "utilities/blueprints",

@@ -1,6 +1,6 @@
 <?php
 
-	namespace App\Bootstrap\Handler;
+	namespace App\Bootstrap\Helper;
 
 	use App\Utilities\Logger;
 	use App\Utilities\Server;

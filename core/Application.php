@@ -8,7 +8,7 @@
 	use App\Bootstrap\Bootstrapper\PreloadFiles;
 	use App\Bootstrap\Bootstrapper\Development;
 	use App\Bootstrap\Bootstrapper\Environment;
-	use App\Bootstrap\Handler\RuntimeException;
+	use App\Bootstrap\Helper\RuntimeException;
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Bootstrap\Bootstrapper\StartupLog;
 	use App\Bootstrap\Bootstrapper\Scheduler;

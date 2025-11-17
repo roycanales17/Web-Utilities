@@ -566,7 +566,7 @@
 			file_put_contents($tempFile, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
 			$phpBinary = PHP_BINARY ?: '/usr/local/bin/php';
-			$backgroundScript = realpath(__DIR__ . '/../http/MailWorker.php');
+			$backgroundScript = realpath(__DIR__ . '/../worker/MailWorker.php');
 
 			if (!file_exists($backgroundScript)) {
 				throw new Exception("Mail worker script not found at: {$backgroundScript}");

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "820f36b05ab0236ccdc8d13084615ff6",
+    "content-hash": "b17e2d9487449d9da37205b1b26a5018",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -945,16 +945,16 @@
         },
         {
             "name": "roy404/blades",
-            "version": "1.6.8",
+            "version": "1.6.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/PHP-Blades-Compiler.git",
-                "reference": "9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf"
+                "reference": "b08cf032eef950e2e6491ef37a1c2e3868378ca4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/PHP-Blades-Compiler/zipball/9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf",
-                "reference": "9a2af9a0060b5c1de1dd5d2a1bd21f307b3865bf",
+                "url": "https://api.github.com/repos/roycanales17/PHP-Blades-Compiler/zipball/b08cf032eef950e2e6491ef37a1c2e3868378ca4",
+                "reference": "b08cf032eef950e2e6491ef37a1c2e3868378ca4",
                 "shasum": ""
             },
             "require": {
@@ -986,9 +986,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/PHP-Blades-Compiler/issues",
-                "source": "https://github.com/roycanales17/PHP-Blades-Compiler/tree/v1.6.8"
+                "source": "https://github.com/roycanales17/PHP-Blades-Compiler/tree/v1.6.9"
             },
-            "time": "2025-11-07T01:59:45+00:00"
+            "time": "2025-11-18T14:59:35+00:00"
         },
         {
             "name": "roy404/eloquent",

@@ -404,7 +404,10 @@
 	function error(string $name): mixed
 	{
 		if ($name == 'message') {
-			return Session::flash("message:error") ?: '';
+			$message = Session::flash("message:error");
+			if ($message) {
+				return $message;
+			}
 		}
 
 		return Session::flash("error:$name") ?: '';
@@ -427,7 +430,10 @@
 	function success(string $name): mixed
 	{
 		if ($name == 'message') {
-			return Session::flash("message:success") ?: '';
+			$message = Session::flash("message:success");
+			if ($message) {
+				return $message;
+			}
 		}
 
 		return Session::flash("success:$name") ?: '';

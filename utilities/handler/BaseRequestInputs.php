@@ -4,8 +4,21 @@
 
 	use App\Utilities\Server;
 
+	/**
+	 * Trait BaseRequestInputs
+	 *
+	 * Provides convenient access to HTTP request input data, including JSON payloads,
+	 * query parameters, POST data, cookies, and uploaded files.
+	 *
+	 * Supports "all", "only", and "except" methods for filtering data,
+	 * and magic methods for dynamic property access.
+	 * @internal
+	 */
 	trait BaseRequestInputs
 	{
+		/**
+		 * Merge JSON payload into internal data array if Content-Type is application/json.
+		 */
 		protected function populateJson(): void
 		{
 			if (Server::contentType() === 'application/json') {
@@ -55,13 +68,11 @@
 		{
 			$keys = is_string($keys) ? explode(',', $keys) : $keys;
 			$result = [];
-
 			foreach ($keys as $key) {
 				if (isset($this->data[$key])) {
 					$result[$key] = $this->data[$key];
 				}
 			}
-
 			return $result;
 		}
 
@@ -69,16 +80,14 @@
 		{
 			$keys = is_string($keys) ? explode(',', $keys) : $keys;
 			$result = $this->data;
-
 			foreach ($keys as $key) {
 				unset($result[$key]);
 			}
-
 			return $result;
 		}
 
 		// -------------------------
-		// Magic methods for dynamic fields
+		// Magic methods for dynamic property access
 		// -------------------------
 		public function __get($name)
 		{
@@ -88,7 +97,9 @@
 		public function __set($name, $value)
 		{
 			$this->data[$name] = $value;
-			self::$cachedData[$name] = $value;
+			if (isset(self::$cachedData)) {
+				self::$cachedData[$name] = $value;
+			}
 		}
 
 		public function __isset($name)

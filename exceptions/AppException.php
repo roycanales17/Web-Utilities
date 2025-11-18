@@ -1,9 +1,25 @@
 <?php
-
 	namespace App\Bootstrap\Exceptions;
 
 	use Exception;
 
+	/**
+	 * Class AppException
+	 *
+	 * A custom framework exception handler responsible for rendering detailed,
+	 * developer-friendly error output. This exception class:
+	 *
+	 * - Generates a styled HTML error page for browser environments.
+	 * - Displays simplified error information when `display_errors` is disabled.
+	 * - Provides CLI-friendly error output when running in console mode.
+	 * - Shows stack trace, diagnostic data, and suggested related issues from StackOverflow.
+	 * - Offers one-click navigation to your preferred IDE (PhpStorm, VSCode, Sublime).
+	 *
+	 * This class is used internally by the framework’s error-handling pipeline and
+	 * is **not intended for use by external applications**.
+	 *
+	 * @internal
+	 */
 	class AppException extends Exception
 	{
 		private string $errorPath = 'error';
@@ -11,16 +27,20 @@
 		public function report(): string
 		{
 			ob_start();
+
 			if (!intval(ini_get('display_errors')) && file_exists($this->errorPath)) {
-				echo(response(view($this->errorPath, ['email' => env('APP_EMAIL', 'support@test.com')]))->html());
+				echo(response(view(
+					$this->errorPath,
+					['email' => env('APP_EMAIL', 'support@test.com')]
+				))->html());
 				return ob_get_clean();
 			}
 
 			if (php_sapi_name() === 'cli') {
 				print_r([
 					'message' => $this->getMessage(),
-					'file' => $this->getFile(),
-					'line' => $this->getLine()
+					'file'    => $this->getFile(),
+					'line'    => $this->getLine()
 				]);
 				echo $this->getTraceAsString();
 				return ob_get_clean();
@@ -32,11 +52,12 @@
 			// Define editor URL schemes
 			$editorUrls = [
 				'phpstorm' => "phpstorm://open?file=$file&line=$line",
-				'vscode' => "vscode://file/$file:$line",
-				'sublime' => "subl://open?file=$file&line=$line"
+				'vscode'   => "vscode://file/$file:$line",
+				'sublime'  => "subl://open?file=$file&line=$line"
 			];
 
-			$selectedUrl = $editorUrls[$this->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
+			$selectedUrl = $editorUrls[$this->preferredIDE ?? 'phpstorm']
+				?? $editorUrls['vscode'];
 
 			echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
 			echo '<h2 style="color: #721c24;">Exception Details</h2>';
@@ -50,11 +71,11 @@
 			);
 
 			$table = [
-				'Exception Type:' => strtoupper(get_class($this)),
-				'Message:' => $this->getMessage(),
-				'File:' => $this->getFile(),
-				'Line:' => $this->getLine(),
-				'Error Code:' => $this->getCode(),
+				'Exception Type:'     => strtoupper(get_class($this)),
+				'Message:'            => $this->getMessage(),
+				'File:'               => $this->getFile(),
+				'Line:'               => $this->getLine(),
+				'Error Code:'         => $this->getCode(),
 				'Previous Exception:' => ($this->getPrevious() ? $this->getPrevious()->getMessage() : 'None'),
 			];
 
@@ -77,7 +98,6 @@
 
 			echo '<a href="' . $selectedUrl . '" style="display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #721c24; color: #fff; text-decoration: none; border-radius: 5px;">Navigate Error</a>';
 			echo '</div>';
-
 			?>
 			<script>
 				async function searchStackOverflow(query) {
@@ -103,10 +123,7 @@
 						loader.style.display = 'none';
 						const data = await response.json();
 
-						if (!listElement) {
-							console.error('Element with id "error-solution-links" not found.');
-							return;
-						}
+						if (!listElement) return;
 
 						listElement.innerHTML = '';
 
@@ -128,14 +145,12 @@
 					} catch (error) {
 						loader.style.display = 'none';
 						listElement.innerHTML = '<li>Something went wrong.</li>';
-						console.error('Error:', error.message);
 					}
 				}
 
 				searchStackOverflow(<?= json_encode($sanitizedMessage) ?>);
 			</script>
 			<?php
-
 			return ob_get_clean();
 		}
 	}

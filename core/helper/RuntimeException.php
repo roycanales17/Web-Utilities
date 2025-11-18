@@ -11,18 +11,51 @@
 	use Throwable;
 	use Closure;
 
+	/**
+	 * @internal
+	 *
+	 * Central exception handler for the framework.
+	 * Supports:
+	 *  - registering custom report callbacks
+	 *  - skipping reporting for specific exception types
+	 *  - duplicate-exception suppression
+	 *  - automatic logging and error mailing
+	 *  - pretty developer exception screen
+	 *  - AJAX-safe structured JSON exception responses
+	 *
+	 * Not intended for public consumption by the project user.
+	 */
 	final class RuntimeException
 	{
+		/**
+		 * @var array<string, Closure>
+		 */
 		protected array $reportCallbacks = [];
+
+		/**
+		 * @var array<int, string>  List of exception class names to skip.
+		 */
 		protected array $dontReport = [];
+
+		/**
+		 * @var bool
+		 */
 		protected bool $suppressDuplicates = false;
+
+		/**
+		 * @var array<string>
+		 */
 		protected static array $reportedHashes = [];
 
 		/**
-		 * Register a callback to handle a specific type of exception.
+		 * Register a callback for a specific exception type.
+		 *
+		 * The closure must have a first parameter type-hinted with the exception.
+		 *
 		 * @throws ReflectionException
 		 */
-		public function report(Closure $closure): void {
+		public function report(Closure $closure): void
+		{
 			$ref = new ReflectionFunction($closure);
 			$params = $ref->getParameters();
 
@@ -32,82 +65,100 @@
 		}
 
 		/**
-		 * Set a view file to be rendered with exception data.
+		 * Render a view file while passing the exception into it.
 		 */
-		public function view(string $path, array $extract = []): void {
+		public function view(string $path, array $extract = []): void
+		{
 			if (file_exists($path)) {
 				view($path, array_merge($extract, ['exception' => $this]));
 			}
 		}
 
 		/**
-		 * Prevent duplicate exceptions from being reported multiple times.
+		 * Enable duplicate exception suppression.
 		 */
-		public function dontReportDuplicates(): void {
+		public function dontReportDuplicates(): void
+		{
 			$this->suppressDuplicates = true;
 		}
 
 		/**
-		 * Exclude specific exception classes from being reported.
+		 * Append exceptions to skip from reporting.
+		 *
+		 * @param array<string> $exclude
 		 */
-		public function dontReport(array $exclude = []): void {
+		public function dontReport(array $exclude = []): void
+		{
 			$this->dontReport = array_merge($this->dontReport, $exclude);
 		}
 
 		/**
-		 * Run the report logic if applicable.
+		 * Main exception processor.
 		 */
-		public function handle(Throwable $e): void {
+		public function handle(Throwable $e): void
+		{
 			http_response_code($e->getCode() ?: 500);
 
-			$class = get_class($e);
-			$ticker = strtoupper(dechex(crc32(uniqid('', true))));
-			$ticker = substr($ticker, 0, 8);
+			$class  = get_class($e);
+			$ticker = strtoupper(substr(dechex(crc32(uniqid('', true))), 0, 8));
 
-			// Skip if in exclusion list
+			//
+			// 1. Skip if in don't-report list
+			//
 			foreach ($this->dontReport as $excluded) {
 				if ($e instanceof $excluded) {
 					return;
 				}
 			}
 
-			// Skip if duplicate and suppression is enabled
+			//
+			// 2. Handle duplicate suppression
+			//
 			if ($this->suppressDuplicates) {
 				$hash = md5($class . $e->getMessage() . $e->getFile() . $e->getLine());
+
 				if (in_array($hash, self::$reportedHashes, true)) {
 					return;
 				}
+
 				self::$reportedHashes[] = $hash;
 			}
 
-			// Print Console
-			console_log("\n\n\n=============\n> **Exception** <\n=============");
-			console_log("Error Ticker: %s", [$ticker]);
-			console_log("Error Message: %s", [strip_tags($e->getMessage())]);
-			console_log("Error File: %s", [$e->getFile()]);
-			console_log("Error Line: %s", [$e->getLine()]);
+			//
+			// 3. Developer console output
+			//
+			console_log("\n=============\n> EXCEPTION <\n=============");
+			console_log("Ticker: %s", [$ticker]);
+			console_log("Message: %s", [strip_tags($e->getMessage())]);
+			console_log("File: %s", [$e->getFile()]);
+			console_log("Line: %s", [$e->getLine()]);
 
-			// Dispatch to registered handler if available
+			//
+			// 4. Dispatch to a custom registered handler
+			//
 			foreach ($this->reportCallbacks as $type => $callback) {
 				if ($e instanceof $type) {
-					echo($callback($e));
+					echo ($callback($e));
 					return;
 				}
 			}
 
-			// If the exception has a custom report method, use it
+			//
+			// 5. Exception-defined report()
+			//
 			if (method_exists($e, 'report')) {
-				echo($e->report());
+				echo ($e->report());
 				exit();
 			}
 
-			// Always put on the logger by default
-			$logger = new Logger('error.log');
-
+			//
+			// 6. Default logging
+			//
+			$logger  = new Logger('error.log');
 			$context = [];
-			if (!get_constant('CLI_MODE', false)) {
 
-				// Send via email
+			if (!get_constant('CLI_MODE', false)) {
+				// Email error (if class exists)
 				if (class_exists('\Handler\Mails\ErrorReportMail')) {
 					Mail::mail(new \Handler\Mails\ErrorReportMail($e, $ticker));
 				}
@@ -139,7 +190,7 @@
 				];
 			}
 
-			$logger->error("[TICKER: {$ticker}] " . strip_tags($e->getMessage()), [
+			$logger->error("[TICKER: $ticker] " . strip_tags($e->getMessage()), [
 				'exception' => strtoupper($class),
 				'file'      => $e->getFile(),
 				'line'      => $e->getLine(),
@@ -147,93 +198,139 @@
 				'context'   => $context,
 			]);
 
-			// Display the error only in the development mode
+			//
+			// 7. Development exception output
+			//
 			if (get_constant('DEVELOPMENT', true)) {
-				$file = urlencode($e->getFile());
-				$line = $e->getLine();
-
-				$editorUrls = [
-					'phpstorm' => "phpstorm://open?file=$file&line=$line",
-					'vscode'   => "vscode://file/$file:$line",
-					'sublime'  => "subl://open?file=$file&line=$line",
-				];
-				$selectedUrl = $editorUrls[$e->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
-
-				$table = [
-					'Ticker:'              => $ticker,
-					'Exception Type:'      => strtoupper($class),
-					'Message:'             => $e->getMessage(),
-					'File:'                => $e->getFile(),
-					'Line:'                => $e->getLine(),
-					'Error Code:'          => $e->getCode(),
-					'Previous Exception:'  => ($e->getPrevious() ? $e->getPrevious()->getMessage() : 'None'),
-				];
-
-				if (get_constant('CLI_MODE', false)) {
-					echo "\n\033[41;37m " . $class . " \033[0m\n\n";
-					foreach ($table as $label => $value) {
-						echo "\033[33m$label\033[0m $value\n";
-					}
-					echo "\n\033[31m--- Stack Trace ---\033[0m\n";
-					echo $e->getTraceAsString() . "\n";
-				} else {
-					if (Server::isAjaxRequest()) {
-						$req = new Request();
-						$trace = array_map(fn($t) => [
-							'file'     => $t['file'] ?? '',
-							'line'     => $t['line'] ?? '',
-							'class'    => $t['class'] ?? '',
-							'function' => $t['function'] ?? '',
-						], $e->getTrace());
-
-						$response = [
-							'status' => 'error',
-							'ticker' => $ticker,
-							'error'  => [
-								'type'    => strtoupper($class),
-								'message' => $e->getMessage(),
-								'code'    => $e->getCode(),
-								'file'    => $e->getFile(),
-								'line'    => $e->getLine(),
-								'trace'   => $trace,
-							],
-						];
-
-						$headers = [
-							'Cache-Control' => 'no-cache, no-store, must-revalidate',
-							'Pragma'        => 'no-cache',
-							'Expires'       => '0',
-							'X-Request-ID'  => Server::RequestId() ?: uniqid('req_', true),
-							'X-Ticker-ID'   => $ticker,
-						];
-
-						echo $req->response($response, 500, $headers)->json();
-					} else {
-						echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
-						echo '<h2 style="color: #721c24;">Exception Details</h2>';
-						echo '<hr style="border-color: #f5c6cb;">';
-						echo '<table style="width: 100%; border-collapse: collapse;">';
-
-						foreach ($table as $label => $value) {
-							echo '<tr>';
-							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;"><strong>' . $label . '</strong></td>';
-							echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . $value . '</td>';
-							echo '</tr>';
-						}
-
-						echo '</table>';
-						echo '<h3 style="color: #721c24;">Stack Trace</h3>';
-						echo '<pre style="background-color: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 5px; color: #333;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
-						echo '<a href="' . $selectedUrl . '" style="display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #721c24; color: #fff; text-decoration: none; border-radius: 5px;">Navigate Error</a>';
-						echo '</div>';
-					}
-				}
-			} else {
-				if (!file_exists(base_path($errorPath = "views/errors/exception.blade.php"))) {
-					die("Missing exception view. Please create the file at: {$errorPath}");
-				}
-
-				echo(view($errorPath, ['email' => env('APP_EMAIL', 'support@test.com'), 'ticker' => $ticker]));
+				$this->renderDeveloperException($e, $class, $ticker);
+				return;
 			}
+
+			//
+			// 8. Production error page
+			//
+			if (!file_exists(base_path($errorPath = "views/errors/exception.blade.php"))) {
+				die("Missing exception view. Create: {$errorPath}");
+			}
+
+			echo view($errorPath, [
+				'email'  => env('APP_EMAIL', 'support@test.com'),
+				'ticker' => $ticker,
+			]);
+		}
+
+		/**
+		 * Render the full developer debug exception page.
+		 */
+		private function renderDeveloperException(Throwable $e, string $class, string $ticker): void
+		{
+			$file = urlencode($e->getFile());
+			$line = $e->getLine();
+
+			$editorUrls = [
+				'phpstorm' => "phpstorm://open?file=$file&line=$line",
+				'vscode'   => "vscode://file/$file:$line",
+				'sublime'  => "subl://open?file=$file&line=$line",
+			];
+
+			$selectedUrl = $editorUrls[$e->preferredIDE ?? 'phpstorm'] ?? $editorUrls['vscode'];
+
+			$table = [
+				'Ticker:'             => $ticker,
+				'Exception Type:'     => strtoupper($class),
+				'Message:'            => $e->getMessage(),
+				'File:'               => $e->getFile(),
+				'Line:'               => $e->getLine(),
+				'Error Code:'         => $e->getCode(),
+				'Previous Exception:' => $e->getPrevious()?->getMessage() ?? 'None',
+			];
+
+			//
+			// CLI output
+			//
+			if (get_constant('CLI_MODE', false)) {
+				echo "\n\033[41;37m $class \033[0m\n\n";
+				foreach ($table as $label => $value) {
+					echo "\033[33m$label\033[0m $value\n";
+				}
+				echo "\n\033[31m--- Stack Trace ---\033[0m\n";
+				echo $e->getTraceAsString() . "\n";
+				return;
+			}
+
+			//
+			// AJAX response
+			//
+			if (Server::isAjaxRequest()) {
+				$this->renderJsonException($e, $ticker);
+				return;
+			}
+
+			//
+			// Browser output
+			//
+			$this->renderPrettyHtmlException($e, $selectedUrl, $table);
+		}
+
+		/**
+		 * JSON error response for AJAX requests.
+		 */
+		private function renderJsonException(Throwable $e, string $ticker): void
+		{
+			$req = new Request();
+
+			$trace = array_map(fn($t) => [
+				'file'     => $t['file'] ?? '',
+				'line'     => $t['line'] ?? '',
+				'class'    => $t['class'] ?? '',
+				'function' => $t['function'] ?? '',
+			], $e->getTrace());
+
+			$response = [
+				'status' => 'error',
+				'ticker' => $ticker,
+				'error'  => [
+					'type'    => strtoupper(get_class($e)),
+					'message' => $e->getMessage(),
+					'code'    => $e->getCode(),
+					'file'    => $e->getFile(),
+					'line'    => $e->getLine(),
+					'trace'   => $trace,
+				],
+			];
+
+			$headers = [
+				'Cache-Control' => 'no-cache, no-store, must-revalidate',
+				'Pragma'        => 'no-cache',
+				'Expires'       => '0',
+				'X-Request-ID'  => Server::RequestId() ?: uniqid('req_', true),
+				'X-Ticker-ID'   => $ticker,
+			];
+
+			echo $req->response($response, 500, $headers)->json();
+		}
+
+		/**
+		 * Pretty HTML exception renderer.
+		 */
+		private function renderPrettyHtmlException(Throwable $e, string $editorUrl, array $table): void
+		{
+			echo '<div style="font-family: Arial, sans-serif; background-color: #f8d7da; color: #721c24; padding: 20px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">';
+			echo '<h2 style="color: #721c24;">Exception Details</h2>';
+			echo '<hr style="border-color: #f5c6cb;">';
+			echo '<table style="width: 100%; border-collapse: collapse;">';
+
+			foreach ($table as $label => $value) {
+				echo '<tr>';
+				echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;"><strong>' . $label . '</strong></td>';
+				echo '<td style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da;">' . $value . '</td>';
+				echo '</tr>';
+			}
+
+			echo '</table>';
+			echo '<h3 style="color: #721c24;">Stack Trace</h3>';
+			echo '<pre style="background-color: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 5px; color: #333;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+			echo '<a href="' . $editorUrl . '" style="display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #721c24; color: #fff; text-decoration: none; border-radius: 5px;">Navigate Error</a>';
+			echo '</div>';
 		}
 	}

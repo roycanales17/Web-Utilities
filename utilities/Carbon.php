@@ -2,7 +2,7 @@
 
 	namespace App\Utilities;
 
-	use App\Utilities\Blueprints\BaseCarbon;
+	use App\Utilities\Blueprints\BaseBaseCarbon;
 
 	/**
 	 * Utility wrapper around BaseCarbon with helper methods.
@@ -12,11 +12,11 @@
 		/**
 		 * Get the current date and time.
 		 *
-		 * @return BaseCarbon
+		 * @return BaseBaseCarbon
 		 */
-		public static function now(): BaseCarbon
+		public static function now(): BaseBaseCarbon
 		{
-			return BaseCarbon::now();
+			return BaseBaseCarbon::now();
 		}
 
 		/**
@@ -26,29 +26,29 @@
 		 */
 		public static function today(): string
 		{
-			return BaseCarbon::now()->toDateString();
+			return BaseBaseCarbon::now()->toDateString();
 		}
 
 		/**
 		 * Add days to the current date.
 		 *
 		 * @param int $days
-		 * @return BaseCarbon
+		 * @return BaseBaseCarbon
 		 */
-		public static function addDays(int $days): BaseCarbon
+		public static function addDays(int $days): BaseBaseCarbon
 		{
-			return BaseCarbon::now()->addDays($days);
+			return BaseBaseCarbon::now()->addDays($days);
 		}
 
 		/**
 		 * Subtract days from the current date.
 		 *
 		 * @param int $days
-		 * @return BaseCarbon
+		 * @return BaseBaseCarbon
 		 */
-		public static function subtractDays(int $days): BaseCarbon
+		public static function subtractDays(int $days): BaseBaseCarbon
 		{
-			return BaseCarbon::now()->subDays($days);
+			return BaseBaseCarbon::now()->subDays($days);
 		}
 
 		/**
@@ -59,18 +59,18 @@
 		 */
 		public static function format(string $format = 'Y-m-d H:i:s'): string
 		{
-			return BaseCarbon::now()->format($format);
+			return BaseBaseCarbon::now()->format($format);
 		}
 
 		/**
 		 * Parse a date string into a BaseCarbon instance.
 		 *
 		 * @param string $date
-		 * @return BaseCarbon
+		 * @return BaseBaseCarbon
 		 */
-		public static function parse(string $date): BaseCarbon
+		public static function parse(string $date): BaseBaseCarbon
 		{
-			return BaseCarbon::parse($date);
+			return BaseBaseCarbon::parse($date);
 		}
 
 		/**
@@ -82,8 +82,8 @@
 		 */
 		public static function diffInDays(string $date1, string $date2): int
 		{
-			$carbonDate1 = BaseCarbon::parse($date1);
-			$carbonDate2 = BaseCarbon::parse($date2);
+			$carbonDate1 = BaseBaseCarbon::parse($date1);
+			$carbonDate2 = BaseBaseCarbon::parse($date2);
 
 			return $carbonDate1->diffInDays($carbonDate2);
 		}
@@ -96,7 +96,7 @@
 		 */
 		public static function isFuture(string $date): bool
 		{
-			return BaseCarbon::parse($date)->isFuture();
+			return BaseBaseCarbon::parse($date)->isFuture();
 		}
 
 		/**
@@ -107,6 +107,6 @@
 		 */
 		public static function isPast(string $date): bool
 		{
-			return BaseCarbon::parse($date)->isPast();
+			return BaseBaseCarbon::parse($date)->isPast();
 		}
 	}

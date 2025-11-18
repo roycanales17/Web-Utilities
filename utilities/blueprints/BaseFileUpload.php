@@ -2,7 +2,6 @@
 
 	namespace App\Utilities\Blueprints;
 
-	use App\Utilities\Config;
 	use App\Utilities\Server;
 	use Aws\S3\S3Client;
 
@@ -54,21 +53,21 @@
 				$_ENV['AWS_ENDPOINT']           = env('AWS_ENDPOINT', null);
 
 				$config = [
-					'region'      => getenv('AWS_DEFAULT_REGION'),
+					'region'      => env('AWS_DEFAULT_REGION'),
 					'version'     => 'latest',
 					'credentials' => [
-						'key'    => getenv('AWS_ACCESS_KEY_ID'),
-						'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
+						'key'    => env('AWS_ACCESS_KEY_ID'),
+						'secret' => env('AWS_SECRET_ACCESS_KEY'),
 					],
 				];
 
-				if (getenv('AWS_ENDPOINT')) {
-					$config['endpoint'] = getenv('AWS_ENDPOINT');
+				if (env('AWS_ENDPOINT')) {
+					$config['endpoint'] = env('AWS_ENDPOINT');
 					$config['use_path_style_endpoint'] = true;
 				}
 
 				$this->s3Client = new S3Client($config);
-				$this->bucket   = getenv('AWS_BUCKET');
+				$this->bucket   = env('AWS_BUCKET');
 
 				try {
 					$this->s3Client->headBucket(['Bucket' => $this->bucket]);

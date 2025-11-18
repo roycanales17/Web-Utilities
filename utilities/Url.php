@@ -105,7 +105,7 @@
 		 */
 		public function base(): string
 		{
-			$url = Config::get('app.url');
+			$url = env('APP_URL');
 			if ($url) {
 				return rtrim($url, '/');
 			}

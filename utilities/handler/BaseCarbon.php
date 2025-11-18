@@ -5,7 +5,7 @@
 	use DateTimeZone;
 	use DateTime;
 
-	abstract class CarbonHandler
+	abstract class BaseCarbon
 	{
 		protected DateTime $date;
 		protected string $timezone;

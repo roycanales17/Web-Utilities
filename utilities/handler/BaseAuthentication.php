@@ -10,7 +10,10 @@
 	use Handler\Model\Users;
 	use DateTime;
 
-	abstract class Authentication
+	/**
+	 * @internal
+	 */
+	abstract class BaseAuthentication
 	{
 		/**
 		 * Cached authenticated user.

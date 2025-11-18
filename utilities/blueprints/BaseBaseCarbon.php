@@ -2,7 +2,7 @@
 
 	namespace App\Utilities\Blueprints;
 
-	use App\Utilities\Handler\CarbonHandler;
+	use App\Utilities\Handler\BaseCarbon;
 
 	/**
 	 * Class BaseCarbon
@@ -13,7 +13,7 @@
 	 * @internal
 	 * @package App\Utilities\Blueprints
 	 */
-	class BaseCarbon extends CarbonHandler
+	class BaseBaseCarbon extends BaseCarbon
 	{
 		/**
 		 * Get the current date and time as a BaseCarbon instance.

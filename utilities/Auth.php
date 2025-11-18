@@ -3,7 +3,7 @@
 	namespace App\Utilities;
 
 	use App\Bootstrap\Exceptions\AppException;
-	use App\Utilities\Handler\Authentication;
+	use App\Utilities\Handler\BaseAuthentication;
 
 	/**
 	 * Class Auth
@@ -57,7 +57,7 @@
 	 * @method static array|null   validateApiToken(string $token)                               Validate token and return user
 	 * @method static string|null  currentApiToken()                                              Get Bearer token from request
 	 */
-	final class Auth extends Authentication
+	final class Auth extends BaseAuthentication
 	{
 		/**
 		 * Forward static calls to the parent Authentication class.

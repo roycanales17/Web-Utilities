@@ -158,7 +158,7 @@
 		 */
 		protected function json(array $data, int $status = 200, array $headers = []): string
 		{
-			return response(status: $status, headers: $headers)->json($data);
+			return response($data, $status, $headers)->json();
 		}
 
 		/**

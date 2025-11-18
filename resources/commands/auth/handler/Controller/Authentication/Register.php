@@ -2,8 +2,8 @@
 
     namespace Handler\Controller\Authentication;
 
-    use App\Headers\Redirect;
-    use App\Headers\Request;
+    use App\Utilities\Redirect;
+    use App\Utilities\Request;
     use App\Http\Controller;
     use Http\Services\Auth;
 

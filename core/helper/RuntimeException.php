@@ -5,7 +5,7 @@
 	use App\Utilities\Logger;
 	use App\Utilities\Server;
 	use App\Utilities\Mail;
-	use App\Headers\Request;
+	use App\Utilities\Request;
 	use ReflectionException;
 	use ReflectionFunction;
 	use Throwable;

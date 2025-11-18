@@ -4,14 +4,12 @@
 
 	use App\Utilities\Handler\BaseRequestHeaders;
 	use App\Utilities\Handler\BaseRequestInputs;
-	use App\Utilities\Handler\BaseRequestResponse;
 	use App\Utilities\Handler\BaseRequestValidator;
 
 	class Request
 	{
 		use BaseRequestInputs;
 		use BaseRequestHeaders;
-		use BaseRequestResponse;
 		use BaseRequestValidator;
 
 		protected array $data = [];
@@ -35,5 +33,10 @@
 			// Store in static cache
 			self::$cachedData = $this->data;
 			self::$cachedFiles = $this->files;
+		}
+
+		public function response(mixed $content, int $code = 200, array $headers = []): Response
+		{
+			return new Response($content, $code, $headers);
 		}
 	}

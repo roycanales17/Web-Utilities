@@ -36,12 +36,9 @@
 			return (string) $this->content;
 		}
 
-		public function json(mixed $value = ''): string
+		public function json(): string
 		{
 			$content = $this->content;
-			if ($value)
-				$content = $value;
-
 			$this->header('Content-Type', 'application/json; charset=UTF-8');
 			return json_encode($content, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 		}

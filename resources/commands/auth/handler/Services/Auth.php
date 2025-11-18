@@ -2,7 +2,7 @@
 
     namespace Http\Services;
 
-    use App\Headers\Request;
+    use App\Utilities\Request;
     use App\Utilities\Mail;
     use App\Utilities\Session;
     use Http\Model\Users;

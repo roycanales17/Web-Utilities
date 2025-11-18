@@ -3,7 +3,6 @@
 	namespace Commands;
 
 	use App\Console\Command;
-	use App\Headers\Request;
 
 	class Middleware extends Command
 	{
@@ -29,7 +28,7 @@
 
 				namespace {$classInfo['namespace']};
 				
-				use App\Headers\Request;
+				use App\Utilities\Request;
 				
 				class {$classInfo['class']}
 				{

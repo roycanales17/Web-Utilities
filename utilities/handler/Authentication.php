@@ -4,7 +4,7 @@
 
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Databases\Database;
-	use App\Headers\Request;
+	use App\Utilities\Request;
 	use App\Utilities\Server;
 	use App\Utilities\Session;
 	use Handler\Model\Users;

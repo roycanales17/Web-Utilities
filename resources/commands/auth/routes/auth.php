@@ -1,8 +1,8 @@
 <?php
 
-    use Http\Controller\Authentication\{ForgotPassword, RecoverAccount, Login, Register};
+	use App\Utilities\Request;
+	use Http\Controller\Authentication\{ForgotPassword, RecoverAccount, Login, Register};
     use Http\Services\Auth;
-    use App\Headers\Request;
     use App\Routes\Route;
 
     /**
@@ -62,7 +62,7 @@
 
         if ($auth->login($email, $password)) {
             $token = $auth->issueToken($auth->id());
-            return response()->json(['api_token' => $token]);
+            return response(['api_token' => $token])->json();
         }
 
         return response(['error' => 'Invalid credentials.'], 401)->json();

@@ -3,6 +3,7 @@
 	namespace App\Utilities\Handler;
 
 	use App\Bootstrap\Exceptions\StreamException;
+	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Redirect;
 	use ReflectionProperty;
@@ -11,13 +12,15 @@
 
 	abstract class Component
 	{
-		private static array $registered = [];
-		private static array $propertyNamesCache = [];
-		private static array $reflectionCache = [];
-		private array $extender = [];
-		private string $componentIdentifier = '';
-		private float $startedTime = 0;
-		private bool $skipCompile = false;
+		private array $__errors = [];
+		private array $__success = [];
+		private array $__extender = [];
+		private float $__startedTime = 0;
+		private bool $__skipCompile = false;
+		private string $__componentIdentifier = '';
+		private static array $__registered = [];
+		private static array $__reflectionCache = [];
+		private static array $__propertyNamesCache = [];
 
 		/**
 		 * Generates a unique identifier for the component using a time-based suffix.
@@ -30,7 +33,7 @@
 			$timeIdentifier = substr(hrtime(true), -5);
 			$baseId = encrypt("COMPONENT_" . $component) . "-{" . $timeIdentifier . "}";
 			$existing = array_filter(
-				self::$registered,
+				self::$__registered,
 				fn($id) => str_starts_with($id, $baseId . "-[")
 			);
 
@@ -171,18 +174,18 @@ HTML;
 		{
 			$className = get_class($this);
 
-			if (!isset(self::$propertyNamesCache[$className])) {
+			if (!isset(self::$__propertyNamesCache[$className])) {
 				$reflection = new ReflectionClass($this);
 				$publicProperties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
 
-				self::$propertyNamesCache[$className] = array_map(
+				self::$__propertyNamesCache[$className] = array_map(
 					fn($prop) => $prop->getName(),
 					$publicProperties
 				);
 			}
 
 			$properties = [];
-			foreach (self::$propertyNamesCache[$className] as $propertyName) {
+			foreach (self::$__propertyNamesCache[$className] as $propertyName) {
 				$properties[$propertyName] = $this->$propertyName;
 			}
 
@@ -199,9 +202,9 @@ HTML;
 		 */
 		public function initialize(string $component, array $params = []): void
 		{
-			$this->startedTime = hrtime(true);
-			$this->componentIdentifier = $this->generateComponentIdentifier($component);
-			self::$registered[] = $this->componentIdentifier;
+			$this->__startedTime = hrtime(true);
+			$this->__componentIdentifier = $this->generateComponentIdentifier($component);
+			self::$__registered[] = $this->__componentIdentifier;
 
 			// Call the init method if it exists.
 			if (!empty($params) && method_exists($this, 'init')) {
@@ -219,7 +222,7 @@ HTML;
 		public function models(array $models): void
 		{
 			$class = static::class;
-			if (!isset(self::$reflectionCache[$class])) {
+			if (!isset(self::$__reflectionCache[$class])) {
 				$ref = new \ReflectionClass($this);
 				$props = [];
 
@@ -227,10 +230,10 @@ HTML;
 					$props[$prop->getName()] = $prop;
 				}
 
-				self::$reflectionCache[$class] = $props;
+				self::$__reflectionCache[$class] = $props;
 			}
 
-			$properties = self::$reflectionCache[$class];
+			$properties = self::$__reflectionCache[$class];
 			$isMatched = function(string $type, mixed $value): bool {
 				return match ($type) {
 					'int'    => is_int($value),
@@ -401,8 +404,8 @@ HTML;
 				throw new Exception("Render function is required.", 500);
 
 			// Prepare data attributes for the component.
-			$component = $identifier ?: base64_encode($this->componentIdentifier);
-			$startedTime = ($identifier ? $startedTime : $this->startedTime);
+			$component = $identifier ?: base64_encode($this->__componentIdentifier);
+			$startedTime = ($identifier ? $startedTime : $this->__startedTime);
 
 			// For development
 			$dev = get_constant('DEVELOPMENT', true);
@@ -410,7 +413,7 @@ HTML;
 			if ($preloader)
 				return $this->preloader($component, $startedTime);
 
-			if ($this->skipCompile) {
+			if ($this->__skipCompile) {
 				$render = [
 					'content' => '',
 					'extender' => $this->prepareExtender()
@@ -568,7 +571,7 @@ HTML;
 				throw new StreamException("Method {$method} does not exist.");
 
 			$action[2] = $action[2] ?? $args;
-			$this->extender[] = $action;
+			$this->__extender[] = $action;
 		}
 
 		/**
@@ -585,7 +588,7 @@ HTML;
 			$isMultiple = is_array($actions[0]);
 			foreach ($isMultiple ? $actions : [$actions] as $action) {
 				$passedArgs = $args ?: ($action[2] ?? []);
-				$this->extender($action, ...$passedArgs);
+				$this->__extender($action, ...$passedArgs);
 			}
 
 			$this->exit();
@@ -598,8 +601,8 @@ HTML;
 		 */
 		protected function exit(): void
 		{
-			if (!$this->skipCompile) {
-				$this->skipCompile = true;
+			if (!$this->__skipCompile) {
+				$this->__skipCompile = true;
 			}
 		}
 
@@ -611,13 +614,27 @@ HTML;
 		 */
 		protected function compile(array $data = []): array
 		{
+			if ($this->__success) {
+				foreach ($this->__success as $key => $msg) {
+					Session::flash("success:$key", $msg);
+				}
+			}
+
+			if ($this->__errors) {
+				http_response_code(400);
+				foreach ($this->__errors as $key => $msg) {
+					Session::flash("error:$key", $msg);
+				}
+			}
+
 			$loadBaseComponent = function() use ($data) {
-				$path = base_path("/views/". str_replace(['.', '\\'], '/', get_called_class()) . ".blade.php");
+				$base = str_replace(['.', '\\'], '/', get_called_class());
+				$path = base_path("/views/{$base}.blade.php");
 				return Blade::load($path, $data);
 			};
 
 			$baseComponent = '';
-			if (!$this->skipCompile) {
+			if (!$this->__skipCompile) {
 				$baseComponent = $loadBaseComponent();
 			}
 
@@ -653,8 +670,8 @@ HTML;
 		private function prepareExtender(): array
 		{
 			$extender = [];
-			if ($this->extender) {
-				$isSingleAction = isset($this->extender[0]) && is_string($this->extender[1] ?? null) && is_array($this->extender[2] ?? null);
+			if ($this->__extender) {
+				$isSingleAction = isset($this->__extender[0]) && is_string($this->__extender[1] ?? null) && is_array($this->__extender[2] ?? null);
 
 				$prepare = function($action) {
 					$class = $action[0] ?? '';
@@ -688,14 +705,14 @@ HTML;
 				};
 
 				if (!$isSingleAction) {
-					foreach ($this->extender as $action_r) {
+					foreach ($this->__extender as $action_r) {
 						$prepared = $prepare($action_r);
 						if ($prepared) {
 							$extender[] = $prepared;
 						}
 					}
 				} else {
-					$prepared = $prepare($this->extender);
+					$prepared = $prepare($this->__extender);
 					if ($prepared) {
 						$extender[] = $prepared;
 					}
@@ -703,6 +720,27 @@ HTML;
 			}
 
 			return $extender;
+		}
+
+		protected function setSuccess(string $key, string $message): void
+		{
+			if (!isset($this->__success[$key])) {
+				$this->__success[$key] = $message;
+			}
+		}
+
+		protected function setError(string $key, string $message): void
+		{
+			if (!isset($this->__errors[$key])) {
+				$this->__errors[$key] = $message;
+			}
+		}
+
+		protected function setErrors(array $errors): void
+		{
+			foreach ($errors as $key => $error) {
+				$this->setError($key, $error);
+			}
 		}
 
 		private function replaceHTML(string $html, string $component): string

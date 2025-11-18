@@ -2,7 +2,7 @@
 
 	use App\Utilities\Url;
 	use App\Utilities\Auth;
-	use App\Headers\Request;
+	use App\Utilities\Request;
 	use App\Utilities\Config;
 	use App\Utilities\Server;
 	use App\Console\Terminal;
@@ -189,11 +189,12 @@
 	 */
 	function validate_token(): void
 	{
-		$method = Request::method();
+		$request = new Request();
+		$method = $request->method();
 
 		if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) {
 			$token = Session::get('csrf_token');
-			$requestToken = request()->header('X-CSRF-TOKEN') ?? request()->input('csrf-token');
+			$requestToken = $request->header('X-CSRF-TOKEN') ?? $request->input('csrf_token');
 
 			if (!$requestToken) {
 				$requestToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;

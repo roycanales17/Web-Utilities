@@ -26,6 +26,7 @@
 	use App\Bootstrap\Bootstrapper\Cache;
 	use App\Utilities\Handler\Bootloader;
 	use App\Bootstrap\Bootstrapper\Mail;
+	use App\Utilities\Request;
 	use Exception;
 	use Throwable;
 	use Closure;
@@ -93,10 +94,11 @@
 
 				$this->runtimeHandler->handle($e);
 			} finally {
+				$request = new Request();
 				$this->performance->end();
 				$summary = $this->performance->generateSummary();
 
-				if (request()->query('SHOW_PERFORMANCE') === true) {
+				if ($request->query('SHOW_PERFORMANCE') === true) {
 					print_r($summary);
 				}
 

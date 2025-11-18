@@ -5,7 +5,7 @@
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\Utilities\Handler\Component;
 	use App\Http\Authenticatable;
-	use App\Headers\Request;
+	use App\Utilities\Request;
 	use ReflectionException;
 	use ReflectionMethod;
 	use Exception;
@@ -48,8 +48,9 @@
 		 */
 		public static function capture(Request $req): string
 		{
+			$request = new Request();
 			$startedTime = hrtime(true);
-			$isStreamWire = Request::header('X-STREAM-WIRE') || ($_SERVER['HTTP_X_STREAM_WIRE'] ?? null);
+			$isStreamWire = $request->header('X-STREAM-WIRE') || $request->server('HTTP_X_STREAM_WIRE');
 
 			if ($isStreamWire) {
 				$validate = $req->validate([
@@ -190,7 +191,8 @@
 
 		private static function isCompiled(string $path): string|bool
 		{
-			$compiledJson = request()->post('_compiled');
+			$request = new Request();
+			$compiledJson = $request->post('_compiled');
 			if ($compiledJson) {
 
 				$compiledArray = json_decode($compiledJson, true);

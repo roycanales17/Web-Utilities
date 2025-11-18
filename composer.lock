@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4253ce6af458560d503367f15b9c398e",
+    "content-hash": "820f36b05ab0236ccdc8d13084615ff6",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.359.9",
+            "version": "3.360.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "754b25dae2f50b568b55735931a3cd73263ac5ae"
+                "reference": "a21055795be59f3d7c5ca6e4d52a80930dcf8c20"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/754b25dae2f50b568b55735931a3cd73263ac5ae",
-                "reference": "754b25dae2f50b568b55735931a3cd73263ac5ae",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/a21055795be59f3d7c5ca6e4d52a80930dcf8c20",
+                "reference": "a21055795be59f3d7c5ca6e4d52a80930dcf8c20",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.9"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.360.0"
             },
-            "time": "2025-11-10T19:14:56+00:00"
+            "time": "2025-11-17T19:46:19+00:00"
         },
         {
             "name": "dragonmantank/cron-expression",
@@ -992,16 +992,16 @@
         },
         {
             "name": "roy404/eloquent",
-            "version": "2.5.5",
+            "version": "2.5.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roycanales17/Database-ORM.git",
-                "reference": "af3d987494eda4985b061b356b0945e4fd7b58d4"
+                "reference": "d95aa3f0137bc65debc7e256afddac5c64f68a72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/af3d987494eda4985b061b356b0945e4fd7b58d4",
-                "reference": "af3d987494eda4985b061b356b0945e4fd7b58d4",
+                "url": "https://api.github.com/repos/roycanales17/Database-ORM/zipball/d95aa3f0137bc65debc7e256afddac5c64f68a72",
+                "reference": "d95aa3f0137bc65debc7e256afddac5c64f68a72",
                 "shasum": ""
             },
             "require": {
@@ -1034,59 +1034,9 @@
             ],
             "support": {
                 "issues": "https://github.com/roycanales17/Database-ORM/issues",
-                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.5"
+                "source": "https://github.com/roycanales17/Database-ORM/tree/v2.5.7"
             },
-            "time": "2025-11-08T03:26:53+00:00"
-        },
-        {
-            "name": "roy404/request",
-            "version": "3.1.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/roycanales17/Input-Request.git",
-                "reference": "06c98f4f2ddc3ef0ce7b10bbe5ab4675c3a6b63f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/roycanales17/Input-Request/zipball/06c98f4f2ddc3ef0ce7b10bbe5ab4675c3a6b63f",
-                "reference": "06c98f4f2ddc3ef0ce7b10bbe5ab4675c3a6b63f",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.1"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Standard.php"
-                ],
-                "psr-4": {
-                    "App\\Headers\\": "src/",
-                    "App\\Headers\\Scheme\\": "src/scheme",
-                    "App\\Headers\\Requests\\": "src/requests",
-                    "App\\Headers\\Scheme\\Validation\\": "src/scheme/validation"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Robroy Canales",
-                    "email": "canales.robroy123@gmail.com"
-                }
-            ],
-            "description": "Request class provides an object-oriented way to interact with the current HTTP request being handled by your application as well as retrieve the input, and files that were submitted with the request.",
-            "keywords": [
-                "php",
-                "plugins"
-            ],
-            "support": {
-                "issues": "https://github.com/roycanales17/Input-Request/issues",
-                "source": "https://github.com/roycanales17/Input-Request/tree/v3.1.7"
-            },
-            "time": "2025-10-23T11:48:41+00:00"
+            "time": "2025-11-11T06:03:47+00:00"
         },
         {
             "name": "roy404/routes",

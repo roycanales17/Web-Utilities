@@ -1,5 +1,7 @@
 <?php
 
+	use App\Utilities\Redirect;
+	use App\Utilities\Response;
 	use App\Utilities\Url;
 	use App\Utilities\Auth;
 	use App\Utilities\Request;
@@ -590,4 +592,14 @@
 	 */
 	function auth(): bool {
 		return Auth::check();
+	}
+
+	function response(mixed $content = '', int $status = 200, array $headers = []): Response
+	{
+		return new Response($content, $status, $headers);
+	}
+
+	function redirect(string $url, int $status = 302, array $headers = []): Redirect
+	{
+		return response(status: $status, headers: $headers)->redirect($url);
 	}

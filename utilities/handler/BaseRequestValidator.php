@@ -97,7 +97,12 @@
 			if (isset($this->messages[$field])) {
 				$message = $this->messages[$field];
 			}
-			$this->validationErrors[$field][] = $message;
+
+			if (!isset($this->validationErrors[$field])) {
+				$this->validationErrors[$field] = $message;
+			}
+
+			// $this->validationErrors[$field][] = $message;
 		}
 
 		public function isSuccess(): bool

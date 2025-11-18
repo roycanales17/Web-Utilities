@@ -51,7 +51,7 @@
 		 * @param string $name
 		 * @return string|null
 		 */
-		private static function header(string $name): ?string
+		public static function header(string $name): ?string
 		{
 			$headers = self::headers();
 			$name = strtolower($name);

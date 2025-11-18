@@ -15,7 +15,6 @@
 	use App\Bootstrap\Bootstrapper\Callback;
 	use App\Bootstrap\Bootstrapper\Constant;
 	use App\Bootstrap\Bootstrapper\Database;
-	use App\Bootstrap\Bootstrapper\Requests;
 	use App\Bootstrap\Bootstrapper\OBStart;
 	use App\Bootstrap\Bootstrapper\Defines;
 	use App\Bootstrap\Bootstrapper\Session;
@@ -25,8 +24,8 @@
 	use App\Bootstrap\Helper\Performance;
 	use App\Bootstrap\Bootstrapper\OBEnd;
 	use App\Bootstrap\Bootstrapper\Cache;
-	use App\Bootstrap\Bootstrapper\Mail;
 	use App\Utilities\Handler\Bootloader;
+	use App\Bootstrap\Bootstrapper\Mail;
 	use Exception;
 	use Throwable;
 	use Closure;
@@ -70,7 +69,6 @@
 				$this->load(StartupLog::class);
 				$this->load(Constant::class);
 				$this->load(OBStart::class);
-				$this->load(Requests::class);
 				$this->load(Environment::class, ['path' => $this->envPath]);
 				$this->load(Defines::class);
 				$this->load(Development::class);

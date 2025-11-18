@@ -196,7 +196,7 @@
 
 		if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) {
 			$token = Session::get('csrf_token');
-			$requestToken = $request->header('X-CSRF-TOKEN') ?? $request->input('csrf_token');
+			$requestToken = $request->header('X-CSRF-TOKEN') ?? $request->input('csrf-token');
 
 			if (!$requestToken) {
 				$requestToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;

@@ -4,7 +4,7 @@
 
 	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\Blade;
-	use App\Headers\Redirect;
+	use App\Utilities\Redirect;
 	use ReflectionProperty;
 	use ReflectionClass;
 	use Exception;

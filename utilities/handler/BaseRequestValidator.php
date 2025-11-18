@@ -99,7 +99,7 @@
 			}
 
 			if (!isset($this->validationErrors[$field])) {
-				$this->validationErrors[$field] = $message;
+				$this->validationErrors[$field] = ucfirst($message);
 			}
 
 			// $this->validationErrors[$field][] = $message;

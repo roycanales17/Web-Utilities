@@ -2,7 +2,11 @@
 
 	namespace App\Http;
 
-	abstract class Requests
+	use App\Utilities\Request;
+
+	abstract class Requests extends Request
 	{
-		// Todo: Will be implemented soon
+		abstract public function authorize(): bool;
+
+		abstract public function rules(): array;
 	}

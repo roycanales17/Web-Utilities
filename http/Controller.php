@@ -2,8 +2,8 @@
 
 	namespace App\Http;
 
-	use App\Headers\Redirect;
-	use App\Headers\Response;
+	use App\Utilities\Redirect;
+	use App\Utilities\Response;
 	use App\Utilities\Session;
 	use App\Utilities\Handler\LazyData;
 

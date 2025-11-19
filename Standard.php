@@ -261,9 +261,9 @@
 	 * Create a cookie with a default 'custom:' prefix in its name.
 	 *
 	 * @param string $name Cookie base name
-	 * @param mixed $value Value to set in cookie
+	 * @param mixed $value Value to set in a cookie
 	 * @param int $expire Expiration time in seconds
-	 * @return mixed Result of cookie() function
+	 * @return mixed Result of a cookie () function
 	 */
 	function createCookie(string $name, mixed $value = null, int $expire = 3600): mixed
 	{
@@ -272,7 +272,7 @@
 
 	/**
 	 * Fetch a cookie with a default 'custom:' prefix in its name.
-	 * Returns $default if cookie is not found.
+	 * Returns $default if the cookie is not found.
 	 *
 	 * @param string $name Cookie base name
 	 * @param mixed $default Default value if cookie not found
@@ -304,7 +304,7 @@
 	 * Encryption uses AES-256-CBC with a key from config('APP_COOKIE_PASSWORD').
 	 *
 	 * @param string $name Cookie name
-	 * @param mixed $value Value to set, or null to get/delete
+	 * @param mixed|null $value Value to set, or null to get/delete
 	 * @param int $expire Expiration time in seconds; 0 for session, negative to delete
 	 * @param string $path Cookie path
 	 * @param string $domain Cookie domain
@@ -312,7 +312,7 @@
 	 * @param bool $httponly HttpOnly flag
 	 * @return mixed Decrypted cookie value on get, true on set/delete, or null if not found
 	 */
-	function cookie(string $name, $value = null, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true): mixed
+	function cookie(string $name, mixed $value = null, int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httponly = true): mixed
 	{
 		$key = env('APP_COOKIE_PASSWORD', 'f2dg23asd3141saf');
 		$cipher = 'AES-256-CBC';

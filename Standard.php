@@ -287,7 +287,7 @@
 	 * Delete a cookie with a default 'custom:' prefix in its name.
 	 *
 	 * @param string $name Cookie base name
-	 * @return mixed Result of cookie() function
+	 * @return mixed Result of a cookie () function
 	 */
 	function deleteCookie(string $name): mixed
 	{
@@ -444,7 +444,7 @@
 	 * Generate a full URL for a given asset using the Server::makeURL helper.
 	 *
 	 * @param string $path  The relative path to the asset.
-	 * @return string       The fully-qualified asset URL.
+	 * @return string       The fully qualified asset URL.
 	 */
 	function asset(string $path): string
 	{
@@ -473,7 +473,7 @@
 	 * Example:
 	 * ```php
 	 * $appName = env('APP_NAME', 'MyApp');
-	 * $debug   = env('APP_DEBUG', false);
+	 * $debug = env('APP_DEBUG', false);
 	 * ```
 	 *
 	 * @param string $key      The environment variable name.

@@ -207,7 +207,7 @@
 				return true;
 			}
 
-			// 2. Stream/Wire header (use header getter instead of $_SERVER)
+			// 2. Stream/Wire header
 			if (self::header('X-STREAM-WIRE')) {
 				return true;
 			}

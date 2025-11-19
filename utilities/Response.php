@@ -18,7 +18,6 @@
 			$this->headers = $headers;
 
 			http_response_code($this->statusCode);
-
 			foreach ($this->headers as $name => $value) {
 				$this->header($name, $value);
 			}
@@ -130,8 +129,9 @@
 			return $xml->asXML();
 		}
 
-		public function download(string $filename, mixed $content = null): void
+		public function download(string $filename): void
 		{
+			$content = $this->content;
 			if ($content === null) {
 				throw new Exception('Content must be provided for the download.');
 			}
@@ -162,12 +162,17 @@
 			}
 		}
 
-		private function arrayToXml(array $data, SimpleXMLElement $xml): void
+		private function arrayToXml(SimpleXMLElement $xml): void
 		{
+			$data = $this->content;
+			if (!is_array($data)) return;
+
 			foreach ($data as $key => $value) {
 				if (is_array($value)) {
 					$subnode = $xml->addChild($key);
-					$this->arrayToXml($value, $subnode);
+					if ($subnode) {
+						$this->arrayToXml($subnode);
+					}
 				} else {
 					$xml->addChild($key, htmlspecialchars((string) $value));
 				}

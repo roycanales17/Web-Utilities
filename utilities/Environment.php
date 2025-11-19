@@ -19,14 +19,14 @@
 		/**
 		 * Checks if the environment is empty.
 		 *
-		 * @return bool True if configuration is empty, false otherwise.
+		 * @return bool True if the configuration is empty, false otherwise.
 		 */
 		public static function isEmpty(): bool {
 			return empty(self::$env);
 		}
 
 		/**
-		 * Loads environment from a .env file.
+		 * Loads environment from an .env file.
 		 * Lines starting with '#' are treated as comments and ignored.
 		 * Supports ${VAR_NAME} substitution using already loaded values.
 		 *

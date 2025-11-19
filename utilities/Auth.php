@@ -16,7 +16,7 @@
 	 * - Bearer API token authentication
 	 * - Token issuing, rotation, expiration, and revocation
 	 * - User registration
-	 * - Password reset flow (token generation + reset)
+	 * - Password reset flow (token generation and reset)
 	 * - Role and permission checking
 	 *
 	 * This class exposes static methods via PHPDoc @method,

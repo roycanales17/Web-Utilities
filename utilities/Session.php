@@ -80,7 +80,7 @@
 		/**
 		 * Checks if the session is currently active.
 		 *
-		 * @return bool True if session is active.
+		 * @return bool True if the session is active.
 		 */
 		public static function started(): bool
 		{
@@ -117,7 +117,7 @@
 		 * Checks if a key exists in the session.
 		 *
 		 * @param string $key Session key.
-		 * @return bool True if key exists.
+		 * @return bool True if the key exists.
 		 */
 		public static function has(string $key): bool
 		{

@@ -81,7 +81,7 @@
 		 */
 		public function withInput(array $input = []): self
 		{
-			// If no input passed, take all request input
+			// If no input passed, take all request inputs
 			if (empty($input)) {
 				$input = (new Request)->all();
 			}

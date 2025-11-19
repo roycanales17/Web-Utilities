@@ -117,7 +117,10 @@
 		}
 
 		/**
-		 * Validates a user array & stores session + cache.
+		 * Authorize a user by setting session and caching the authenticated user.
+		 *
+		 * @param array|null $user User data array (must contain 'id').
+		 * @return bool True if authorization succeeded, false otherwise.
 		 */
 		protected static function authorize(?array $user): bool
 		{
@@ -125,12 +128,14 @@
 				return false;
 			}
 
-			// Convert array → object
+			// Cache authenticated user as an object for property access
 			self::$user = new AuthUser($user);
 
-			Session::set('user_id', $user['id']);
+			// Regenerate session ID to prevent fixation attacks
 			Session::regenerate(true);
 
+			// Store essential session info
+			Session::set('user_id', $user['id']);
 			Session::set('user_agent', Server::userAgent());
 			Session::set('ip_address', Server::IPAddress());
 			Session::set('login_time', time());

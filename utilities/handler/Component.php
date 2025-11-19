@@ -721,6 +721,14 @@ HTML;
 			return $extender;
 		}
 
+		/**
+		 * Set a success message for a specific key.
+		 * Only sets the message if the key doesn't already exist.
+		 *
+		 * @param string $key     The unique identifier for the success message
+		 * @param string $message The success message to store
+		 * @return void
+		 */
 		protected function setSuccess(string $key, string $message): void
 		{
 			if (!isset($this->__success[$key])) {
@@ -728,6 +736,14 @@ HTML;
 			}
 		}
 
+		/**
+		 * Set an error message for a specific key.
+		 * Only sets the message if the key doesn't already exist.
+		 *
+		 * @param string $key     The unique identifier for the error message
+		 * @param string $message The error message to store
+		 * @return void
+		 */
 		protected function setError(string $key, string $message): void
 		{
 			if (!isset($this->__errors[$key])) {
@@ -735,6 +751,14 @@ HTML;
 			}
 		}
 
+		/**
+		 * Set multiple error messages at once.
+		 * Iterates through the provided array and sets each error using setError().
+		 *
+		 * @param array<string, string> $errors Associative array of key-value pairs where
+		 *                                       keys are error identifiers and values are error messages
+		 * @return void
+		 */
 		protected function setErrors(array $errors): void
 		{
 			foreach ($errors as $key => $error) {
@@ -742,6 +766,15 @@ HTML;
 			}
 		}
 
+		/**
+		 * Replace HTML placeholders and inject component-specific StreamListener.
+		 * Removes empty tag placeholders (<> and </>) and replaces generic StreamListener()
+		 * with a component-specific StreamListener call.
+		 *
+		 * @param string $html      The HTML string to process
+		 * @param string $component The component name to inject into StreamListener
+		 * @return string The processed HTML with replacements applied
+		 */
 		private function replaceHTML(string $html, string $component): string
 		{
 			$html = str_replace(['<>', '</>'], '', $html);

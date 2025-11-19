@@ -745,10 +745,6 @@ It bridges backend and frontend communication automatically, allowing components
     ```css
     @import "/libraries/streamdom/stream.css";
     ```
-3. **Add Stream-Wire Route** <br> In your routes file:
-   ```php
-   App\Routes\Route::post('/api/stream-wire/{identifier}', [App\Utilities\Stream::class, 'capture']);
-   ```
 
 ### Creating a Component
 

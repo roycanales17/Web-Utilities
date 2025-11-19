@@ -52,9 +52,9 @@
 		 */
 		public function current(): string
 		{
-			$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-			$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-			$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+			$scheme = Server::isSecureConnection() ? 'https' : 'http';
+			$host = Server::hostName();
+			$uri = parse_url(Server::requestURI(), PHP_URL_PATH);
 
 			return "$scheme://$host$uri";
 		}
@@ -66,9 +66,9 @@
 		 */
 		public function full(): string
 		{
-			$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-			$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-			$uri = $_SERVER['REQUEST_URI'] ?? '/';
+			$scheme = Server::isSecureConnection() ? 'https' : 'http';
+			$host = Server::hostName();
+			$uri = Server::requestURI();
 
 			return "$scheme://$host$uri";
 		}
@@ -81,7 +81,8 @@
 		 */
 		public function previous(string $default = '/'): string
 		{
-			return $_SERVER['HTTP_REFERER'] ?? $this->to($default);
+			$referer = Server::referer();
+			return ($referer !== 'No Referer') ? $referer : $this->to($default);
 		}
 
 		/**
@@ -110,8 +111,8 @@
 				return rtrim($url, '/');
 			}
 
-			$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-			$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+			$scheme = Server::isSecureConnection() ? 'https' : 'http';
+			$host = Server::hostName();
 
 			return "$scheme://$host";
 		}

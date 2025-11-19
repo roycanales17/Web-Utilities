@@ -621,7 +621,6 @@ HTML;
 			}
 
 			if ($this->__errors) {
-				http_response_code(400);
 				foreach ($this->__errors as $key => $msg) {
 					Session::flash("error:$key", $msg);
 				}

@@ -117,7 +117,7 @@
 		}
 
 		/**
-		 * Authorize a user by setting session and caching the authenticated user.
+		 * Authorize a user by setting a session and caching the authenticated user.
 		 *
 		 * @param array|null $user User data array (must contain 'id').
 		 * @return bool True if authorization succeeded, false otherwise.

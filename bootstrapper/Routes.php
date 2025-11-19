@@ -17,21 +17,6 @@
 		public function handler(): void {
 			$routes = Config::get('Routes');
 
-			// Run first the default routes
-			if (!$this->isCli()) {
-				$routeObject = Route::configure(
-					root: $this->getRealPath('/resources/routes'),
-					routes: ['DefaultRoutes.php'],
-					validate: true
-				);
-
-				$resolved = $routeObject->captured(fn($content) => print($content));
-				if ($resolved) {
-					console_log("Route resolved!");
-					return;
-				}
-			}
-
 			// Then the application routes
 			foreach ([false, true] as $validate) {
 				foreach ($routes as $route) {
@@ -56,6 +41,21 @@
 							break 2;
 						}
 					}
+				}
+			}
+
+			// Run first the default routes
+			if (!$this->isCli()) {
+				$routeObject = Route::configure(
+					root: $this->getRealPath('/resources/routes'),
+					routes: ['DefaultRoutes.php'],
+					validate: true
+				);
+
+				$resolved = $routeObject->captured(fn($content) => print($content));
+				if ($resolved) {
+					console_log("Route resolved!");
+					return;
 				}
 			}
 

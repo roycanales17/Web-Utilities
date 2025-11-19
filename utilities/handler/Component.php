@@ -550,7 +550,7 @@ HTML;
 		}
 
 		/**
-		 * This allows us to perform other component.
+		 * This allows us to perform another component.
 		 *
 		 * @param array $action
 		 * @param mixed ...$args
@@ -588,7 +588,7 @@ HTML;
 			$isMultiple = is_array($actions[0]);
 			foreach ($isMultiple ? $actions : [$actions] as $action) {
 				$passedArgs = $args ?: ($action[2] ?? []);
-				$this->__extender($action, ...$passedArgs);
+				$this->extender($action, ...$passedArgs);
 			}
 
 			$this->exit();

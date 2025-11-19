@@ -31,7 +31,7 @@
 				use App\Databases\Schema;
 				use App\Databases\Handler\Blueprints\Table;
 
-				class {$className}
+				final class {$className}
 				{
 					/**
 					 * Apply the migration

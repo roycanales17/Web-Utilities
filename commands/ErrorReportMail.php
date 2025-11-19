@@ -21,7 +21,7 @@
 				use Exception;
 				use Error;
 			
-				class {$classInfo['class']} extends Mailable {
+				final class {$classInfo['class']} extends Mailable {
 			
 					private Error|Exception \$exception;
 					private string \$to;

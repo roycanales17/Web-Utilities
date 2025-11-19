@@ -35,7 +35,7 @@
 				
 				use App\Utilities\Handler\Component;
 				
-				class {$classInfo['class']} extends Component
+				final class {$classInfo['class']} extends Component
 				{
 					/** @see {$relativeViewDir}/{$bladeFilename} */
 					public function render(): array

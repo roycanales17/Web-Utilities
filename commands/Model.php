@@ -33,7 +33,7 @@
 
 				use App\Databases\Facade\Model;
 
-				class {$className} extends Model
+				final class {$className} extends Model
 				{
 					/** @var string Primary key of the table */
 					public string \$primary_key = 'id';

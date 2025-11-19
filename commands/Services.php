@@ -29,7 +29,7 @@
 
 				namespace {$namespace};
 
-				class {$className}
+				final class {$className}
 				{
 					/**
 					 * Initialize your service.

@@ -36,7 +36,7 @@
 
 				use App\Http\Controller;
 
-				class {$classInfo['class']} extends Controller
+				final class {$classInfo['class']} extends Controller
 				{
 					public function index()
 					{

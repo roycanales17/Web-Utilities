@@ -30,7 +30,7 @@
 				
 				use App\Utilities\Request;
 				
-				class {$classInfo['class']}
+				final class {$classInfo['class']}
 				{
 					/**
 					 * Handle an incoming request.

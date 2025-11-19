@@ -30,10 +30,10 @@
 		 * Access a $_SERVER variable or return a default value.
 		 *
 		 * @param string $key
-		 * @param mixed $default
+		 * @param mixed|null $default
 		 * @return mixed
 		 */
-		public function server($key, $default = null): mixed
+		public function server(string $key, mixed $default = null): mixed
 		{
 			return $_SERVER[$key] ?? $default;
 		}

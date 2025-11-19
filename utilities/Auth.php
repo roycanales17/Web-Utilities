@@ -2,6 +2,7 @@
 
 	namespace App\Utilities;
 
+	use App\Utilities\Handler\AuthUser;
 	use App\Bootstrap\Exceptions\AppException;
 	use App\Utilities\Handler\BaseAuthentication;
 
@@ -37,7 +38,7 @@
 	 * ----------------------------------------------------------------------
 	 * Core Login / Registration
 	 * ----------------------------------------------------------------------
-	 * @method static bool        authorize(array|null $user)                                   Validate user object and establish session
+	 * @method static AuthUser|false authorize(array|null $user)  Validate user object and establish session
 	 * @method static array|null  register(string $name, string $email, string $password, string $role = '')  Register and return new user
 	 * @method static bool        login(string $email, string $password, bool $remember = false) Log in user
 	 * @method static void        logout(bool $allSessions = false, bool $regenerate_session = true) Log out user (optionally all sessions)

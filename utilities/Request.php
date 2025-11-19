@@ -30,7 +30,7 @@
 			$this->data = array_merge($_GET, $_POST, $this->data);
 			$this->files = $_FILES ?? [];
 
-			// Store in static cache
+			// Store in a static cache
 			self::$cachedData = $this->data;
 			self::$cachedFiles = $this->files;
 		}

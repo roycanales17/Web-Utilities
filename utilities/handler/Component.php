@@ -128,7 +128,7 @@
                 var newContent = '';
                 if (isJson) {
                     if (res.redirect !== undefined) {
-                        window.location.href = data.redirect;
+                        window.location.href = res.redirect;
                         return;
                     } else {
                         newContent = res.content;
@@ -626,6 +626,9 @@ HTML;
 				}
 			}
 
+			$publicProperties = get_object_vars($this);
+			$data = array_merge($data, $publicProperties);
+
 			$loadBaseComponent = function() use ($data) {
 				$base = str_replace(['.', '\\'], '/', get_called_class());
 				$path = base_path("/views/{$base}.blade.php");
@@ -651,7 +654,7 @@ HTML;
 		 */
 		protected function print(mixed $callback): mixed
 		{
-			if (is_object($callback)) {
+			if (is_callable($callback)) {
 				ob_start();
 				echo $callback();
 				return ob_get_clean();

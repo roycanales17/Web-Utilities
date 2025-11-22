@@ -173,6 +173,18 @@
 				$this->addError($field, "$field must be a valid date.", 'date');
 			}
 
+			if (str_starts_with($rule, 'after_or_equal:')) {
+				$otherField = substr($rule, 15);
+				$otherValue = $this->input($otherField);
+				if ($value && $otherValue && strtotime($value) < strtotime($otherValue)) {
+					$this->addError(
+						$field,
+						"$field must be a date after or equal to $otherField.",
+						'after_or_equal'
+					);
+				}
+			}
+
 			// min:X
 			if (str_starts_with($rule, 'min:')) {
 				$min = (int) substr($rule, 4);

@@ -185,6 +185,15 @@
 				}
 			}
 
+			// required_if:other_field,value
+			if (str_starts_with($rule, 'required_if:')) {
+				[$otherField, $expectedValue] = explode(',', substr($rule, 12));
+				$otherValue = $this->input($otherField);
+				if ($otherValue == $expectedValue && ($value === null || $value === '')) {
+					$this->addError($field, "$field is required when $otherField is $expectedValue.", 'required_if');
+				}
+			}
+
 			// min:X
 			if (str_starts_with($rule, 'min:')) {
 				$min = (int) substr($rule, 4);

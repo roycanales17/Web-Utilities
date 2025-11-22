@@ -207,7 +207,7 @@ HTML;
 			self::$__registered[] = $this->__componentIdentifier;
 
 			// Call the init method if it exists.
-			if (!empty($params) && method_exists($this, 'init')) {
+			if (method_exists($this, 'init')) {
 				$this->init(...$params);
 			}
 		}

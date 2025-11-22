@@ -15,8 +15,12 @@
 			return $this->isSuccess() ? $this->only(array_keys($this->validationRules)) : [];
 		}
 
-		public function validate(array $config = []): static
+		public function validate(array $config = [], array $messages = []): static
 		{
+			if ($messages) {
+				$this->message($messages);
+			}
+
 			$this->validationRules = $config;
 			$this->validationErrors = [];
 			$this->validated = true;

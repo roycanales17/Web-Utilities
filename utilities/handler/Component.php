@@ -632,7 +632,7 @@ HTML;
 			$loadBaseComponent = function() use ($data) {
 				$base = str_replace(['.', '\\'], '/', get_called_class());
 				$path = base_path("/views/{$base}.blade.php");
-				return Blade::load($path, $data);
+				return \App\View\Compilers\Component::renderComponents(Blade::load($path, $data));
 			};
 
 			$baseComponent = '';

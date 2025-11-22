@@ -31,8 +31,20 @@
 				$value = $this->sanitize($this->input($field));
 				$nullable = in_array('nullable', $rules);
 
-				// Skip validation if nullable and empty
-				if ($nullable && ($value === null || $value === '')) {
+				// --- REQUIRED_IF MUST BE CHECKED BEFORE NULLABLE SKIPS ---
+				foreach ($rules as $rule) {
+					if (str_starts_with($rule, 'required_if:')) {
+						[$otherField, $expectedValue] = explode(',', substr($rule, 12));
+						$otherValue = $this->input($otherField);
+
+						if ($otherValue == $expectedValue && $this->isEmpty($value)) {
+							$this->addError($field, "$field is required when $otherField is $expectedValue.", 'required_if');
+						}
+					}
+				}
+
+				// Skip validation if nullable and empty (but required_if already handled)
+				if ($nullable && $this->isEmpty($value)) {
 					continue;
 				}
 
@@ -65,7 +77,7 @@
 				}
 			}
 
-			// Run after-hooks
+			// After hooks
 			foreach ($this->afterHooks as $hook) {
 				$hook($this);
 			}
@@ -98,12 +110,9 @@
 
 		private function addError(string $field, string $message, string $rule = ''): void
 		{
-			// Check "field.rule"
 			if ($rule && isset($this->messages["{$field}.{$rule}"])) {
 				$message = $this->messages["{$field}.{$rule}"];
-			}
-			// Check "field"
-			elseif (isset($this->messages[$field])) {
+			} elseif (isset($this->messages[$field])) {
 				$message = $this->messages[$field];
 			}
 
@@ -134,67 +143,65 @@
 
 		private function applyRule(string $field, string $rule, $value): void
 		{
-			// Basic rules
+			// required
 			if ($rule === 'required') {
-				if ($value === null || $value === '') {
+				if ($this->isEmpty($value)) {
 					$this->addError($field, "$field is required.", 'required');
 				}
 			}
 
+			// email
 			if ($rule === 'email' && $value && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
 				$this->addError($field, "$field must be a valid email.", 'email');
 			}
 
+			// numeric
 			if ($rule === 'numeric' && $value !== null && !is_numeric($value)) {
 				$this->addError($field, "$field must be numeric.", 'numeric');
 			}
 
+			// integer
 			if ($rule === 'integer' && $value !== null && filter_var($value, FILTER_VALIDATE_INT) === false) {
 				$this->addError($field, "$field must be an integer.", 'integer');
 			}
 
+			// boolean
 			if ($rule === 'boolean' && !in_array($value, [true, false, 0, 1, "0", "1"], true)) {
 				$this->addError($field, "$field must be boolean.", 'boolean');
 			}
 
+			// alpha
 			if ($rule === 'alpha' && !ctype_alpha($value)) {
 				$this->addError($field, "$field must contain only letters.", 'alpha');
 			}
 
+			// alpha_num
 			if ($rule === 'alpha_num' && !ctype_alnum($value)) {
 				$this->addError($field, "$field must contain only letters and numbers.", 'alpha_num');
 			}
 
+			// url
 			if ($rule === 'url' && $value && !filter_var($value, FILTER_VALIDATE_URL)) {
 				$this->addError($field, "$field must be a valid URL.", 'url');
 			}
 
+			// date
 			if ($rule === 'date' && $value && strtotime($value) === false) {
 				$this->addError($field, "$field must be a valid date.", 'date');
 			}
 
+			// after_or_equal
 			if (str_starts_with($rule, 'after_or_equal:')) {
 				$otherField = substr($rule, 15);
 				$otherValue = $this->input($otherField);
 				if ($value && $otherValue && strtotime($value) < strtotime($otherValue)) {
-					$this->addError(
-						$field,
-						"$field must be a date after or equal to $otherField.",
-						'after_or_equal'
-					);
+					$this->addError($field, "$field must be a date after or equal to $otherField.", 'after_or_equal');
 				}
 			}
 
-			// required_if:other_field,value
-			if (str_starts_with($rule, 'required_if:')) {
-				[$otherField, $expectedValue] = explode(',', substr($rule, 12));
-				$otherValue = $this->input($otherField);
-				if ($otherValue == $expectedValue && ($value === null || $value === '')) {
-					$this->addError($field, "$field is required when $otherField is $expectedValue.", 'required_if');
-				}
-			}
+			// required_if handled above and skipped here
 
-			// min:X
+			// min
 			if (str_starts_with($rule, 'min:')) {
 				$min = (int) substr($rule, 4);
 				if (strlen((string)$value) < $min) {
@@ -202,7 +209,7 @@
 				}
 			}
 
-			// max:X
+			// max
 			if (str_starts_with($rule, 'max:')) {
 				$max = (int) substr($rule, 4);
 				if (strlen((string)$value) > $max) {
@@ -210,7 +217,7 @@
 				}
 			}
 
-			// between:min,max
+			// between
 			if (str_starts_with($rule, 'between:')) {
 				[$min, $max] = explode(',', substr($rule, 8));
 				if (strlen((string)$value) < $min || strlen((string)$value) > $max) {
@@ -218,7 +225,7 @@
 				}
 			}
 
-			// same:other_field
+			// same
 			if (str_starts_with($rule, 'same:')) {
 				$other = substr($rule, 5);
 				if ($value !== $this->input($other)) {
@@ -226,7 +233,7 @@
 				}
 			}
 
-			// in:a,b,c
+			// in
 			if (str_starts_with($rule, 'in:')) {
 				$allowed = explode(',', substr($rule, 3));
 				if (!in_array($value, $allowed)) {
@@ -234,7 +241,7 @@
 				}
 			}
 
-			// not_in:a,b,c
+			// not_in
 			if (str_starts_with($rule, 'not_in:')) {
 				$blocked = explode(',', substr($rule, 7));
 				if (in_array($value, $blocked)) {
@@ -242,7 +249,7 @@
 				}
 			}
 
-			// FILE VALIDATION
+			// FILE HANDLING
 			$fileList = [];
 			$isMultiple = false;
 
@@ -316,12 +323,21 @@
 				}
 			}
 
-			// max_files:X (for multiple files)
+			// max_files
 			if (str_starts_with($rule, 'max_files:') && $isMultiple) {
 				$maxFiles = (int) substr($rule, 10);
 				if (count($fileList) > $maxFiles) {
 					$this->addError($field, "You can upload a maximum of {$maxFiles} files for {$field}.", 'max_files');
 				}
 			}
+		}
+
+		private function isEmpty($value): bool
+		{
+			if (is_string($value)) {
+				return trim($value) === '';
+			}
+
+			return $value === null || (is_array($value) && empty($value));
 		}
 	}

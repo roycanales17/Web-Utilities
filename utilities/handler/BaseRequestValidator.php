@@ -34,11 +34,14 @@
 				// --- REQUIRED_IF MUST BE CHECKED BEFORE NULLABLE SKIPS ---
 				foreach ($rules as $rule) {
 					if (str_starts_with($rule, 'required_if:')) {
-						[$otherField, $expectedValue] = explode(',', substr($rule, 12));
+						$parts = explode(',', substr($rule, 12));
+						$otherField = array_shift($parts); // first element is the other field
+						$expectedValues = $parts; // rest are expected values
+
 						$otherValue = $this->input($otherField);
 
-						if ($otherValue == $expectedValue && $this->isEmpty($value)) {
-							$this->addError($field, "$field is required when $otherField is $expectedValue.", 'required_if');
+						if (in_array($otherValue, $expectedValues) && $this->isEmpty($value)) {
+							$this->addError($field, "$field is required when $otherField is " . implode(' or ', $expectedValues) . ".", 'required_if');
 						}
 					}
 				}
@@ -198,8 +201,6 @@
 					$this->addError($field, "$field must be a date after or equal to $otherField.", 'after_or_equal');
 				}
 			}
-
-			// required_if handled above and skipped here
 
 			// min
 			if (str_starts_with($rule, 'min:')) {

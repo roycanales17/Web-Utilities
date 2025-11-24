@@ -3,6 +3,7 @@
 	namespace Commands;
 
 	use App\Console\Command;
+	use App\Utilities\Buffer;
 
 	class StreamResources extends Command
 	{
@@ -75,10 +76,10 @@
 
 		protected function renderPhpFile(string $file, array $extract): string
 		{
-			extract($extract, EXTR_SKIP);
-			ob_start();
-			include $file;
-			return ob_get_clean();
+			return Buffer::capture(function() use($file, $extract) {
+				extract($extract, EXTR_SKIP);
+				include $file;
+			});
 		}
 
 		protected function printNextSteps(string $path): void

@@ -15,18 +15,17 @@
 	use App\Bootstrap\Bootstrapper\Callback;
 	use App\Bootstrap\Bootstrapper\Constant;
 	use App\Bootstrap\Bootstrapper\Database;
-	use App\Bootstrap\Bootstrapper\OBStart;
 	use App\Bootstrap\Bootstrapper\Defines;
 	use App\Bootstrap\Bootstrapper\Session;
 	use App\Bootstrap\Bootstrapper\Storage;
 	use App\Bootstrap\Helper\BufferedError;
 	use App\Bootstrap\Bootstrapper\Routes;
 	use App\Bootstrap\Helper\Performance;
-	use App\Bootstrap\Bootstrapper\OBEnd;
 	use App\Bootstrap\Bootstrapper\Cache;
 	use App\Utilities\Handler\Bootloader;
 	use App\Bootstrap\Bootstrapper\Mail;
 	use App\Utilities\Request;
+	use App\Utilities\Buffer;
 	use Exception;
 	use Throwable;
 	use Closure;
@@ -35,8 +34,8 @@
 	{
 		use BufferedError;
 
+		private string $envPath;
 		private static ?self $app = null;
-		private string $envPath = '';
 		private Performance $performance;
 		private ?RuntimeException $runtimeHandler = null;
 
@@ -69,7 +68,6 @@
 				}
 				$this->load(StartupLog::class);
 				$this->load(Constant::class);
-				$this->load(OBStart::class);
 				$this->load(Environment::class, ['path' => $this->envPath]);
 				$this->load(Defines::class);
 				$this->load(Development::class);
@@ -86,7 +84,7 @@
 				$this->load(Routes::class);
 
 			} catch (Exception|Throwable $e) {
-				$this->load(OBEnd::class);
+				Buffer::flash();
 
 				if (!$this->runtimeHandler) {
 					$this->runtimeHandler = new RuntimeException();

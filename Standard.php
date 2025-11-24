@@ -1,5 +1,6 @@
 <?php
 
+	use App\Utilities\Buffer;
 	use App\Utilities\Redirect;
 	use App\Utilities\Response;
 	use App\Utilities\Url;
@@ -600,12 +601,46 @@
 		return Auth::check();
 	}
 
-	function response(mixed $content = '', int $status = 200, array $headers = []): Response
-	{
+	/**
+	 * Immediately renders the given data to the browser.
+	 *
+	 * This function sends the provided content to the output buffer
+	 * and flushes it using the Buffer utility.
+	 *
+	 * @param mixed $data The content to render (string, array, object, etc.).
+	 * @param mixed ...$args Additional optional arguments passed to Buffer::print().
+	 * @return void
+	 */
+	function render(mixed $data, ...$args): void {
+		Buffer::print($data, $args);
+	}
+
+	/**
+	 * Creates an HTTP response.
+	 *
+	 * This function returns a Response object with the specified content,
+	 * status code, and headers.
+	 *
+	 * @param mixed $content The content of the response (string, JSON, etc.).
+	 * @param int $status HTTP status code (default: 200).
+	 * @param array $headers Optional HTTP headers to include in the response.
+	 * @return Response The HTTP response object.
+	 */
+	function response(mixed $content = '', int $status = 200, array $headers = []): Response {
 		return new Response($content, $status, $headers);
 	}
 
-	function redirect(string $url, int $status = 302, array $headers = []): Redirect
-	{
+	/**
+	 * Redirects the client to a specified URL.
+	 *
+	 * This function returns a Redirect object that, when sent,
+	 * instructs the browser to navigate to the given URL.
+	 *
+	 * @param string $url The URL to redirect the client to.
+	 * @param int $status HTTP status code for the redirect (default: 302).
+	 * @param array $headers Optional HTTP headers to include in the redirect response.
+	 * @return Redirect The redirect response object.
+	 */
+	function redirect(string $url, int $status = 302, array $headers = []): Redirect {
 		return response(status: $status, headers: $headers)->redirect($url);
 	}

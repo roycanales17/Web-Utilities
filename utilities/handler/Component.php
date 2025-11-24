@@ -3,9 +3,10 @@
 	namespace App\Utilities\Handler;
 
 	use App\Bootstrap\Exceptions\StreamException;
-	use App\Utilities\Session;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Redirect;
+	use App\Utilities\Session;
+	use App\Utilities\Buffer;
 	use ReflectionProperty;
 	use ReflectionClass;
 	use Exception;
@@ -555,7 +556,6 @@ HTML;
 		 * @param array $action
 		 * @param mixed ...$args
 		 * @return void
-		 * @throws StreamException
 		 */
 		protected function extender(array $action, ...$args): void
 		{
@@ -576,8 +576,6 @@ HTML;
 
 		/**
 		 * Smart action to run extender and exit at one action.
-		 *
-		 * @throws StreamException
 		 */
 		protected function invokeAndExit(array $actions, ...$args): void
 		{
@@ -655,9 +653,7 @@ HTML;
 		protected function print(mixed $callback): mixed
 		{
 			if (is_callable($callback)) {
-				ob_start();
-				echo $callback();
-				return ob_get_clean();
+				return Buffer::capture($callback);
 			}
 
 			return $callback;

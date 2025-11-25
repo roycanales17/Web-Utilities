@@ -36,6 +36,10 @@
 
 					if (!$this->isCli()) {
 						$resolved = $routeObject->captured(fn($content) => print($content));
+						if (isset($GLOBALS['__BLADES_ERROR__'])) {
+							throw new AppException($GLOBALS['__BLADES_ERROR__']);
+						}
+
 						if ($resolved) {
 							console_log("Route resolved!");
 							break 2;

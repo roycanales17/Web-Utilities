@@ -202,19 +202,35 @@
 				}
 			}
 
+			// Determine if numeric check applies
+			$isNumericRule = in_array('integer', $this->validationRules[$field] ?? [])
+				|| in_array('numeric', $this->validationRules[$field] ?? []);
+
 			// min
 			if (str_starts_with($rule, 'min:')) {
 				$min = (int) substr($rule, 4);
-				if (strlen((string)$value) < $min) {
-					$this->addError($field, "$field must be at least $min characters.", 'min');
+				if ($isNumericRule) {
+					if ($value < $min) {
+						$this->addError($field, "$field must be at least $min.", 'min');
+					}
+				} else {
+					if (strlen((string)$value) < $min) {
+						$this->addError($field, "$field must be at least $min characters.", 'min');
+					}
 				}
 			}
 
 			// max
 			if (str_starts_with($rule, 'max:')) {
 				$max = (int) substr($rule, 4);
-				if (strlen((string)$value) > $max) {
-					$this->addError($field, "$field must be less than $max characters.", 'max');
+				if ($isNumericRule) {
+					if ($value > $max) {
+						$this->addError($field, "$field must be no greater than $max.", 'max');
+					}
+				} else {
+					if (strlen((string)$value) > $max) {
+						$this->addError($field, "$field must be less than $max characters.", 'max');
+					}
 				}
 			}
 

@@ -3,12 +3,12 @@
 	namespace App\Utilities\Handler;
 
 	use App\View\Compilers\scheme\CompilerException;
-	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Stream;
 
 	use InvalidArgumentException;
 	use ReflectionException;
+	use Exception;
 
 	final class StreamHandler
 	{
@@ -26,11 +26,11 @@
 		 * @param string|null $class Class to invoke
 		 * @param array $constructParams Parameters to pass to the class constructor (if needed).
 		 * @param bool $asynchronous Whether the stream should run asynchronously.
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		function __construct(null|string $class = null, array $constructParams = [], bool $asynchronous = false) {
 			if ($class !== null && !is_subclass_of($class, Component::class)) {
-				throw new StreamException("Class {$class} must extend " . Component::class);
+				throw new Exception("Class {$class} must extend " . Component::class);
 			}
 
 			$this->class = $class;
@@ -56,7 +56,7 @@
 		/**
 		 * On stream echo we also allow to execute more function
 		 *
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public function with(array|string $action, ...$args): self {
 			if ($this->class && $action) {
@@ -65,7 +65,7 @@
 					$method = $action;
 
 					if (!method_exists($class, $method)) {
-						throw new StreamException("Method {$method} does not exist.");
+						throw new Exception("Method {$method} does not exist.");
 					}
 
 					$this->action = [$class, $method, $args];
@@ -74,19 +74,19 @@
 					$method = $action[1] ?? null;
 
 					if (!$class || !$method) {
-						throw new StreamException("Both class and method must be provided.");
+						throw new Exception("Both class and method must be provided.");
 					}
 
 					if (!class_exists($class)) {
-						throw new StreamException("Class {$class} does not exist.");
+						throw new Exception("Class {$class} does not exist.");
 					}
 
 					if (!is_subclass_of($class, Component::class)) {
-						throw new StreamException("Component '".get_class($class)."' does not implement " . Component::class);
+						throw new Exception("Component '".get_class($class)."' does not implement " . Component::class);
 					}
 
 					if (!method_exists($class, $method)) {
-						throw new StreamException("Method {$method} does not exist.");
+						throw new Exception("Method {$method} does not exist.");
 					}
 
 					$action[2] = $args;
@@ -107,7 +107,7 @@
 		 * @param array $action [className, methodName]
 		 * @param mixed ...$argv Method arguments
 		 * @return string generated wire attributes
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public function target(array $action, ...$argv): string
 		{
@@ -116,7 +116,7 @@
 			$isTarget = $action[2] ?? true;
 
 			if (!class_exists($class)) {
-				throw new StreamException('Class not found: ' . $class);
+				throw new Exception('Class not found: ' . $class);
 			}
 
 			if (!is_string($method) || !method_exists($class, $method)) {
@@ -145,7 +145,7 @@
 					$identifier = $class::identifier();
 					$wireTarget = 'wire:target="' . $identifier;
 				} else {
-					throw new StreamException("`identifier` method is required for target action '" . json_encode($action) . "'.");
+					throw new Exception("`identifier` method is required for target action '" . json_encode($action) . "'.");
 				}
 			}
 
@@ -162,7 +162,7 @@
 		 * @param array $action [className, methodName]
 		 * @param mixed ...$argv Method arguments
 		 * @return string generated wire attributes
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public function execute(array $action, ...$argv): string
 		{
@@ -174,7 +174,7 @@
 		 * This returns the component interface.
 		 *
 		 * @throws CompilerException
-		 * @throws StreamException|ReflectionException
+		 * @throws Exception|ReflectionException
 		 */
 		public function __toString(): string {
 			ob_start();
@@ -206,6 +206,6 @@
 				return Blade::compileAndCapture(ob_get_clean());
 			}
 
-			throw new StreamException("Unable to generate stream, class is not provided.");
+			throw new Exception("Unable to generate stream, class is not provided.");
 		}
 	}

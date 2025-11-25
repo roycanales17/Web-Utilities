@@ -2,10 +2,8 @@
 
 	namespace App\Utilities;
 
-	use App\Bootstrap\Exceptions\StreamException;
 	use App\Utilities\Handler\Component;
 	use App\Http\Authenticatable;
-	use App\Utilities\Request;
 	use ReflectionException;
 	use ReflectionMethod;
 	use Exception;
@@ -21,7 +19,7 @@
 		 *
 		 * @param array $authentication
 		 * @return void
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public static function authentication(array $authentication = []): void
 		{
@@ -30,21 +28,21 @@
 				$method = $authentication[1] ?? null;
 
 				if (!class_exists($class) || !method_exists($class, $method))
-					throw new StreamException("Invalid authentication method '{$class}::{$method}'.", 500);
+					throw new Exception("Invalid authentication method '{$class}::{$method}'.", 500);
 
 				self::$authentication = $authentication;
 			}
 		}
 
 		/**
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		/**
 		 * This capture the stream wire request.
 		 *
 		 * @param Request $req
 		 * @return string
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public static function capture(Request $req): string
 		{
@@ -103,14 +101,14 @@
 							$component->models($orig_properties);
 
 						if (!self::verifyComponent($component)) {
-							throw new StreamException('Unauthorized', 401);
+							throw new Exception('Unauthorized', 401);
 						}
 
 						if ($function != 'render') {
 							try {
 								self::perform([$component, $function], $args);
 							} catch (Exception $e) {
-								throw new StreamException($e->getMessage(), 401);
+								throw new Exception($e->getMessage(), 401);
 							}
 						}
 
@@ -120,7 +118,7 @@
 				}
 			}
 
-			throw new StreamException('Invalid Request', 400);
+			throw new Exception('Invalid Request', 400);
 		}
 
 		private static function validateMethod(object $class, string $method, array $args): bool
@@ -241,24 +239,24 @@
 		}
 
 		/**
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		public static function verifyComponent(Component $component): bool
 		{
 			if (!is_subclass_of($component, Component::class)) {
-				throw new StreamException("Component '".get_class($component)."' does not implement " . Component::class, 500);
+				throw new Exception("Component '".get_class($component)."' does not implement " . Component::class, 500);
 			}
 
 			// Check for Authenticatable trait
 			if (in_array(Authenticatable::class, class_uses($component))) {
 				if (empty(self::$authentication)) {
-					throw new StreamException("Component uses Authenticatable trait but no authentication callback is configured.", 500);
+					throw new Exception("Component uses Authenticatable trait but no authentication callback is configured.", 500);
 				}
 
 				[$class, $method, $authArgs] = self::$authentication + [null, null, []];
 
 				if (!is_callable([$class, $method])) {
-					throw new StreamException("Invalid authentication callback: {$class}::{$method} is not callable.", 500);
+					throw new Exception("Invalid authentication callback: {$class}::{$method} is not callable.", 500);
 				}
 
 				if (!call_user_func_array([$class, $method], $authArgs)) {
@@ -275,7 +273,7 @@
 		}
 
 		/**
-		 * @throws StreamException
+		 * @throws Exception
 		 */
 		private static function perform(array $action, array $params): void
 		{
@@ -283,11 +281,11 @@
 			$method = $action[1] ?? null;
 
 			if (!$class || !$method) {
-				throw new StreamException('Class and method must be provided', 500);
+				throw new Exception('Class and method must be provided', 500);
 			}
 
 			if (!method_exists($class, $method)) {
-				throw new StreamException("Invalid stream wire request '{$class}::{$method}'.", 500);
+				throw new Exception("Invalid stream wire request '{$class}::{$method}'.", 500);
 			}
 
 			$paramsValue = [];
@@ -309,7 +307,7 @@
 			try {
 				$class->{$method}(...$paramsValue);
 			} catch (Exception $e) {
-				throw new StreamException($e->getMessage(), 500);
+				throw new Exception($e->getMessage(), 500);
 			}
 		}
 	}

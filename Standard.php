@@ -14,7 +14,6 @@
 	use App\Utilities\Environment;
 	use App\View\Compilers\Component;
 	use App\Utilities\Handler\StreamHandler;
-	use App\Bootstrap\Exceptions\StreamException;
 
 	/**
 	 * Generates a URI for a named route with optional parameter replacements.
@@ -236,7 +235,7 @@
 	 * @param array $constructParams Parameters to pass to the class constructor (if needed).
 	 * @param bool $asynchronous Whether the stream should run asynchronously.
 	 * @return StreamHandler            Rendered HTML output or Stream actions methods for blade content.
-	 * @throws StreamException
+	 * @throws Exception
 	 */
 	function stream(null|string $class = null, array $constructParams = [], bool $asynchronous = false): StreamHandler
 	{

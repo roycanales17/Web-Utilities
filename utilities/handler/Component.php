@@ -2,7 +2,6 @@
 
 	namespace App\Utilities\Handler;
 
-	use App\Bootstrap\Exceptions\StreamException;
 	use App\View\Compilers\Blade;
 	use App\Utilities\Redirect;
 	use App\Utilities\Session;
@@ -562,13 +561,13 @@ HTML;
 			[$class, $method] = $action + [null, null];
 
 			if (!$class || !$method)
-				throw new StreamException("Both class and method must be provided.");
+				throw new Exception("Both class and method must be provided.");
 
 			if (!class_exists($class))
-				throw new StreamException("Class {$class} does not exist.");
+				throw new Exception("Class {$class} does not exist.");
 
 			if (!method_exists($class, $method))
-				throw new StreamException("Method {$method} does not exist.");
+				throw new Exception("Method {$method} does not exist.");
 
 			$action[2] = $action[2] ?? $args;
 			$this->__extender[] = $action;

@@ -205,28 +205,16 @@
 			// min
 			if (str_starts_with($rule, 'min:')) {
 				$min = (int) substr($rule, 4);
-				if (is_numeric($value)) {
-					if ((float)$value < $min) {
-						$this->addError($field, "$field must be at least $min.", 'min');
-					}
-				} else {
-					if (strlen((string)$value) < $min) {
-						$this->addError($field, "$field must be at least $min characters.", 'min');
-					}
+				if (strlen((string)$value) < $min) {
+					$this->addError($field, "$field must be at least $min characters.", 'min');
 				}
 			}
 
 			// max
 			if (str_starts_with($rule, 'max:')) {
 				$max = (int) substr($rule, 4);
-				if (is_numeric($value)) {
-					if ((float)$value > $max) {
-						$this->addError($field, "$field must not exceed $max.", 'max');
-					}
-				} else {
-					if (strlen((string)$value) > $max) {
-						$this->addError($field, "$field must be less than $max characters.", 'max');
-					}
+				if (strlen((string)$value) > $max) {
+					$this->addError($field, "$field must be less than $max characters.", 'max');
 				}
 			}
 

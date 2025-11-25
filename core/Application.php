@@ -84,8 +84,6 @@
 				$this->load(Routes::class);
 
 			} catch (Exception|Throwable $e) {
-				Buffer::flash();
-
 				if (!$this->runtimeHandler) {
 					$this->runtimeHandler = new RuntimeException();
 				}

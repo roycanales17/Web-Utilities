@@ -4,6 +4,7 @@
 
 	trait BaseRequestValidator
 	{
+		protected array $inputValidation = [];
 		protected array $validationRules = [];
 		protected array $validationErrors = [];
 		protected bool $validated = false;
@@ -22,6 +23,7 @@
 			}
 
 			$this->validationRules = $config;
+			$this->inputValidation = [];
 			$this->validationErrors = [];
 			$this->validated = true;
 
@@ -30,6 +32,7 @@
 				$rules = is_string($rules) ? explode('|', $rules) : $rules;
 				$value = $this->sanitize($this->input($field));
 				$nullable = in_array('nullable', $rules);
+				$this->inputValidation[$field] = $rules;
 
 				// --- REQUIRED_IF MUST BE CHECKED BEFORE NULLABLE SKIPS ---
 				foreach ($rules as $rule) {
@@ -203,8 +206,8 @@
 			}
 
 			// Determine if numeric check applies
-			$isNumericRule = in_array('integer', $this->validationRules[$field] ?? [])
-				|| in_array('numeric', $this->validationRules[$field] ?? []);
+			$isNumericRule = in_array('integer', $this->inputValidation[$field] ?? [])
+				|| in_array('numeric', $this->inputValidation[$field] ?? []);
 
 			// min
 			if (str_starts_with($rule, 'min:')) {
